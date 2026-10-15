@@ -7222,3 +7222,186 @@ button,input,select,textarea { font-family: inherit; }
   .intake-row-number { justify-self: start; min-width: 28px; }
   .intake-remove { grid-column: 1; }
 }
+
+/* Shared brand and footer */
+/* Shared footer for the public site and client portal. */
+.footer { position: relative; padding: clamp(3rem, 5vw, 4.25rem) 0 1rem; text-align: left; background: #0b1520; color: rgba(233,249,255,.75); font-family: 'DM Sans', sans-serif; font-size: .875rem; line-height: 1.6; border-top: 1px solid rgba(91,152,217,.2); }
+.footer::before { content: ''; position: absolute; inset: 0 0 auto; height: 1px; background: linear-gradient(90deg, transparent, #5e9ee2, transparent); }
+.footer .container { width: 100%; max-width: 1280px; margin-inline: auto; padding-inline: clamp(1.25rem,3vw,2.5rem); box-sizing: border-box; }
+.footer .footer__grid { display: grid; grid-template-columns: 2fr repeat(3,1fr); gap: clamp(1.5rem,3vw,3rem); margin-bottom: 2rem; }
+.footer .footer__brand { max-width: 300px; }
+.footer .footer__logo { display: inline-flex; align-items: center; min-height: 64px; margin-bottom: 1rem; }
+.footer .footer__logo-img { height: 100px; width: auto; max-width: 100%; object-fit: contain; }
+.footer .footer__desc { max-width: 350px; margin: 0 0 1.5rem; color: rgba(233,249,255,.68); line-height: 1.7; }
+.footer .footer__column-title { margin: 0 0 1rem; color: #dff6ff; font-family: 'Manrope',sans-serif; font-size: .83rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+.footer .footer__links { display: flex; flex-direction: column; gap: .55rem; }
+.footer .footer__grid > .footer__column--nav:nth-child(2) .footer__links { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); column-gap: 1.25rem; row-gap: .45rem; }
+.footer a { text-decoration: none; }
+.footer .footer__link { display: inline-block; color: rgba(233,249,255,.66); font-size: .875rem; font-weight: 400; padding: .24rem 0; transition: color .2s, transform .2s; }
+.footer .footer__link:hover { color: #87d6f3; transform: translateX(3px); }
+.footer .footer__newsletter { display: flex; flex-direction: column; gap: .5rem; }
+.footer .footer__newsletter-input { width: 100%; min-width: 0; box-sizing: border-box; padding: .75rem 1rem; border: 1px solid rgba(218,245,255,.18); border-radius: .5rem; background: rgba(255,255,255,.08); color: #fff; font: inherit; }
+.footer .footer__newsletter-input::placeholder { color: #96bbc9; }
+.footer .footer__newsletter-btn { padding: .75rem 1rem; border: 0; border-radius: .65rem; background: #8cd8f4; color: #0d1b29; font: inherit; font-weight: 800; cursor: pointer; }
+.footer .footer__newsletter-success:empty { display: none; }
+.footer .footer__tax { display: flex; flex-direction: column; gap: .5rem; }
+.footer .footer__tax-item { display: flex; flex-direction: column; gap: .25rem; }
+.footer .footer__tax-label { color: #7ecce8; font-size: .75rem; font-style: italic; }
+.footer .footer__tax-value { display: flex; align-items: flex-start; gap: .5rem; font-size: .875rem; }
+.footer .footer__tax-value, .footer .footer__tax-link { color: rgba(233,249,255,.68); font-weight: 400; overflow-wrap: anywhere; }
+.footer .footer__tax-icon { flex-shrink: 0; width: 1rem; height: 1rem; margin-top: .15rem; }
+.footer .footer__bottom { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid rgba(218,245,255,.14); }
+.footer .footer__social { display: flex; justify-content: flex-start; gap: .75rem; margin: 0; }
+.footer .footer__social-link { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: 1px solid rgba(218,245,255,.15); border-radius: .7rem; color: #bfeeff; }
+.footer .footer__social-link:hover { background: #1a3f66; border-color: #609ddf; color: #fff; }
+.footer .footer__social-link .icon { width: 20px; height: 20px; }
+.footer .footer__copyright { margin: 0; color: rgba(233,249,255,.45); font-size: .875rem; }
+.footer :is(a,button,input):focus-visible { outline: 2px solid #8cd8f4; outline-offset: 4px; }
+@media (max-width: 900px) { .footer .footer__grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (max-width: 600px) {
+  .footer .footer__grid { grid-template-columns: 1fr; }
+  .footer .footer__brand { max-width: 100%; }
+  .footer .footer__grid > .footer__column--nav:nth-child(2) .footer__links { display: flex; flex-direction: column; }
+  .footer .footer__logo-img { height: 82px; }
+  .footer .footer__bottom { align-items: flex-start; flex-direction: column; }
+}
+
+/* Shared Solven Labs identity across the public site and client workspace. */
+:root {
+  --color-primary: #0057e6;
+  --color-primary-dark: #003bb3;
+  --color-primary-light: #008bdf;
+  --gradient-primary: linear-gradient(135deg, #0057e6, #008bdf);
+  --shadow-glow: 0 0 40px rgb(0 139 223 / 18%);
+}
+.navbar__logo-img { width: 198px; height: auto; max-width: 100%; object-fit: contain; }
+.footer .footer__logo-img { width: 230px; height: auto; max-width: 100%; }
+.sidebar__logo-img { width: 180px; height: auto; max-width: 100%; object-fit: contain; }
+.login__logo img { width: 240px; height: auto; max-width: 100%; object-fit: contain; }
+.topbar__logo img { width: 190px; height: auto; max-width: 100%; object-fit: contain; }
+.sidebar.collapsed .sidebar__logo-img { content: url('/assets/favicon%20chopped.png'); width: 36px; height: 36px; object-fit: contain; }
+.hero__promise, .hero__metric-icon { color: #68d9ff; }
+.hero__title-highlight { background-image: linear-gradient(110deg, #67dcff, #80adff); }
+.hero__backing { width: min(720px, 100%); margin-top: 2.2rem; padding-top: 1.2rem; border-top: 1px solid rgb(174 224 255 / 20%); }
+.hero__backing-label { margin: 0 0 .9rem; color: rgb(219 242 255 / 64%); font-size: .68rem; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; }
+.hero__backing-items { display: flex; justify-content: center; align-items: center; gap: 1rem; }
+.hero__backing-item { display: flex; align-items: center; gap: .75rem; min-width: 0; }
+.hero__backing-item img { display: block; object-fit: contain; }
+.hero__backing-item--anid img { width: auto; height: 78px; flex-shrink: 0; }
+.hero__backing-item--viu img { width: auto; height: 78px; flex-shrink: 0; }
+.hero__backing-item span { max-width: 145px; color: rgb(235 248 255 / 82%); font-size: .72rem; font-weight: 600; line-height: 1.35; }
+.hero__backing-divider { width: 1px; height: 46px; background: rgb(190 229 255 / 20%); }
+.faq__solvi-gif { aspect-ratio: 1; object-fit: cover; object-position: center; border-radius: 28px; }
+.faq__chatbot-avatar, .chatbot__avatar--solvi img, .solvi-float__avatar, .solvi-float__trigger-avatar { object-fit: cover; object-position: center 35%; }
+.solvi-float__trigger-avatar { border: 2px solid rgb(126 226 255 / 72%); }
+.btn--primary { background: var(--gradient-primary); color: #fff; }
+.btn--primary:hover { background: #003bb3; color: #fff; }
+#equipo .solven-team { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.25rem; }
+#equipo .solven-team .usecase-card { display: flex; flex-direction: column; align-items: flex-start; padding: 1.4rem; text-align: left; min-width: 0; }
+#equipo .solven-team .usecase-card__image { width: 100%; height: 230px; border-radius: 18px; overflow: hidden; margin-bottom: 1.5rem; }
+#equipo .solven-team .usecase-card__profile { width: 100%; height: 100%; object-fit: cover; object-position: center 25%; border-radius: 0; }
+#equipo .solven-team .usecase-card__title { font-size: 1.2rem; line-height: 1.4; }
+#equipo .solven-team .btn { margin-top: auto; }
+.solven-clinical-partners { display: flex; gap: 1.5rem; align-items: center; max-width: 800px; padding: 2rem; margin: 0 auto 3rem; border: 1px solid #c8dcf4; border-radius: 24px; background: #fff; }
+.solven-clinical-partners > svg { flex-shrink: 0; width: 50px; height: 50px; color: #0057e6; }
+.solven-clinical-partners span { font-size: .78rem; color: #0057b8; }
+.solven-clinical-partners h3 { margin: .5rem 0; font-size: 1.4rem; }
+.solven-clinical-partners p { color: #526782; line-height: 1.6; margin: 0; }
+@media (max-width: 1050px) {
+  #equipo .solven-team { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .navbar__logo-img { width: 154px; height: auto; }
+  .footer .footer__logo-img { width: 200px; height: auto; }
+  .topbar__logo img { width: 150px; height: auto; }
+  #equipo .solven-team { grid-template-columns: minmax(0, 1fr); }
+  #equipo .solven-team .usecase-card__image { height: 300px; }
+  .solven-clinical-partners { padding: 1.4rem; gap: 1rem; }
+}
+
+/* Restored service composition and a lighter, visual project presentation. */
+.innovation-solution__grid--three { grid-template-columns: 1fr; gap: .9rem; }
+.innovation-solution__grid--three .innovation-capability { display: grid; grid-template-columns: 36px minmax(0, 1fr); column-gap: .9rem; padding: 1.25rem; align-items: start; }
+.innovation-solution__grid--three .innovation-capability__icon { grid-column: 1; grid-row: 1 / 4; margin-top: .15rem; color: #0057e6; }
+.innovation-solution__grid--three .innovation-capability__title { grid-column: 2; font-size: 1rem; }
+.innovation-solution__grid--three .innovation-capability__description, .innovation-solution__grid--three .innovation-capability__link { grid-column: 2; }
+.project-spotlights { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem; }
+.project-spotlights .project-spotlight { width: auto; min-width: 0; max-width: none; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; overflow: visible; }
+.project-spotlights .project-spotlight:hover { transform: none; box-shadow: none; }
+.project-spotlight__brand { position: relative; isolation: isolate; height: 360px; overflow: hidden; border-radius: 26px; background: linear-gradient(125deg, #062b62, #075b9c 65%, #19a2bf); padding: 2rem; }
+.project-spotlight--urgencias .project-spotlight__brand { background: linear-gradient(125deg, #062b62, #075b9c 65%, #19a2bf); }
+.project-spotlight__eyebrow { position: relative; z-index: 2; display: block; color: #ffffffbf; font-size: .7rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
+.project-spotlight__logo { position: relative; z-index: 2; display: block; width: 230px; height: 95px; object-fit: contain; object-position: left center; margin: .75rem 0; }
+.project-spotlight__wordmark { position: relative; z-index: 2; display: flex; align-items: center; gap: .8rem; height: 95px; margin: .75rem 0; color: #fff; }
+.project-spotlight__wordmark > svg { width: 48px; height: 48px; color: #7fe9f4; }
+.project-spotlight__wordmark > span { font-size: 2.8rem; font-weight: 800; letter-spacing: -.05em; line-height: 1.1; }
+.project-spotlight__wordmark small { display: block; font-size: .7rem; font-weight: 400; letter-spacing: .02em; margin-top: .5rem; }
+.project-spotlight__preview { position: absolute; top: 220px; left: 12%; width: 85%; height: auto; max-width: none; border: 5px solid #ffffff35; border-radius: 12px; transform: rotate(-5deg); box-shadow: 0 20px 45px #0005; transition: transform .3s; }
+.project-spotlight--urgencias .project-spotlight__preview { transform: rotate(5deg); left: 8%; }
+.project-spotlight:hover .project-spotlight__preview { transform: rotate(0) translateY(-7px); }
+.project-spotlight__orb { position: absolute; width: 270px; height: 270px; border-radius: 50%; background: #fff1; top: -120px; right: -70px; box-shadow: 0 0 0 50px #ffffff08, 0 0 0 100px #ffffff05; }
+.project-spotlight__caption { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.5rem 0 .8rem; }
+.project-spotlight__caption h3 { margin: 0 0 .5rem; color: #142c49; font-size: 1.2rem; line-height: 1.4; }
+.project-spotlight__caption p { margin: 0; color: #627187; font-size: .85rem; line-height: 1.6; }
+.project-spotlight__open { flex-shrink: 0; display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid #bfd3ed; border-radius: 50%; background: #fff; color: #0057d8; cursor: pointer; }
+.project-spotlight__open:hover { background: #0057e6; color: #fff; }
+.project-spotlight__open:focus-visible { outline: 3px solid #0057e6; outline-offset: 4px; }
+.project-spotlight__recognition { display: flex; flex-wrap: wrap; gap: .6rem 1rem; border-top: 1px solid #dce6f2; padding-top: .9rem; }
+.project-spotlight__recognition span { display: inline-flex; align-items: center; gap: .4rem; font-size: .7rem; color: #426180; }
+.project-spotlight__recognition svg { width: 15px; height: 15px; color: #0057c5; }
+#equipo .solven-team { gap: 1.7rem; }
+#equipo .solven-team .usecase-card { align-items: center; padding: 0 0 1rem; text-align: center; border: 0; background: transparent; box-shadow: none; }
+#equipo .solven-team .usecase-card__image { height: 260px; border-radius: 24px; margin: 0 0 1.4rem; background: #e8eff7; }
+#equipo .solven-team .usecase-card__profile { object-position: center 22%; transition: transform .35s; }
+#equipo .solven-team .usecase-card:hover .usecase-card__profile { transform: scale(1.04); }
+#equipo .solven-team .usecase-card__title { font-size: 1.1rem; line-height: 1.5; margin: 0 0 .4rem; }
+#equipo .solven-team .usecase-card__role { font-size: .78rem; line-height: 1.5; color: #58718f; min-height: 2.5em; }
+#equipo .solven-team .team-member-btn { margin-top: 1rem; padding: .5rem .1rem; border: 0; border-radius: 0; border-bottom: 1px solid #97b5db; background: transparent; color: #0057c5; }
+#equipo .solven-team .team-member-btn:hover { color: #003480; border-color: #003480; }
+#testimonios { padding-bottom: 4rem; }
+.solven-clinical-partners { padding: 1.5rem 0; border: 0; border-block: 1px solid #d8e4f2; border-radius: 0; background: transparent; }
+.logos__heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.8rem; }
+.logos__heading .logos__title { margin: 0; color: #526782; font-size: .9rem; }
+.solven-institution-carousel .logos__viewport { mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent); padding-block: 1.5rem; }
+.solven-institution-carousel .logos__track { width: max-content; gap: 3rem; }
+.solven-institution-carousel .logos__item-wrapper { width: 190px; height: 135px; padding: 0; border: 0; background: transparent; box-shadow: none; }
+.solven-institution-carousel .logos__item { width: 160px; height: 80px; object-fit: contain; filter: none; opacity: 1; }
+.solven-institution-carousel .logos__item-name { font-size: .7rem; margin-top: 1rem; color: #627187; }
+@media (max-width: 760px) { .project-spotlights { grid-template-columns: minmax(0, 1fr); gap: 2.5rem; } .project-spotlight__brand { height: 320px; } }
+@media (max-width: 640px) {
+  #equipo .solven-team { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.4rem 1rem; }
+  #equipo .solven-team .usecase-card__image { height: 190px; border-radius: 18px; }
+  #equipo .solven-team .usecase-card__title { font-size: .93rem; }
+  #equipo .solven-team .usecase-card__role { font-size: .7rem; }
+  #equipo .solven-team .team-member-btn { font-size: .75rem; }
+  .project-spotlight__brand { padding: 1.5rem; height: 295px; }
+  .project-spotlight__caption h3 { font-size: 1.05rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .project-spotlight__preview, #equipo .solven-team .usecase-card__profile { transition: none; }
+  .solven-institution-carousel .logos__viewport { overflow-x: auto; }
+}
+
+/* Event logos and aligned project identities. */
+.project-spotlight__identity { position: relative; z-index: 2; margin: .75rem 0; height: 112px; }
+.project-spotlight__identity .project-spotlight__logo { height: 80px; margin: 0; }
+.project-spotlight__tagline { margin: .4rem 0 0; color: #fff; font-size: .7rem; line-height: 1.5; }
+.solven-events { margin-bottom: 3rem; }
+.solven-events .logos__title { color: #526782; font-size: .9rem; margin-bottom: 2rem; }
+.solven-events__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2rem; align-items: center; }
+.solven-events__logo { display: flex; align-items: center; justify-content: center; min-width: 0; min-height: 120px; padding: 1rem; border-radius: 16px; background: #fff; }
+.solven-events__logo img { width: 100%; max-width: 200px; height: 85px; object-fit: contain; }
+.solven-events__logo img[src$="etmday.png"], .solven-events__logo img[src$="eco-sd.png"], .solven-institution-carousel img[src$="herminda-martin.png"] { filter: brightness(0) saturate(100%); opacity: .8; }
+.solven-events__logo:focus-visible { outline: 3px solid #0057e6; outline-offset: 4px; }
+@media (max-width: 640px) {
+  .solven-events__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+  .solven-events__logo { padding: .75rem; min-height: 100px; }
+  .solven-events__logo img { height: 70px; }
+  .project-spotlight__preview { top: 205px; }
+  .hero__backing { margin-top: 1.7rem; }
+  .hero__backing-items { align-items: flex-start; gap: .75rem; }
+  .hero__backing-item { flex-direction: column; align-items: center; gap: .5rem; text-align: center; }
+  .hero__backing-item--anid img { width: auto; height: 64px; }
+  .hero__backing-item--viu img { width: auto; height: 64px; }
+  .hero__backing-item span { max-width: 130px; font-size: .66rem; }
+}

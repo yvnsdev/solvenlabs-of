@@ -1,11 +1,438 @@
-import { getCompanyInfo, loadPdfRuntime, loadLogoDataURL, getIntakePdfAssets } from './document-assets.js?v=1';
+// intakeModel
+const intakeModel = (() => {
+
+const INTAKE_STATUSES = ['En levantamiento', 'En revisión', 'Validada'];
+const INTAKE_SECTIONS = [
+  { id: 'general', title: 'Información general', intro: 'Identifica el proyecto y a las personas que participan en el levantamiento.', fields: [
+    ['project_name', 'Nombre del proyecto', 'text', 'Usa un nombre que permita reconocer esta iniciativa.'],
+    ['client_name', 'Nombre del cliente', 'text', 'Indica la empresa o persona para quien se construirá la solución.'],
+    ['meeting_date', 'Fecha de reunión', 'date', 'Fecha en que se recopiló esta información.'],
+    ['ntek_owner', 'Responsable Solven Labs', 'text', 'Persona de Solven Labs que conduce y da seguimiento al levantamiento.'],
+    ['initiative_type', 'Tipo de iniciativa', 'text', 'Indica el tipo de producto o servicio que se propone.'],
+    ['initial_market', 'Mercado inicial', 'text', 'Define el territorio o segmento al que se dirige la primera etapa.'],
+    ['scope_status', 'Estado del alcance', 'text', 'Indica si el alcance es preliminar, está en revisión o ya fue acordado.'],
+    ['participants', 'Participantes', 'textarea', 'Incluye nombre, cargo y organización de quienes participaron.']
+  ] },
+  { id: 'need', title: 'Descripción de la necesidad', intro: 'Primero describe cómo se trabaja hoy; a partir de ese contexto, identifica qué necesita cambiar.', fields: [
+    ['current_situation', '2.1. Situación actual', 'textarea', '¿Cómo se realiza hoy el proceso? Describe los pasos, personas y herramientas, por ejemplo Excel, correo o WhatsApp.'],
+    ['identified_need', '2.2. Problema o necesidad identificada', 'textarea', 'A partir de la situación actual, ¿qué dificultades aparecen y a quién afectan? Explica errores, demoras o información que falta.']
+  ] },
+  { id: 'objective', title: 'Objetivo del proyecto', intro: 'Relaciona el problema identificado con el resultado que el cliente espera conseguir.', fields: [
+    ['main_objective', 'Objetivo principal', 'textarea', '¿Qué debe mejorar gracias al software? Describe el resultado esperado y, si se conoce, cómo se comprobará.'],
+    ['expected_results', 'Resultados esperados', 'textarea', 'Describe los resultados observables que permitirán evaluar el proyecto.']
+  ] },
+  { id: 'users', title: 'Usuarios y funcionalidades solicitadas', intro: 'Define quién utilizará el sistema y qué necesita hacer para alcanzar el objetivo.', fields: [
+    ['system_users', '4.1. Usuarios del sistema', 'textarea', 'Identifica los tipos de usuario, sus tareas y diferencias de acceso. Por ejemplo: cliente, operador y administrador.']
+  ], tables: ['roles', 'features'] },
+  { id: 'constraints', title: 'Condiciones y restricciones', intro: 'Con las funcionalidades descritas, registra los límites y condiciones que podrían influir en la solución.', fields: [
+    ['expected_deadline', 'Plazo esperado', 'textarea', 'Indica una fecha o plazo y si existe algún hito que lo condicione.'],
+    ['reference_budget', 'Presupuesto referencial (si existe)', 'textarea', 'Indica monto, moneda y si considera impuestos. Si no está definido, puedes señalarlo aquí.'],
+    ['integrations', 'Sistemas o servicios con los que debe integrarse', 'textarea', 'Nombra los sistemas externos, qué información se intercambia y quién puede dar acceso.'],
+    ['other_constraints', 'Otras condiciones o restricciones', 'textarea', 'Incluye seguridad, dispositivos, conectividad, rendimiento, normativa u otras condiciones relevantes.']
+  ] },
+  { id: 'pending', title: 'Observaciones y asuntos pendientes', intro: 'Cierra la reunión registrando el contexto adicional y las respuestas que faltan para continuar.', fields: [
+    ['general_observations', '6.1. Observaciones generales', 'textarea', 'Registra acuerdos, prioridades, supuestos o información adicional relevante obtenida durante la reunión.']
+  ], table: 'pending', afterFields: [
+    ['validation_next_step', '6.3. Próximo paso de validación', 'textarea', 'Define qué se debe revisar, con quién y cuál será el siguiente acuerdo.'],
+    ['reviewed_sources', 'Fuentes revisadas', 'textarea', 'Identifica reuniones, documentos y versiones usados como referencia.']
+  ] }
+];
+const INTAKE_TABLES = {
+  roles: { title: 'Matriz de roles y permisos', columns: [['role', 'Usuario / rol'], ['permissions', 'Participación y permisos esperados'], ['source', 'Origen']], help: 'Describe las responsabilidades de cada perfil y la fuente de esta definición.', add: 'Agregar rol' },
+  features: { title: '4.2. Funcionalidades solicitadas', columns: [['name', 'Funcionalidad solicitada'], ['description', 'Descripción preliminar'], ['source', 'Origen']], help: 'Registra una capacidad por fila. Explica quién la necesita, qué debe permitir hacer y qué resultado se espera. En origen, identifica la reunión, documento o confirmación pendiente.', note: 'Las funcionalidades registradas son preliminares y estarán sujetas a análisis y posterior validación.', add: 'Agregar funcionalidad' },
+  pending: { title: '6.2. Dudas o información pendiente', columns: [['question', 'Consulta o información pendiente'], ['owner', 'Responsable de responder']], help: 'Convierte cada duda en una consulta concreta y asigna a la persona que puede responderla.', add: 'Agregar pendiente' }
+};
+function todayInChile(now = new Date()) {
+  const parts = new Intl.DateTimeFormat('en', { timeZone: 'America/Santiago', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(now);
+  const value = type => parts.find(part => part.type === type).value;
+  return `${value('year')}-${value('month')}-${value('day')}`;
+}
+function newIntake(project = {}) {
+  return { version: '1.0', status: INTAKE_STATUSES[0], meeting_date: todayInChile(), project_name: project.name || '', client_name: project.clients?.name || '', roles: [{ role: '', permissions: '', source: '' }], features: [{ name: '', description: '', source: '' }], pending: [{ question: '', owner: '' }] };
+}
+function normalizeIntake(raw = {}) {
+  const data = {};
+  for (const key of ['version', 'status', ...INTAKE_SECTIONS.flatMap(section => [...section.fields, ...(section.afterFields || [])].map(field => field[0]))]) data[key] = String(raw[key] ?? '').trim();
+  for (const [key, table] of Object.entries(INTAKE_TABLES)) {
+    data[key] = (Array.isArray(raw[key]) ? raw[key] : []).map(row => Object.fromEntries(table.columns.map(([column]) => [column, String(row?.[column] ?? '').trim()])));
+  }
+  return data;
+}
+function validateIntake(data) {
+  if (!data.project_name || !data.client_name) return 'Completa el nombre del proyecto y del cliente.';
+  if (!data.version || data.version.length > 40) return 'Indica una versión de hasta 40 caracteres.';
+  if (!INTAKE_STATUSES.includes(data.status)) return 'Selecciona un estado válido.';
+  if (data.meeting_date && (!/^\d{4}-\d{2}-\d{2}$/.test(data.meeting_date) || Number.isNaN(Date.parse(`${data.meeting_date}T12:00:00Z`)) || new Date(`${data.meeting_date}T12:00:00Z`).toISOString().slice(0, 10) !== data.meeting_date)) return 'Revisa la fecha de reunión.';
+  for (const section of INTAKE_SECTIONS) for (const [key, label, type] of [...section.fields, ...(section.afterFields || [])]) if (data[key].length > (type === 'text' ? 300 : 12000)) return `El campo «${label}» supera el largo permitido.`;
+  for (const [key, table] of Object.entries(INTAKE_TABLES)) {
+    if (data[key].length > 100) return 'Puedes ingresar hasta 100 filas por tabla.';
+    if (data[key].some(row => table.columns.some(([column]) => row[column].length > 4000))) return 'Cada celda de las tablas admite hasta 4.000 caracteres.';
+  }
+  return '';
+}
+function formatIntakeDate(value) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value || '');
+  return match ? `${match[3]}-${match[2]}-${match[1]}` : 'Por definir';
+}
+function intakeFilename(data) {
+  const name = (data.project_name || 'proyecto').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9_-]+/g, '-').replace(/^-|-$/g, '').slice(0, 65) || 'proyecto';
+  return `SolvenLabs-Ficha-${name}-${(data.version || '1.0').replace(/[^a-zA-Z0-9.-]/g, '-')}.pdf`;
+}
+
+return { INTAKE_STATUSES, INTAKE_SECTIONS, INTAKE_TABLES, todayInChile, newIntake, normalizeIntake, validateIntake, formatIntakeDate, intakeFilename };
+})();
+// intakePdf
+const intakePdf = (() => {
+const { INTAKE_SECTIONS, INTAKE_TABLES, formatIntakeDate } = intakeModel;
+
+// Vector text, measured wrapping and page breaks keep long answers selectable
+// and readable; no screenshot of the dashboard is embedded in the document.
+function buildIntakePDF(data, { jsPDF, logoDataURL, company = {} }) {
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const left = 19, width = 172, bottom = 273, lineHeight = 4.8;
+  const blue = [0, 87, 230], ink = [10, 26, 46], muted = [82, 100, 122];
+  let y = 0;
+  const font = (style = 'normal', size = 10, color = ink) => { pdf.setFont('helvetica', style); pdf.setFontSize(size); pdf.setTextColor(...color); };
+  const lines = (text, w = width) => pdf.splitTextToSize(String(text || 'Por definir').replace(/\t/g, '    '), w);
+  function page() {
+    pdf.setFillColor(...blue); pdf.rect(0, 0, 210, 3, 'F');
+    if (logoDataURL) {
+      const image = pdf.getImageProperties(logoDataURL);
+      const w = Math.min(43, 16 * image.width / image.height);
+      pdf.addImage(logoDataURL, 'PNG', left, 10, w, w * image.height / image.width);
+    } else { font('bold', 24, blue); pdf.text('Solven Labs', left, 23); }
+    font('bold', 9, blue); pdf.text('LEVANTAMIENTO DE REQUERIMIENTOS', 191, 16, { align: 'right' });
+    font('normal', 8, muted); pdf.text(lines(`Versión ${data.version}  |  ${data.status}`, 130), 191, 22, { align: 'right' });
+    pdf.setDrawColor(214, 226, 244); pdf.line(left, 31, 191, 31);
+    y = 40;
+  }
+  function ensure(height) { if (y + height > bottom) { pdf.addPage(); page(); } }
+  function paragraph(text, { style = 'normal', size = 10, color = ink, gap = 4 } = {}) {
+    font(style, size, color);
+    const wrapped = lines(text);
+    const step = Math.max(lineHeight, size * 0.44);
+    for (const line of wrapped) { ensure(step); font(style, size, color); pdf.text(line, left, y); y += step; }
+    y += gap;
+  }
+  function heading(title) {
+    ensure(24);
+    pdf.setFillColor(235, 244, 255); pdf.roundedRect(left, y - 4, width, 10, 1.5, 1.5, 'F');
+    font('bold', 11, blue); pdf.text(title, left + 3, y + 2); y += 14;
+  }
+  function field(label, value) {
+    ensure(17); paragraph(label, { style: 'bold', size: 9, gap: 1 }); paragraph(value);
+  }
+  function table(key) {
+    const definition = INTAKE_TABLES[key];
+    ensure(28); paragraph(definition.title, { style: 'bold', size: 10 });
+    const widths = key === 'pending' ? [12, 108, 52] : [12, 40, 94, 26];
+    const labels = ['N.º', ...definition.columns.map(([, label]) => label)];
+    function tableHeader() {
+      ensure(16); pdf.setFillColor(235, 244, 255); pdf.rect(left, y - 4, width, 12, 'F');
+      font('bold', 8, blue);
+      let x = left;
+      labels.forEach((label, index) => { pdf.text(lines(label, widths[index] - 4), x + 2, y); x += widths[index]; });
+      y += 13;
+    }
+    tableHeader();
+    const rows = (data[key] || []).filter(row => definition.columns.some(([column]) => row[column]?.trim()));
+    if (!rows.length) rows.push(Object.fromEntries(definition.columns.map(([column]) => [column, 'Por definir'])));
+    rows.forEach((row, index) => {
+      font('normal', 9);
+      const cells = [String(index + 1), ...definition.columns.map(([column]) => row[column] || 'Por definir')].map((text, i) => lines(text, widths[i] - 4));
+      const count = Math.max(...cells.map(cell => cell.length));
+      for (let line = 0; line < count; line++) {
+        if (y + lineHeight > bottom) { pdf.addPage(); page(); tableHeader(); }
+        font('normal', 9);
+        let x = left;
+        cells.forEach((cell, i) => { if (cell[line]) pdf.text(cell[line], x + 2, y); x += widths[i]; });
+        y += lineHeight;
+      }
+      pdf.setDrawColor(214, 226, 244); pdf.line(left, y - 2, left + width, y - 2); y += 4;
+    });
+    y += 3;
+    if (definition.note) paragraph(definition.note, { size: 9, color: muted });
+  }
+  page();
+  paragraph('Ficha de Levantamiento de Requerimientos', { style: 'bold', size: 18, gap: 7 });
+  for (const [index, section] of INTAKE_SECTIONS.entries()) {
+    heading(`${index + 1}. ${section.title}`);
+    for (const [key, label, type] of section.fields) field(label, type === 'date' ? formatIntakeDate(data[key]) : data[key]);
+    for (const key of (section.tables || [section.table]).filter(Boolean)) table(key);
+    for (const [key, label, type] of section.afterFields || []) field(label, type === 'date' ? formatIntakeDate(data[key]) : data[key]);
+  }
+  ensure(16); paragraph('Fin de la ficha de levantamiento.', { size: 9, color: muted });
+  const pages = pdf.getNumberOfPages();
+  for (let p = 1; p <= pages; p++) {
+    pdf.setPage(p); pdf.setDrawColor(214, 226, 244); pdf.line(left, 282, 191, 282);
+    font('normal', 8, muted);
+    pdf.text(`${company.website || 'www.solvenlabs.cl'}  |  ${company.email || 'tomas@solvenlabs.cl'}`, left, 288);
+    pdf.text(`Página ${p} de ${pages}`, 191, 288, { align: 'right' });
+  }
+  pdf.setProperties({ title: `Ficha de levantamiento - ${data.project_name}`, subject: `Cliente: ${data.client_name}`, author: 'Solven Labs', creator: 'Solven Labs Panel de Gestión' });
+  return pdf;
+}
+
+return { buildIntakePDF };
+})();
+// intakeUi
+const intakeUi = (() => {
+const { INTAKE_SECTIONS, INTAKE_TABLES, INTAKE_STATUSES, newIntake, normalizeIntake, validateIntake, formatIntakeDate, intakeFilename } = intakeModel;
+const { buildIntakePDF } = intakePdf;
+
+function intakeErrorMessage(error) {
+  if (['42P01', '42703', 'PGRST204', 'PGRST205'].includes(error?.code)) return 'Falta actualizar la base de datos de fichas. Aplica la migración de requirement_intakes en Supabase. Los datos ingresados se conservan.';
+  if (error?.code === '42501') return 'Tu cuenta no tiene permiso para guardar fichas. Revisa el acceso a Requisitos de tu rol. Los datos ingresados se conservan.';
+  if (error?.code === 'PGRST116') return 'Otra persona modificó esta ficha. Descarga tu PDF antes de actualizar la lista y revisar los cambios.';
+  return 'No se pudo guardar la ficha. Revisa la conexión y vuelve a intentar. Los datos ingresados se conservan.';
+}
+
+async function mountRequirements(root, { supabase, escapeHtml: esc, showToast, canWrite, getPdfAssets }) {
+  if (root.dataset.mounted && root.dataset.canWrite === String(canWrite)) return;
+  const previous = root.intakeDraft?.();
+  root.intakeDispose?.();
+  root.dataset.mounted = 'true';
+  root.dataset.canWrite = String(canWrite);
+  let data = previous?.data || newIntake();
+  let projectId = previous?.projectId || '';
+  let current = previous?.current || null;
+  let dirty = previous?.dirty || false;
+  let projects = [], records = [], working = false, pdfBusy = false;
+  const beforeUnload = event => { if (dirty) { event.preventDefault(); event.returnValue = ''; } };
+  window.addEventListener('beforeunload', beforeUnload);
+  root.intakeDispose = () => window.removeEventListener('beforeunload', beforeUnload);
+  const label = record => `${record.data?.project_name || 'Ficha sin nombre'} · ${record.data?.client_name || 'Cliente por definir'} · ${formatIntakeDate(record.data?.meeting_date)} · v${record.data?.version || '1.0'}`;
+
+  function capture() {
+    const form = root.querySelector('#intake-form');
+    if (!form) return;
+    const values = new FormData(form);
+    for (const key of ['version', 'status', ...INTAKE_SECTIONS.flatMap(section => [...section.fields, ...(section.afterFields || [])].map(field => field[0]))]) data[key] = String(values.get(key) ?? data[key] ?? '');
+    projectId = String(values.get('project_id') ?? projectId);
+    for (const [key, table] of Object.entries(INTAKE_TABLES)) data[key] = [...form.querySelectorAll(`[data-row="${key}"]`)].map(row => Object.fromEntries(table.columns.map(([column]) => [column, row.querySelector(`[data-column="${column}"]`).value])));
+  }
+  root.intakeDraft = () => { capture(); return { data, projectId, current, dirty }; };
+  const hasContent = row => Object.values(row).some(value => String(value).trim());
+  function progress() {
+    const completed = section => [...section.fields, ...(section.afterFields || [])].some(([key]) => key !== 'meeting_date' && String(data[key] || '').trim()) || (section.tables || [section.table]).filter(Boolean).some(key => data[key]?.some(hasContent));
+    const done = INTAKE_SECTIONS.filter(completed).length;
+    root.querySelector('#intake-progress').textContent = `${done} de ${INTAKE_SECTIONS.length} secciones con información`;
+    root.querySelector('#intake-progress-bar').value = done;
+    root.querySelectorAll('[data-section]').forEach(button => {
+      const filled = completed(INTAKE_SECTIONS.find(section => section.id === button.dataset.section));
+      button.classList.toggle('is-filled', filled);
+    });
+    root.querySelector('#intake-save-status').textContent = working ? 'Guardando…' : dirty ? 'Cambios sin guardar' : current ? 'Ficha guardada' : 'Nueva ficha';
+  }
+  function field([key, title, type, help]) {
+    const required = ['project_name', 'client_name'].includes(key);
+    const attrs = `id="intake-${key}" name="${key}" aria-describedby="help-${key}" ${required ? 'required' : ''}`;
+    return `<div class="intake-field ${type === 'textarea' ? 'intake-field--wide' : ''}"><label for="intake-${key}">${esc(title)}${required ? ' *' : ''}</label>${type === 'textarea' ? `<textarea ${attrs} rows="4" maxlength="12000">${esc(data[key] || '')}</textarea>` : `<input ${attrs} type="${type}" ${type === 'text' ? 'maxlength="300"' : ''} value="${esc(data[key] || '')}">`}<p class="intake-hint" id="help-${key}">${esc(help)}</p></div>`;
+  }
+  function table(key) {
+    const definition = INTAKE_TABLES[key];
+    return `<div class="intake-repeat intake-repeat--${key}" data-table="${key}"><h3>${definition.title}</h3><p class="intake-hint">${definition.help}</p><div class="intake-rows">${(data[key] || []).map((row, index) => `<div class="intake-row" data-row="${key}" data-index="${index}"><span class="intake-row-number">${index + 1}</span>${definition.columns.map(([column, title]) => `<div class="intake-field"><label for="${key}-${index}-${column}">${title}</label><textarea id="${key}-${index}-${column}" data-column="${column}" rows="3" maxlength="4000">${esc(row[column] || '')}</textarea></div>`).join('')}<button type="button" class="btn-dash btn-dash--secondary intake-remove" data-remove="${key}" data-index="${index}" aria-label="Eliminar fila ${index + 1} de ${definition.title}">Eliminar</button></div>`).join('')}</div><button type="button" data-add="${key}" class="btn-dash btn-dash--secondary">+ ${definition.add}</button>${definition.note ? `<p class="intake-note">${definition.note}</p>` : ''}</div>`;
+  }
+  function render() {
+    root.innerHTML = `<div class="intake-app">
+      <div class="dash-card intake-picker"><div class="dash-card__body">
+        <div class="intake-field"><label for="intake-select">Fichas guardadas</label><select id="intake-select" ${working ? 'disabled' : ''}><option value="">Nueva ficha</option>${records.map(record => `<option value="${esc(record.id)}" ${current?.id === record.id ? 'selected' : ''}>${esc(label(record))}</option>`).join('')}</select></div>
+        <button type="button" id="intake-new" class="btn-dash btn-dash--secondary" ${!canWrite || working ? 'disabled' : ''}>Nueva ficha</button>
+        <button type="button" id="intake-refresh" class="btn-dash btn-dash--secondary" ${working ? 'disabled' : ''}>Actualizar lista</button>
+      </div></div>
+      <div class="intake-workspace"><aside class="intake-index" aria-label="Secciones de la ficha"><span class="intake-eyebrow">LA REUNIÓN, PASO A PASO</span>${INTAKE_SECTIONS.map((section, index) => `<button type="button" data-section="${section.id}"><span>${index + 1}</span>${section.title}</button>`).join('')}<div class="intake-progress-panel"><span class="intake-eyebrow">AVANCE DE LA FICHA</span><p id="intake-progress" class="intake-hint"></p><progress id="intake-progress-bar" max="${INTAKE_SECTIONS.length}" value="0" aria-labelledby="intake-progress"></progress><p class="intake-hint">Registra lo conocido y deja las dudas en pendientes.</p></div></aside>
+      <form id="intake-form"><fieldset ${!canWrite || working ? 'disabled' : ''}>
+        <section class="dash-card intake-cover"><div class="dash-card__body"><img src="/assets/logo%20extended%20chopped.png" alt="Solven Labs" width="160" height="47"><div><span class="intake-eyebrow">Solven Labs / GESTIÓN DE PROYECTOS</span><h2>Ficha de Levantamiento de Requerimientos</h2><p>Completa la ficha junto al cliente. Las ayudas te orientan durante la reunión; el PDF contiene la información registrada.</p></div><div class="intake-meta"><div class="intake-field"><label for="intake-version">Versión *</label><input id="intake-version" name="version" maxlength="40" required value="${esc(data.version || '1.0')}"></div><div class="intake-field"><label for="intake-status">Estado</label><select id="intake-status" name="status">${INTAKE_STATUSES.map(status => `<option ${data.status === status ? 'selected' : ''}>${status}</option>`).join('')}</select></div></div></div></section>
+        ${INTAKE_SECTIONS.map((section, index) => `<section class="dash-card intake-section" tabindex="-1" id="intake-section-${section.id}"><div class="dash-card__body"><div class="intake-section-heading"><span>${index + 1}</span><h2>${section.title}</h2></div><p class="intake-bridge">${section.intro}</p>${index === 0 ? `<div class="intake-field"><label for="intake-project">Vincular a un proyecto del panel</label><select id="intake-project" name="project_id"><option value="">Sin proyecto asignado</option>${projects.map(project => `<option value="${esc(project.id)}" ${projectId === project.id ? 'selected' : ''}>${esc(project.name)}</option>`).join('')}${projectId && !projects.some(project => project.id === projectId) ? `<option value="${esc(projectId)}" selected>Proyecto vinculado no disponible</option>` : ''}</select><p class="intake-hint">Puedes levantar la necesidad antes de crear el proyecto. Los campos con * son necesarios para guardar o generar el PDF.</p></div>` : ''}<div class="intake-fields">${section.fields.map(field).join('')}</div>${(section.tables || [section.table]).filter(Boolean).map(table).join('')}${section.afterFields ? `<div class="intake-fields intake-closing-fields">${section.afterFields.map(field).join('')}</div>` : ''}</div></section>`).join('')}
+      </fieldset><div class="dash-card intake-finish"><div class="dash-card__body"><div><h2>Finalizar la ficha</h2><p id="intake-save-status" role="status"></p><p class="intake-hint">El PDF incluye los datos actuales del formulario. Los campos vacíos se muestran como «Por definir».</p></div><div class="intake-final-actions"><button type="submit" class="btn-dash btn-dash--secondary" ${!canWrite || working ? 'disabled' : ''}>Guardar ficha</button><button type="button" id="intake-pdf" class="btn-dash btn-dash--primary" ${working || pdfBusy ? 'disabled' : ''}>${pdfBusy ? 'Generando PDF…' : 'Generar PDF para el cliente'}</button></div></div></div></form></div></div>`;
+    progress();
+    root.querySelector('#intake-form').addEventListener('input', () => { capture(); dirty = true; progress(); });
+    root.querySelector('#intake-form').addEventListener('change', event => {
+      capture();
+      if (event.target.name === 'project_id') {
+        const project = projects.find(item => item.id === projectId);
+        for (const [key, value] of [['project_name', project?.name], ['client_name', project?.clients?.name]]) {
+          if (!data[key]?.trim() && value) { data[key] = value; root.querySelector(`[name="${key}"]`).value = value; }
+        }
+      }
+      dirty = true; progress();
+    });
+    root.querySelector('#intake-form').addEventListener('submit', save);
+    root.querySelector('#intake-select').addEventListener('change', event => {
+      if (!allowDiscard()) { event.target.value = current?.id || ''; return; }
+      choose(records.find(record => record.id === event.target.value));
+    });
+    root.querySelector('#intake-new').addEventListener('click', () => { if (allowDiscard()) choose(); });
+    root.querySelector('#intake-refresh').addEventListener('click', async () => { if (allowDiscard()) await load(true); });
+    root.querySelector('#intake-pdf').addEventListener('click', exportPDF);
+    root.querySelectorAll('[data-section]').forEach(button => button.addEventListener('click', () => {
+      root.querySelectorAll('[data-section]').forEach(item => item.removeAttribute('aria-current'));
+      button.setAttribute('aria-current', 'step');
+      const section = root.querySelector(`#intake-section-${button.dataset.section}`);
+      section.focus({ preventScroll: true });
+      section.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' });
+    }));
+    root.querySelectorAll('[data-add]').forEach(button => button.addEventListener('click', () => {
+      if (!canWrite || working) return;
+      capture(); const key = button.dataset.add;
+      if (data[key].length >= 100) return showToast('Puedes agregar hasta 100 filas por tabla.', 'warning');
+      data[key].push(Object.fromEntries(INTAKE_TABLES[key].columns.map(([column]) => [column, '']))); dirty = true; render();
+      root.querySelector(`[data-row="${key}"][data-index="${data[key].length - 1}"] textarea`).focus();
+    }));
+    root.querySelectorAll('[data-remove]').forEach(button => button.addEventListener('click', () => {
+      if (!canWrite || working) return;
+      capture(); const key = button.dataset.remove, index = Number(button.dataset.index);
+      if (hasContent(data[key][index]) && !window.confirm('¿Eliminar esta fila de la ficha?')) return;
+      data[key].splice(index, 1); dirty = true; render(); root.querySelector(`[data-add="${key}"]`).focus();
+    }));
+  }
+  function allowDiscard() {
+    if (working || pdfBusy) return false;
+    return !dirty || window.confirm('Hay cambios sin guardar. ¿Descartarlos y continuar?');
+  }
+  function choose(record, project = null) {
+    current = record || null; data = record ? normalizeIntake(record.data) : newIntake(project || {});
+    projectId = record?.project_id || project?.id || ''; dirty = false; render();
+  }
+  async function load(refreshCurrent = false) {
+    working = true; render();
+    const results = await Promise.allSettled([
+      supabase.from('projects').select('id, name, clients(name)').order('name'),
+      supabase.from('requirement_intakes').select('*').order('updated_at', { ascending: false })
+    ]);
+    working = false;
+    const [projectResult, recordResult] = results;
+    if (projectResult.status === 'fulfilled' && !projectResult.value.error) projects = projectResult.value.data || [];
+    else showToast('No se pudieron cargar los proyectos. Puedes completar una ficha sin asignación.', 'warning');
+    if (recordResult.status === 'fulfilled' && !recordResult.value.error) {
+      records = recordResult.value.data || [];
+      if (refreshCurrent && current) {
+        const updated = records.find(record => record.id === current.id);
+        if (updated) { choose(updated); return; }
+        showToast('La ficha ya no está disponible. Se conserva tu copia para descargarla.', 'warning');
+      }
+    } else showToast('No se pudieron cargar las fichas guardadas. Verifica la conexión, los permisos y la migración de fichas. Puedes completar el formulario y descargar el PDF.', 'warning');
+    render();
+  }
+  async function save(event) {
+    event.preventDefault(); if (!canWrite || working) return;
+    capture(); const normalized = normalizeIntake(data), error = validateIntake(normalized);
+    if (error) return showToast(error, 'warning');
+    const payload = { project_id: projectId || null, data: normalized };
+    dirty = true;
+    working = true; render();
+    try {
+      const query = current
+        ? supabase.from('requirement_intakes').update(payload).eq('id', current.id).eq('updated_at', current.updated_at)
+        : supabase.from('requirement_intakes').insert(payload);
+      const { data: saved, error: saveError } = await query.select().single();
+      if (saveError) throw saveError;
+      current = saved; data = normalizeIntake(saved.data); dirty = false;
+      records = [saved, ...records.filter(record => record.id !== saved.id)];
+      showToast('Ficha guardada.', 'success');
+    } catch (error) { showToast(intakeErrorMessage(error), 'error'); }
+    finally { working = false; render(); }
+  }
+  async function exportPDF() {
+    if (working || pdfBusy) return;
+    capture(); const snapshot = normalizeIntake(data), error = validateIntake(snapshot);
+    if (error) { root.querySelector('#intake-form').reportValidity(); return showToast(error, 'warning'); }
+    pdfBusy = true;
+    const button = root.querySelector('#intake-pdf'); button.disabled = true; button.textContent = 'Generando PDF…';
+    try {
+      const assets = await getPdfAssets();
+      buildIntakePDF(snapshot, assets).save(intakeFilename(snapshot));
+      showToast('PDF generado con los datos de la ficha.', 'success');
+    } catch (error) { showToast('No se pudo generar el PDF. Revisa la conexión y vuelve a intentar; la ficha se conserva.', 'error'); }
+    finally { pdfBusy = false; const currentButton = root.querySelector('#intake-pdf'); currentButton.disabled = working; currentButton.textContent = 'Generar PDF para el cliente'; }
+  }
+  root.selectRequirementProject = async id => {
+    if (!allowDiscard()) return false;
+    const record = records.find(item => item.project_id === id), project = projects.find(item => item.id === id);
+    if (!project && !record) { showToast('El proyecto no está disponible.', 'warning'); return false; }
+    choose(record, project); return true;
+  };
+  render(); await load();
+}
+
+return { intakeErrorMessage, mountRequirements };
+})();
+// documentAssets
+const documentAssets = (() => {
+
+const PDF_SCRIPT_ID = 'jspdf-runtime';
+const PDF_SCRIPT_URL = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+const PDF_SCRIPT_INTEGRITY = 'sha384-JcnsjUPPylna1s1fvi1u12X5qjY5OL56iySh75FdtrwhO/SWXgMjoVqcKyIIWOLk';
+const COMPANY = Object.freeze({
+  name: 'Servicios Informaticos Yevenes & CIA LTDA', rut: '78.352.809-6',
+  giro: 'Actividades de consultoria informatica y de gestion de instalaciones informatica',
+  address: 'Colo-Colo 379 Of. 706, Concepción, Chile', city: 'Concepción', region: 'Región del Biobío',
+  phone: '+56 9 7702 9753', email: 'tomas@solvenlabs.cl', website: 'www.solvenlabs.cl'
+});
+let runtimePromise = null;
+const logoCache = new Map();
+
+function getCompanyInfo() { return { ...COMPANY }; }
+
+function loadPdfRuntime() {
+  if (window.jspdf?.jsPDF) return Promise.resolve(window.jspdf);
+  if (runtimePromise) return runtimePromise;
+  runtimePromise = new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.id = PDF_SCRIPT_ID;
+    script.src = PDF_SCRIPT_URL;
+    script.integrity = PDF_SCRIPT_INTEGRITY;
+    script.crossOrigin = 'anonymous';
+    script.referrerPolicy = 'no-referrer';
+    const fail = () => { clearTimeout(timeout); script.remove(); reject(new Error('No se pudo cargar la biblioteca PDF.')); };
+    const timeout = setTimeout(fail, 20000);
+    script.addEventListener('load', () => {
+      if (!window.jspdf?.jsPDF) { fail(); return; }
+      clearTimeout(timeout); resolve(window.jspdf);
+    }, { once: true });
+    script.addEventListener('error', fail, { once: true });
+    document.head.appendChild(script);
+  }).catch(error => { runtimePromise = null; throw error; });
+  return runtimePromise;
+}
+
+function loadImageDataURL(url) {
+  if (!logoCache.has(url)) {
+    const promise = fetch(url).then(response => {
+      if (!response.ok) throw new Error('No se pudo cargar el logo Solven Labs.');
+      return response.blob();
+    }).then(blob => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    })).catch(error => { logoCache.delete(url); throw error; });
+    logoCache.set(url, promise);
+  }
+  return logoCache.get(url);
+}
+
+function loadLogoDataURL() {
+  // Commercial documents already use the compact mark; preserve their layout.
+  return loadImageDataURL('/assets/favicon%20chopped.png').catch(() => null);
+}
+
+async function getIntakePdfAssets() {
+  const [runtime, logoDataURL] = await Promise.all([loadPdfRuntime(), loadImageDataURL('/assets/logo%20extended%20chopped.png')]);
+  return { jsPDF: runtime.jsPDF, logoDataURL, company: getCompanyInfo() };
+}
+
+return { getCompanyInfo, loadPdfRuntime, loadLogoDataURL, getIntakePdfAssets };
+})();
+
+const { mountRequirements } = intakeUi;
+const { getCompanyInfo, loadPdfRuntime, loadLogoDataURL, getIntakePdfAssets } = documentAssets;
 // @ts-nocheck
 /* ==========================================================================
    Solven Labs Dashboard — JavaScript (Supabase Integration)
    ========================================================================== */
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.112.4'
 import DOMPurify from 'https://esm.sh/dompurify@3.2.6'
-import { mountRequirements } from './dashboard-intake.js?v=2';
 
 const fallbackParams = new URLSearchParams(window.location.search);
 let storedFallbackRoute = null;
@@ -5455,227 +5882,8 @@ async function loadMaintenance() {
   }
 
   renderManualMaintenancePlans(subscriptions || [], subscriptionsErr);
-  if (!window._maintenanceListenersSetup) {
-    window._maintenanceListenersSetup = true;
-    initManualMaintenanceModal();
-  }
 }
 
-
-function openMaintenanceSubscriptionLink(checkoutUrl, customerName) {
-  const safeUrl = escapeHtml(checkoutUrl);
-  openModal(
-    'Enlace de activación listo',
-    `<p>Envía este enlace a <strong>${escapeHtml(customerName || 'tu cliente')}</strong>. La suscripción seguirá pendiente hasta que autorice el cobro.</p>
-     <div style="display:grid;gap:10px;margin-top:16px;">
-       <input class="modal-form__input" id="mp-subscription-ready-link" value="${safeUrl}" readonly>
-       <div style="display:flex;gap:10px;flex-wrap:wrap;">
-         <button type="button" class="btn-dash btn-dash--secondary" id="mp-subscription-copy-link"><i data-lucide="copy"></i> Copiar enlace</button>
-         <a class="btn-dash btn-dash--primary" href="${safeUrl}" target="_blank" rel="noopener"><i data-lucide="external-link"></i> Abrir checkout</a>
-       </div>
-     </div>`,
-    'Cerrar',
-    () => closeModal()
-  );
-  setTimeout(() => {
-    document.getElementById('mp-subscription-copy-link')?.addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText(checkoutUrl);
-        showToast('Enlace copiado', 'success');
-      } catch (_) {
-        const input = document.getElementById('mp-subscription-ready-link');
-        input?.select();
-        showToast('Selecciona y copia el enlace', 'info');
-      }
-    });
-    if (typeof lucide !== 'undefined') lucide.createIcons();
-  }, 50);
-}
-
-
-window.copyMaintenanceSubscriptionLink = function copyMaintenanceSubscriptionLink(subscriptionId) {
-  const subscription = (window._maintenanceSubscriptions || []).find(item => item.id === subscriptionId);
-  if (!subscription?.checkout_url) {
-    showToast('Esta suscripción no tiene un enlace disponible', 'error');
-    return;
-  }
-  openMaintenanceSubscriptionLink(subscription.checkout_url, subscription.customer_name);
-};
-
-window.manageMaintenanceSubscription = function manageMaintenanceSubscription(subscriptionId, action) {
-  const labels = { pause: 'pausar', resume: 'reactivar', cancel: 'cancelar definitivamente' };
-  openModal(
-    `${action === 'cancel' ? 'Cancelar' : action === 'pause' ? 'Pausar' : 'Reactivar'} suscripción`,
-    `<p>¿Confirmas que quieres <strong>${labels[action]}</strong> esta suscripción de pago?</p>${action === 'cancel' ? '<p style="color:#b91c1c;">Una suscripción cancelada no se puede reactivar.</p>' : ''}`,
-    'Confirmar',
-    async () => {
-      const { data, error } = await supabase.functions.invoke('manage-maintenance-subscription', {
-        body: { subscription_id: subscriptionId, action }
-      });
-      if (error || data?.error) {
-        showToast(data?.error || error?.message || 'No se pudo actualizar la suscripción', 'error');
-        return;
-      }
-      closeModal();
-      showToast('Suscripción actualizada correctamente', 'success');
-      await loadMaintenance();
-    }
-  );
-};
-
-window.deleteMaintenanceSubscription = function deleteMaintenanceSubscription(subscriptionId) {
-  const subscription = (window._maintenanceSubscriptions || []).find(item => item.id === subscriptionId);
-  if (!subscription) {
-    showToast('No encontramos la suscripción', 'error');
-    return;
-  }
-  openModal(
-    'Eliminar suscripción',
-    `<p>¿Quieres eliminar del dashboard la suscripción de <strong>${escapeHtml(subscription.customer_name || 'este cliente')}</strong>?</p>
-     <p style="margin-top:10px;color:#b91c1c;"><strong>Antes de ocultarla se cancelará el cobro recurrente</strong> para impedir cobros futuros. El historial de pagos y facturación se conservará.</p>`,
-    'Cancelar y eliminar',
-    async () => {
-      const { data, error } = await supabase.functions.invoke('manage-maintenance-subscription', {
-        body: { subscription_id: subscriptionId, action: 'delete' }
-      });
-      if (error || data?.error || !data?.deleted) {
-        showToast(data?.error || error?.message || 'No se pudo eliminar la suscripción', 'error');
-        return;
-      }
-      closeModal();
-      showToast('Suscripción cancelada y eliminada del dashboard', 'success');
-      await loadMaintenance();
-    }
-  );
-};
-
-function invokeMaintenanceFunction(functionName, body, timeoutMs = 20000) {
-  let timeoutId;
-  const timeoutPromise = new Promise((_, reject) => {
-    timeoutId = window.setTimeout(() => reject(new Error('La solicitud tardó demasiado. Intenta nuevamente.')), timeoutMs);
-  });
-  return Promise.race([
-    supabase.functions.invoke(functionName, { body }),
-    timeoutPromise
-  ]).finally(() => window.clearTimeout(timeoutId));
-}
-
-function setMaintenanceModalFeedback(elementId, message = '', type = 'error') {
-  const feedback = document.getElementById(elementId);
-  if (!feedback) return;
-  feedback.hidden = !message;
-  feedback.textContent = message;
-  feedback.style.color = type === 'info' ? '#1d4ed8' : '#b91c1c';
-  feedback.style.background = type === 'info' ? '#eff6ff' : '#fef2f2';
-  feedback.style.borderColor = type === 'info' ? '#bfdbfe' : '#fecaca';
-}
-
-function getNextValidMaintenanceDate() {
-  const date = new Date();
-  date.setHours(0, 0, 0, 0);
-  if (date.getDate() > 28) {
-    date.setMonth(date.getMonth() + 1, 1);
-  }
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-}
-
-function initManualMaintenanceModal() {
-  const button = document.getElementById('btn-add-mp-subscription');
-  if (!button || button.dataset.manualBillingBound) return;
-  button.dataset.manualBillingBound = 'true';
-  button.addEventListener('click', () => {
-    const projects = window._maintenanceProjects || [];
-    const firstDate = getNextValidMaintenanceDate();
-    openModal('Activar facturación de mantención', `
-      <div class="modal-form__group">
-        <label class="modal-form__label">Proyecto / portal del cliente</label>
-        <select class="modal-form__select" id="manual-maintenance-project">
-          <option value="">Selecciona un proyecto</option>
-          ${projects.map(project => `<option value="${project.id}">${escapeHtml(project.name || 'Proyecto')}</option>`).join('')}
-        </select>
-        <small style="color:var(--dash-text-secondary);">El proyecto debe tener un cliente vinculado con RUT registrado.</small>
-      </div>
-      <div class="modal-form__row">
-        <div class="modal-form__group"><label class="modal-form__label">Nombre del acuerdo</label><input class="modal-form__input" id="manual-maintenance-name" maxlength="80" placeholder="Ej. Mantención mensual" required></div>
-        <div class="modal-form__group"><label class="modal-form__label">Monto mensual</label><input type="number" class="modal-form__input" id="manual-maintenance-amount" min="1000" max="5000000" step="1" inputmode="numeric" placeholder="Ej. 19990" required></div>
-      </div>
-      <div class="modal-form__group">
-        <label class="modal-form__label">Fecha programada del próximo cobro</label>
-        <input type="date" class="modal-form__input" id="manual-maintenance-date" value="${firstDate}" min="${firstDate}">
-        <small style="color:var(--dash-text-secondary);">Debe ser hoy o una fecha futura, entre los días 1 y 28. Nunca se crearán cobros retroactivos.</small>
-      </div>
-      <label style="display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;padding:14px;border:1px solid rgba(46,84,125,.2);border-radius:10px;background:rgba(46,84,125,.05);">
-        <input type="checkbox" id="manual-maintenance-balance" style="margin-top:3px;">
-        <span><strong>Confirmo que el segundo 50% ya fue pagado.</strong><br><small style="color:var(--dash-text-secondary);">Esto habilita la mantención, pero no autoriza cobros automáticos.</small></span>
-      </label>
-      <p style="margin-top:14px;color:var(--dash-text-secondary);font-size:.85rem;"><strong>Pago manual:</strong> cada cobro aparecerá en proyecto.html y el cliente abrirá el pago sólo cuando presione «Pagar».</p>
-      <p id="manual-maintenance-feedback" role="alert" hidden style="margin-top:14px;padding:10px 12px;border:1px solid;border-radius:8px;"></p>
-    `, 'Activar facturación', async () => {
-      const projectId = document.getElementById('manual-maintenance-project')?.value || '';
-      const firstIssueDate = document.getElementById('manual-maintenance-date')?.value || '';
-      const customPlanName = document.getElementById('manual-maintenance-name')?.value.trim() || '';
-      const customAmount = Number(document.getElementById('manual-maintenance-amount')?.value || 0);
-      setMaintenanceModalFeedback('manual-maintenance-feedback');
-      if (!projectId || !firstIssueDate) {
-        const message = 'Selecciona el proyecto y la fecha de facturación.';
-        setMaintenanceModalFeedback('manual-maintenance-feedback', message);
-        showToast(message, 'error');
-        document.getElementById(!projectId ? 'manual-maintenance-project' : 'manual-maintenance-date')?.focus();
-        return;
-      }
-      const billingDay = Number(firstIssueDate.slice(8, 10));
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(firstIssueDate) || billingDay < 1 || billingDay > 28) {
-        const message = 'La fecha debe tener un día entre el 1 y el 28.';
-        setMaintenanceModalFeedback('manual-maintenance-feedback', message);
-        showToast(message, 'error');
-        document.getElementById('manual-maintenance-date')?.focus();
-        return;
-      }
-      if (firstIssueDate < firstDate) {
-        const message = 'La fecha programada del próximo cobro no puede estar en el pasado.';
-        setMaintenanceModalFeedback('manual-maintenance-feedback', message);
-        showToast(message, 'error');
-        document.getElementById('manual-maintenance-date')?.focus();
-        return;
-      }
-      if (!document.getElementById('manual-maintenance-balance')?.checked) {
-        const message = 'Confirma primero el pago del segundo 50%.';
-        setMaintenanceModalFeedback('manual-maintenance-feedback', message);
-        showToast(message, 'error');
-        document.getElementById('manual-maintenance-balance')?.focus();
-        return;
-      }
-      if (customPlanName.length < 3 || !Number.isInteger(customAmount) || customAmount < 1000 || customAmount > 5000000) {
-        const message = 'Indica un nombre y monto mensual válido.';
-        setMaintenanceModalFeedback('manual-maintenance-feedback', message);
-        showToast(message, 'error');
-        document.getElementById(customPlanName.length < 3 ? 'manual-maintenance-name' : 'manual-maintenance-amount')?.focus();
-        return;
-      }
-      const confirm = document.getElementById('modal-confirm');
-      if (confirm) { confirm.disabled = true; confirm.textContent = 'Activando…'; }
-      setMaintenanceModalFeedback('manual-maintenance-feedback', 'Activando la facturación…', 'info');
-      try {
-        const { data, error } = await invokeMaintenanceFunction('create-maintenance-billing', {
-          project_id: projectId, plan_code: 'custom', first_issue_date: firstIssueDate, balance_confirmed: true,
-          custom_plan_name: customPlanName,
-          custom_amount: customAmount
-        });
-        if (error || data?.error || !data?.plan_id) throw new Error(data?.error || error?.message || 'No se pudo activar la facturación.');
-        closeModal();
-        showToast('Facturación mensual activada en el portal del cliente', 'success');
-        await loadMaintenance();
-      } catch (requestError) {
-        console.error('Error activando facturación de mantención:', requestError);
-        const message = requestError?.message || 'No se pudo activar la facturación.';
-        setMaintenanceModalFeedback('manual-maintenance-feedback', message);
-        showToast(message, 'error');
-      } finally {
-        if (confirm) { confirm.disabled = false; confirm.textContent = 'Activar facturación'; }
-      }
-    });
-  });
-}
 
 function getManualMaintenanceStatusMeta(plan) {
   const planStatus = String(plan.status || 'active').toLowerCase();
@@ -5698,114 +5906,11 @@ function renderManualMaintenancePlans(plans, loadError = null) {
   tbody.innerHTML = plans.map(plan => {
     const status = String(plan.status || 'active').toLowerCase();
     const state = getManualMaintenanceStatusMeta(plan);
-    const editButton = `<button class="btn-dash btn-dash--secondary btn-dash--sm" onclick="editManualMaintenance('${plan.id}')"><i data-lucide="pencil"></i> Editar</button>`;
-    const actions = status === 'active'
-      ? `${editButton}<button class="btn-dash btn-dash--secondary btn-dash--sm" onclick="manageManualMaintenance('${plan.id}','pause')"><i data-lucide="pause"></i> Pausar</button><button class="btn-dash btn-dash--danger btn-dash--sm" onclick="manageManualMaintenance('${plan.id}','cancel')"><i data-lucide="x-circle"></i> Cancelar</button>`
-      : status === 'paused'
-        ? `${editButton}<button class="btn-dash btn-dash--primary btn-dash--sm" onclick="manageManualMaintenance('${plan.id}','resume')"><i data-lucide="play"></i> Reactivar</button><button class="btn-dash btn-dash--danger btn-dash--sm" onclick="manageManualMaintenance('${plan.id}','delete')"><i data-lucide="trash-2"></i> Eliminar</button>`
-        : `<button class="btn-dash btn-dash--danger btn-dash--sm" onclick="manageManualMaintenance('${plan.id}','delete')"><i data-lucide="trash-2"></i> Eliminar</button>`;
+    const actions = 'Solo consulta';
     return `<tr><td><strong>${escapeHtml(plan.customer_name || 'Sin nombre')}</strong><br><small>${escapeHtml(plan.customer_email || '')}</small></td><td>${escapeHtml(plan.plan_name || '-')}</td><td><strong>${formatCurrency(plan.amount || 0)}</strong></td><td><span class="status-badge status-badge--${state.badge}">${state.label}</span></td><td>${plan.next_issue_date ? formatDateShort(plan.next_issue_date) : '-'}</td><td>${escapeHtml(plan.customer_rut || '-')}</td><td><div class="table-actions">${actions}</div></td></tr>`;
   }).join('');
   if (typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 30);
 }
-
-window.editManualMaintenance = function editManualMaintenance(planId) {
-  const plan = (window._maintenanceSubscriptions || []).find(item => item.id === planId);
-  if (!plan) { showToast('No encontramos la mantención', 'error'); return; }
-  const todayDate = getNextValidMaintenanceDate();
-  const editableNextDate = String(plan.next_issue_date || '') >= todayDate ? plan.next_issue_date : todayDate;
-  openModal('Editar mantención', `
-    <div class="modal-form__row">
-      <div class="modal-form__group">
-        <label class="modal-form__label">Nombre del plan</label>
-        <input class="modal-form__input" id="edit-maintenance-name" maxlength="80" value="${escapeHtml(plan.plan_name || '')}">
-      </div>
-      <div class="modal-form__group">
-        <label class="modal-form__label">Monto por período</label>
-        <input type="number" class="modal-form__input" id="edit-maintenance-amount" min="1000" max="5000000" step="1" value="${Number(plan.amount || 0)}">
-      </div>
-    </div>
-    ${event.recurrence_group_id ? `<div class="modal-form__group">
-      <label class="modal-form__label">Repetir hasta</label>
-      <input type="date" class="modal-form__input" id="edit-event-repeat-until" value="${escapeHtml(event.recurrence_rule?.until || event.event_date)}">
-      <small class="event-recurrence-help">Al guardar para toda la serie, se agregarán o quitarán las ocurrencias necesarias.</small>
-    </div>` : ''}
-    <div class="modal-form__group">
-      <label class="modal-form__label">Fecha programada del próximo cobro</label>
-      <input type="date" class="modal-form__input" id="edit-maintenance-next-date" min="${todayDate}" value="${escapeHtml(editableNextDate)}">
-      <small style="color:var(--dash-text-secondary);">Define el próximo período, desde hoy en adelante. Si existe un cobro impago, no se emitirá otro.</small>
-    </div>
-    <p style="margin-top:14px;padding:12px;border:1px solid rgba(46,84,125,.2);border-radius:10px;background:rgba(46,84,125,.05);color:var(--dash-text-secondary);font-size:.85rem;"><strong>Un solo cobro abierto:</strong> al guardar, el nombre y el monto se actualizarán también en el cobro pendiente o vencido del portal. Los pagos ya completados no cambian.</p>
-    <p id="edit-maintenance-feedback" role="alert" hidden style="margin-top:14px;padding:10px 12px;border:1px solid;border-radius:8px;"></p>
-  `, 'Guardar cambios', async () => {
-    const planName = document.getElementById('edit-maintenance-name')?.value.trim() || '';
-    const amount = Number(document.getElementById('edit-maintenance-amount')?.value || 0);
-    const nextIssueDate = document.getElementById('edit-maintenance-next-date')?.value || '';
-    const billingDay = Number(nextIssueDate.slice(8, 10));
-    setMaintenanceModalFeedback('edit-maintenance-feedback');
-    if (planName.length < 3) {
-      const message = 'Indica un nombre de plan válido.';
-      setMaintenanceModalFeedback('edit-maintenance-feedback', message); showToast(message, 'error');
-      document.getElementById('edit-maintenance-name')?.focus(); return;
-    }
-    if (!Number.isInteger(amount) || amount < 1000 || amount > 5000000) {
-      const message = 'Indica un monto entre $1.000 y $5.000.000.';
-      setMaintenanceModalFeedback('edit-maintenance-feedback', message); showToast(message, 'error');
-      document.getElementById('edit-maintenance-amount')?.focus(); return;
-    }
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(nextIssueDate) || billingDay < 1 || billingDay > 28) {
-      const message = 'La fecha debe tener un día entre el 1 y el 28.';
-      setMaintenanceModalFeedback('edit-maintenance-feedback', message); showToast(message, 'error');
-      document.getElementById('edit-maintenance-next-date')?.focus(); return;
-    }
-    if (nextIssueDate < todayDate) {
-      const message = 'La fecha programada del próximo cobro no puede estar en el pasado.';
-      setMaintenanceModalFeedback('edit-maintenance-feedback', message); showToast(message, 'error');
-      document.getElementById('edit-maintenance-next-date')?.focus(); return;
-    }
-    const confirm = document.getElementById('modal-confirm');
-    if (confirm) { confirm.disabled = true; confirm.textContent = 'Guardando…'; }
-    setMaintenanceModalFeedback('edit-maintenance-feedback', 'Guardando los cambios…', 'info');
-    try {
-      const { data, error } = await invokeMaintenanceFunction('manage-maintenance-billing', {
-        plan_id: planId,
-        action: 'edit',
-        plan_name: planName,
-        amount,
-        next_issue_date: nextIssueDate
-      });
-      if (error || data?.error) throw new Error(data?.error || error?.message || 'No se pudo editar la mantención.');
-      closeModal();
-      showToast('Mantención y cobro abierto actualizados', 'success');
-      await loadMaintenance();
-    } catch (requestError) {
-      console.error('Error editando facturación de mantención:', requestError);
-      const message = requestError?.message || 'No se pudo editar la mantención.';
-      setMaintenanceModalFeedback('edit-maintenance-feedback', message);
-      showToast(message, 'error');
-    } finally {
-      if (confirm) { confirm.disabled = false; confirm.textContent = 'Guardar cambios'; }
-    }
-  });
-};
-
-window.manageManualMaintenance = function manageManualMaintenance(planId, action) {
-  const labels = { pause: 'pausar', resume: 'reactivar', cancel: 'cancelar', delete: 'eliminar' };
-  openModal(`${labels[action].charAt(0).toUpperCase() + labels[action].slice(1)} mantención`, `<p>¿Confirmas que quieres <strong>${labels[action]}</strong> esta facturación mensual?</p>${['cancel','delete'].includes(action) ? '<p style="margin-top:10px;color:#b91c1c;">No se crearán nuevos cobros; el historial emitido se conservará.</p>' : ''}`, 'Confirmar', async () => {
-    const { data, error } = await supabase.functions.invoke('manage-maintenance-billing', { body: { plan_id: planId, action } });
-    if (error || data?.error) { showToast(data?.error || error?.message || 'No se pudo actualizar la mantención', 'error'); return; }
-    closeModal(); showToast('Mantención actualizada', 'success'); await loadMaintenance();
-  });
-};
-
-function isDueSoon(dateStr, days = 7) {
-  const due = parseDate(dateStr);
-  if (!due) return false;
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  const diff = (due.getTime() - today.getTime()) / 86400000;
-  return diff >= 0 && diff <= days;
-}
-
 
 function renderMaintenanceModalForm({ prefix, item = {}, projectLabel = '' }) {
   const projectPickerId = `${prefix}-maintenance-project-picker`;
@@ -8488,55 +8593,8 @@ async function viewTeamMember(id) {
   if (typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 50);
 }
 
-function deleteTeamMember(id, name, kind = 'team_member') {
-  if (!isAdministrativeRole(getCurrentRole())) return showToast('Solo administración puede eliminar miembros del equipo', 'warning');
-  if (kind === 'profile' && id === currentProfile?.id) return showToast('No puedes eliminar tu propia cuenta', 'warning');
-  openModal('Eliminar Miembro', `<p>¿Estás seguro de eliminar a <strong>${escapeHtml(name)}</strong>? Esta acción no se puede deshacer.</p>`, 'Eliminar', async () => {
-    const confirmButton = document.getElementById('modal-confirm');
-    if (confirmButton) {
-      confirmButton.disabled = true;
-      confirmButton.textContent = 'Eliminando…';
-    }
-    try {
-      const timeoutPromise = new Promise((_, reject) => window.setTimeout(
-        () => reject(new Error('La eliminación tardó demasiado. Verifica que la función delete-team-member esté desplegada.')),
-        20000
-      ));
-      const { data, error } = await Promise.race([
-        supabase.functions.invoke('delete-team-member', {
-          body: { target_id: id, target_kind: kind }
-        }),
-        timeoutPromise
-      ]);
-      let errorMessage = data?.error || error?.message || '';
-      if (error?.context && typeof error.context.clone === 'function') {
-        try {
-          const errorBody = await error.context.clone().json();
-          errorMessage = errorBody?.error || errorMessage;
-        } catch (_) { /* La respuesta no contenía JSON. */ }
-      }
-      if (error || data?.error) throw new Error(errorMessage || 'No se pudo eliminar el miembro');
-
-      invalidateModalEntitySearchCache('employee');
-      closeModal();
-      showToast(`${name} fue eliminado de Auth y del equipo`, 'success');
-      await loadTeam();
-      await loadRelations();
-      db.activity.log({ user_name: currentProfile?.full_name, activity_type: 'team', description: 'eliminó miembro del equipo', entity_name: name });
-    } catch (error) {
-      console.error('No se pudo eliminar el miembro:', error);
-      const message = /failed to send|not found|404/i.test(error?.message || '')
-        ? 'La función delete-team-member aún no está desplegada en Supabase.'
-        : error?.message || 'No se pudo eliminar el miembro';
-      showToast(message, 'error');
-    } finally {
-      const activeConfirmButton = document.getElementById('modal-confirm');
-      if (activeConfirmButton) {
-        activeConfirmButton.disabled = false;
-        activeConfirmButton.textContent = 'Eliminar';
-      }
-    }
-  });
+function deleteTeamMember() {
+  showToast('La eliminación de cuentas se gestiona desde Supabase.', 'info');
 }
 
 async function editProject(id) {

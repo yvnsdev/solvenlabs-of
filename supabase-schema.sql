@@ -1,31 +1,90 @@
--- ==========================================================================
--- Solven Labs Dashboard — Supabase Database Schema
--- Ejecutar en Supabase SQL Editor (Dashboard > SQL Editor > New Query)
--- ==========================================================================
--- NOTA: RLS desactivado por ahora. Activar en producción.
--- ==========================================================================
+-- Solven Labs — esquema completo de Supabase
+-- Ejecutar TODO en SQL Editor como postgres. Incluye una única transacción.
+-- Se puede repetir: no recrea tablas, no duplica políticas/triggers ni datos iniciales.
+-- Requiere los esquemas auth y storage y los roles estándar de Supabase.
+-- pg_cron es opcional: solo se programa la retención si ya está habilitado.
+-- No incluye datos de demostración ni elimina tablas/datos existentes.
+-- Para retirar tablas antiguas VACÍAS, ejecutar después supabase-cleanup.sql.
+-- Se conservan las políticas de acceso actuales; este archivo no es una auditoría RLS.
+-- Orden: tipos; identidad; operaciones; funciones; portal; finanzas; agenda;
+-- historial; requerimientos; dependencias del dashboard; vistas finales.
+
+BEGIN;
+SET LOCAL search_path = public, extensions;
 
 -- ========== EXTENSIONES ==========
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- ========== ENUM TYPES ==========
-CREATE TYPE client_status AS ENUM ('active', 'inactive', 'prospect');
-CREATE TYPE client_relationship AS ENUM ('owner', 'manager', 'legal_rep', 'collaborator', 'other');
-CREATE TYPE project_status AS ENUM ('proposal', 'in_development', 'review', 'completed', 'paused');
-CREATE TYPE invoice_status AS ENUM ('draft', 'pending', 'paid', 'overdue', 'cancelled');
-CREATE TYPE order_status AS ENUM ('pending', 'in_progress', 'review', 'done');
-CREATE TYPE order_priority AS ENUM ('low', 'medium', 'high');
-CREATE TYPE task_priority AS ENUM ('low', 'medium', 'high');
-CREATE TYPE event_type AS ENUM ('meeting', 'deadline', 'demo', 'kickoff', 'other');
-CREATE TYPE activity_type AS ENUM ('project', 'invoice', 'client', 'document', 'deploy', 'general', 'task', 'order', 'team', 'provider');
-CREATE TYPE team_availability AS ENUM ('available', 'busy', 'away', 'offline');
-CREATE TYPE doc_folder AS ENUM ('contratos', 'propuestas', 'diseños', 'entregables', 'facturas', 'legal', 'otros');
-CREATE TYPE expense_category AS ENUM ('salarios', 'alquiler', 'servicios', 'software', 'hardware', 'viajes', 'marketing', 'legal', 'otro');
-CREATE TYPE expense_status AS ENUM ('draft', 'submitted', 'approved', 'rejected', 'paid');
+DO $enum$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace WHERE n.nspname = 'public' AND t.typname = 'client_status') THEN
+    CREATE TYPE public.client_status AS ENUM ('active', 'inactive', 'prospect');
+  END IF;
+END $enum$;
+DO $enum$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace WHERE n.nspname = 'public' AND t.typname = 'client_relationship') THEN
+    CREATE TYPE public.client_relationship AS ENUM ('owner', 'manager', 'legal_rep', 'collaborator', 'other');
+  END IF;
+END $enum$;
+DO $enum$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace WHERE n.nspname = 'public' AND t.typname = 'project_status') THEN
+    CREATE TYPE public.project_status AS ENUM ('proposal', 'in_development', 'review', 'completed', 'paused');
+  END IF;
+END $enum$;
+DO $enum$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace WHERE n.nspname = 'public' AND t.typname = 'invoice_status') THEN
+    CREATE TYPE public.invoice_status AS ENUM ('draft', 'pending', 'paid', 'overdue', 'cancelled');
+  END IF;
+END $enum$;
+DO $enum$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace WHERE n.nspname = 'public' AND t.typname = 'order_status') THEN
+    CREATE TYPE public.order_status AS ENUM ('pending', 'in_progress', 'review', 'done');
+  END IF;
+END $enum$;
+DO $enum$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace WHERE n.nspname = 'public' AND t.typname = 'order_priority') THEN
+    CREATE TYPE public.order_priority AS ENUM ('low', 'medium', 'high');
+  END IF;
+END $enum$;
+DO $enum$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace WHERE n.nspname = 'public' AND t.typname = 'task_priority') THEN
+    CREATE TYPE public.task_priority AS ENUM ('low', 'medium', 'high');
+  END IF;
+END $enum$;
+DO $enum$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace WHERE n.nspname = 'public' AND t.typname = 'event_type') THEN
+    CREATE TYPE public.event_type AS ENUM ('meeting', 'deadline', 'demo', 'kickoff', 'other');
+  END IF;
+END $enum$;
+DO $enum$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace WHERE n.nspname = 'public' AND t.typname = 'activity_type') THEN
+    CREATE TYPE public.activity_type AS ENUM ('project', 'invoice', 'client', 'document', 'deploy', 'general', 'task', 'order', 'team', 'provider');
+  END IF;
+END $enum$;
+DO $enum$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace WHERE n.nspname = 'public' AND t.typname = 'team_availability') THEN
+    CREATE TYPE public.team_availability AS ENUM ('available', 'busy', 'away', 'offline');
+  END IF;
+END $enum$;
+DO $enum$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace WHERE n.nspname = 'public' AND t.typname = 'doc_folder') THEN
+    CREATE TYPE public.doc_folder AS ENUM ('contratos', 'propuestas', 'diseños', 'entregables', 'facturas', 'legal', 'otros');
+  END IF;
+END $enum$;
+DO $enum$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace WHERE n.nspname = 'public' AND t.typname = 'expense_category') THEN
+    CREATE TYPE public.expense_category AS ENUM ('salarios', 'alquiler', 'servicios', 'software', 'hardware', 'viajes', 'marketing', 'legal', 'otro');
+  END IF;
+END $enum$;
+DO $enum$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace WHERE n.nspname = 'public' AND t.typname = 'expense_status') THEN
+    CREATE TYPE public.expense_status AS ENUM ('draft', 'submitted', 'approved', 'rejected', 'paid');
+  END IF;
+END $enum$;
 
 -- ========== PROFILES ==========
 -- Extiende auth.users de Supabase
-CREATE TABLE profiles (
+CREATE TABLE IF NOT EXISTS profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   full_name TEXT NOT NULL,
   email TEXT NOT NULL,
@@ -39,7 +98,8 @@ CREATE TABLE profiles (
 );
 
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
--- RLS desactivado: permitir todo
+-- Política existente del módulo; se reemplaza por las políticas específicas debajo.
+DROP POLICY IF EXISTS "Allow all on profiles" ON profiles;
 CREATE POLICY "Allow all on profiles" ON profiles FOR ALL USING (true) WITH CHECK (true);
 
 -- Permitir roles personalizados administrados desde el dashboard.
@@ -66,7 +126,7 @@ END $$;
 
 ALTER TABLE profiles ADD CONSTRAINT profiles_role_not_empty CHECK (length(trim(role)) > 0);
 
-CREATE TABLE dashboard_roles (
+CREATE TABLE IF NOT EXISTS dashboard_roles (
   slug TEXT PRIMARY KEY CHECK (slug ~ '^[a-z0-9_]+$'),
   name TEXT NOT NULL,
   description TEXT,
@@ -78,6 +138,7 @@ CREATE TABLE dashboard_roles (
 );
 
 ALTER TABLE dashboard_roles ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow all on dashboard_roles" ON dashboard_roles;
 CREATE POLICY "Allow all on dashboard_roles" ON dashboard_roles FOR ALL USING (true) WITH CHECK (true);
 
 -- ========== PRÁCTICAS Y BITÁCORA ==========
@@ -281,12 +342,9 @@ ALTER TABLE site_content ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Allow all on site_content" ON site_content;
 CREATE POLICY "Allow all on site_content" ON site_content FOR ALL USING (true) WITH CHECK (true);
 
-DELETE FROM site_content WHERE section IN ('events', 'countdowns', 'popups');
 ALTER TABLE site_content DROP CONSTRAINT IF EXISTS site_content_section_check;
 ALTER TABLE site_content ADD CONSTRAINT site_content_section_check
-  CHECK (section IN ('pricing', 'cases', 'contact'));
-
-DROP TABLE IF EXISTS public.site_event_registrations;
+  CHECK (section IN ('pricing', 'cases', 'contact')) NOT VALID;
 
 CREATE TABLE IF NOT EXISTS site_messages (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -383,13 +441,7 @@ INSERT INTO dashboard_roles (slug, name, description, pages, buttons, is_system)
     ARRAY['btn-add-practice-log'],
     true
   )
-ON CONFLICT (slug) DO UPDATE SET
-  name = EXCLUDED.name,
-  description = EXCLUDED.description,
-  pages = EXCLUDED.pages,
-  buttons = EXCLUDED.buttons,
-  is_system = EXCLUDED.is_system,
-  updated_at = NOW();
+ON CONFLICT (slug) DO NOTHING;
 
 INSERT INTO site_content (section, content) VALUES
   ('pricing', '{
@@ -408,56 +460,6 @@ INSERT INTO site_content (section, content) VALUES
   }'::jsonb)
 ON CONFLICT (section) DO NOTHING;
 
--- ==========================================================================
--- Solven Labs Academy — Tests de cursos
--- ==========================================================================
--- Estas tablas complementan la intranet educativa. Se mantienen sin FK dura a
--- cursos/tareas para ser compatibles con instalaciones donde esas tablas ya
--- existen con ids bigint.
-
-CREATE TABLE IF NOT EXISTS tests (
-  id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
-  curso_id BIGINT NOT NULL,
-  titulo TEXT NOT NULL,
-  descripcion TEXT,
-  fecha_limite TIMESTAMPTZ NOT NULL,
-  puntaje_total NUMERIC(6,2) NOT NULL DEFAULT 7 CHECK (puntaje_total > 0),
-  preguntas JSONB NOT NULL DEFAULT '[]'::jsonb,
-  estado TEXT NOT NULL DEFAULT 'publicado' CHECK (estado IN ('borrador', 'publicado', 'archivado')),
-  user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
-  fecha_creacion TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  fecha_actualizacion TIMESTAMPTZ
-);
-
-CREATE TABLE IF NOT EXISTS test_intentos (
-  id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
-  test_id BIGINT NOT NULL REFERENCES tests(id) ON DELETE CASCADE,
-  curso_id BIGINT NOT NULL,
-  estudiante_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  email TEXT,
-  respuestas JSONB NOT NULL DEFAULT '[]'::jsonb,
-  puntaje_obtenido NUMERIC(6,2) NOT NULL DEFAULT 0,
-  estado TEXT NOT NULL DEFAULT 'enviado' CHECK (estado IN ('enviado', 'corregido')),
-  fecha_envio TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  fecha_correccion TIMESTAMPTZ,
-  corregido_por UUID REFERENCES auth.users(id) ON DELETE SET NULL,
-  UNIQUE (test_id, estudiante_id)
-);
-
-CREATE INDEX IF NOT EXISTS idx_tests_curso_id ON tests(curso_id);
-CREATE INDEX IF NOT EXISTS idx_test_intentos_test_id ON test_intentos(test_id);
-CREATE INDEX IF NOT EXISTS idx_test_intentos_curso_id ON test_intentos(curso_id);
-CREATE INDEX IF NOT EXISTS idx_test_intentos_estudiante_id ON test_intentos(estudiante_id);
-
-ALTER TABLE tests ENABLE ROW LEVEL SECURITY;
-ALTER TABLE test_intentos ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Allow all on tests" ON tests;
-CREATE POLICY "Allow all on tests" ON tests FOR ALL USING (true) WITH CHECK (true);
-
-DROP POLICY IF EXISTS "Allow all on test_intentos" ON test_intentos;
-CREATE POLICY "Allow all on test_intentos" ON test_intentos FOR ALL USING (true) WITH CHECK (true);
-
 -- Trigger para crear profile automáticamente al registrarse
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
@@ -473,12 +475,13 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION handle_new_user();
 
 -- ========== TEAM MEMBERS ==========
-CREATE TABLE team_members (
+CREATE TABLE IF NOT EXISTS team_members (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   profile_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
   full_name TEXT NOT NULL,
@@ -491,20 +494,23 @@ CREATE TABLE team_members (
 
 ALTER TABLE team_members ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Allow all on team_members" ON team_members;
+DROP POLICY IF EXISTS "Anyone can view team members" ON team_members;
 CREATE POLICY "Anyone can view team members"
 ON team_members FOR SELECT
 USING (true);
 DROP POLICY IF EXISTS "Admins manage team members" ON team_members;
+DROP POLICY IF EXISTS "Admins create team members" ON team_members;
 CREATE POLICY "Admins create team members"
 ON team_members FOR INSERT TO authenticated
 WITH CHECK (public.is_dashboard_admin());
+DROP POLICY IF EXISTS "Admins update team members" ON team_members;
 CREATE POLICY "Admins update team members"
 ON team_members FOR UPDATE TO authenticated
 USING (public.is_dashboard_admin())
 WITH CHECK (public.is_dashboard_admin());
 
 -- ========== CLIENTS ==========
-CREATE TABLE clients (
+CREATE TABLE IF NOT EXISTS clients (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL,
   company TEXT NOT NULL,
@@ -523,7 +529,7 @@ CREATE TABLE clients (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE providers (
+CREATE TABLE IF NOT EXISTS providers (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL,
   company TEXT NOT NULL,
@@ -544,13 +550,15 @@ CREATE TABLE providers (
 );
 
 ALTER TABLE clients ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow all on clients" ON clients;
 CREATE POLICY "Allow all on clients" ON clients FOR ALL USING (true) WITH CHECK (true);
 
 ALTER TABLE providers ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow all on providers" ON providers;
 CREATE POLICY "Allow all on providers" ON providers FOR ALL USING (true) WITH CHECK (true);
 
 -- ========== PROJECTS =============
-CREATE TABLE projects (
+CREATE TABLE IF NOT EXISTS projects (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL,
   client_id UUID REFERENCES clients(id) ON DELETE SET NULL,
@@ -579,10 +587,11 @@ CREATE TABLE projects (
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS health_check_url TEXT;
 
 ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow all on projects" ON projects;
 CREATE POLICY "Allow all on projects" ON projects FOR ALL USING (true) WITH CHECK (true);
 
 -- Relación muchos-a-muchos: proyectos ↔ team_members
-CREATE TABLE project_members (
+CREATE TABLE IF NOT EXISTS project_members (
   project_id UUID REFERENCES projects(id) ON DELETE CASCADE,
   team_member_id UUID REFERENCES team_members(id) ON DELETE CASCADE,
   role TEXT DEFAULT 'developer',
@@ -590,66 +599,11 @@ CREATE TABLE project_members (
 );
 
 ALTER TABLE project_members ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow all on project_members" ON project_members;
 CREATE POLICY "Allow all on project_members" ON project_members FOR ALL USING (true) WITH CHECK (true);
 
--- ========== KPI PÚBLICOS DEL SITIO ==========
--- La web consume solo este resumen agregado. Ningún nombre, correo ni detalle
--- de clientes, integrantes o proyectos forma parte de la respuesta pública.
-CREATE TABLE IF NOT EXISTS public_site_kpi_settings (
-  singleton BOOLEAN PRIMARY KEY DEFAULT true CHECK (singleton),
-  founded_year SMALLINT NOT NULL CHECK (founded_year BETWEEN 1900 AND 2100),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-INSERT INTO public_site_kpi_settings (singleton, founded_year)
-VALUES (true, 2024)
-ON CONFLICT (singleton) DO NOTHING;
-
-ALTER TABLE public_site_kpi_settings ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "Admins manage public site KPI settings" ON public_site_kpi_settings;
-CREATE POLICY "Admins manage public site KPI settings"
-ON public_site_kpi_settings FOR ALL TO authenticated
-USING (public.is_dashboard_admin())
-WITH CHECK (public.is_dashboard_admin());
-
-REVOKE ALL ON TABLE public.public_site_kpi_settings FROM PUBLIC, anon;
-GRANT SELECT, INSERT, UPDATE, DELETE
-  ON TABLE public.public_site_kpi_settings TO authenticated;
-GRANT ALL ON TABLE public.public_site_kpi_settings TO service_role;
-
-CREATE OR REPLACE FUNCTION public.get_public_site_kpis()
-RETURNS JSONB
-LANGUAGE sql
-STABLE
-SECURITY DEFINER
-SET search_path = public, pg_temp
-AS $$
-  SELECT jsonb_build_object(
-    'founded_year', COALESCE(
-      (SELECT founded_year FROM public.public_site_kpi_settings WHERE singleton = true),
-      2024
-    ),
-    'specialists', (
-      SELECT COUNT(*) FROM public.profiles
-      WHERE lower(trim(role)) IN ('administracion', 'admin', 'administrator', 'administrador')
-    ),
-    'organizations', (
-      SELECT COUNT(DISTINCT lower(trim(company)))
-      FROM public.clients
-      WHERE status IN ('active', 'inactive')
-        AND NULLIF(trim(company), '') IS NOT NULL
-    ),
-    'completed_projects', (
-      SELECT COUNT(*) FROM public.projects WHERE status = 'completed'
-    )
-  );
-$$;
-
-REVOKE ALL ON FUNCTION public.get_public_site_kpis() FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.get_public_site_kpis() TO anon, authenticated, service_role;
-
 -- ========== INVOICES ==========
-CREATE TABLE invoices (
+CREATE TABLE IF NOT EXISTS invoices (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   invoice_number TEXT NOT NULL UNIQUE,
   client_id UUID REFERENCES clients(id) ON DELETE SET NULL,
@@ -676,10 +630,11 @@ CREATE TABLE invoices (
 );
 
 ALTER TABLE invoices ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow all on invoices" ON invoices;
 CREATE POLICY "Allow all on invoices" ON invoices FOR ALL USING (true) WITH CHECK (true);
 
 -- ========== FACTURACIÓN ==========
-CREATE TABLE facturacion_items (
+CREATE TABLE IF NOT EXISTS facturacion_items (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   project_id UUID REFERENCES projects(id) ON DELETE SET NULL,
   invoice_number TEXT,
@@ -699,23 +654,30 @@ CREATE TABLE facturacion_items (
 );
 
 ALTER TABLE facturacion_items ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow all on facturacion_items" ON facturacion_items;
 CREATE POLICY "Allow all on facturacion_items" ON facturacion_items FOR ALL USING (true) WITH CHECK (true);
 CREATE INDEX IF NOT EXISTS idx_facturacion_items_project ON public.facturacion_items(project_id);
 CREATE INDEX IF NOT EXISTS idx_facturacion_items_status ON public.facturacion_items(status);
 
--- Items de factura (líneas de detalle)
-CREATE TABLE invoice_items (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  invoice_id UUID REFERENCES invoices(id) ON DELETE CASCADE,
-  description TEXT NOT NULL,
-  quantity INTEGER NOT NULL DEFAULT 1,
-  unit_price BIGINT NOT NULL DEFAULT 0,
-  total BIGINT NOT NULL DEFAULT 0,
-  sort_order INTEGER DEFAULT 0
+-- ========== COTIZACIONES (usadas por dashboard y portal) ==========
+CREATE TABLE IF NOT EXISTS public.cotizaciones (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  folio BIGINT, fecha DATE, vigencia INTEGER DEFAULT 30,
+  estado TEXT DEFAULT 'vigente', cliente TEXT, razon_social TEXT,
+  rut_receptor TEXT, giro_receptor TEXT, direccion_receptor TEXT,
+  ciudad_receptor TEXT, email_receptor TEXT,
+  contacto_proveedor_nombre TEXT, contacto_proveedor_telefono TEXT,
+  contacto_proveedor_cargo TEXT,
+  exento BOOLEAN DEFAULT false, items JSONB DEFAULT '[]'::jsonb,
+  neto NUMERIC DEFAULT 0, iva NUMERIC DEFAULT 0, total NUMERIC DEFAULT 0,
+  observaciones TEXT, project_id UUID REFERENCES public.projects(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
 );
-
-ALTER TABLE invoice_items ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow all on invoice_items" ON invoice_items FOR ALL USING (true) WITH CHECK (true);
+ALTER TABLE public.cotizaciones ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Dashboard manages quotes" ON public.cotizaciones;
+CREATE POLICY "Dashboard manages quotes" ON public.cotizaciones
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+GRANT ALL ON public.cotizaciones TO authenticated, service_role;
 
 -- ========== FACTURAS PRE-SII ==========
 -- Datos adicionales de contacto para cotizaciones. La migración es
@@ -725,7 +687,7 @@ ALTER TABLE IF EXISTS public.cotizaciones
   ADD COLUMN IF NOT EXISTS contacto_proveedor_telefono TEXT,
   ADD COLUMN IF NOT EXISTS contacto_proveedor_cargo TEXT;
 
-CREATE TABLE facturas_presii (
+CREATE TABLE IF NOT EXISTS facturas_presii (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   folio TEXT,
   tipo_dte TEXT,
@@ -757,6 +719,7 @@ CREATE TABLE facturas_presii (
 );
 
 ALTER TABLE facturas_presii ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow all on facturas_presii" ON facturas_presii;
 CREATE POLICY "Allow all on facturas_presii" ON facturas_presii FOR ALL USING (true) WITH CHECK (true);
 
 CREATE INDEX IF NOT EXISTS idx_facturas_presii_rut ON public.facturas_presii USING btree (rut_receptor);
@@ -764,7 +727,7 @@ CREATE INDEX IF NOT EXISTS idx_facturas_presii_estado ON public.facturas_presii 
 CREATE INDEX IF NOT EXISTS idx_facturas_presii_project ON public.facturas_presii USING btree (project_id);
 
 -- ========== PAGOS (Honorarios / Contratos) ==========
-CREATE TABLE pagos (
+CREATE TABLE IF NOT EXISTS pagos (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   fecha DATE,
   tipo TEXT,
@@ -785,10 +748,11 @@ ALTER TABLE pagos ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'pendien
 ALTER TABLE pagos ADD COLUMN IF NOT EXISTS operacion TEXT NOT NULL DEFAULT 'compra';
 
 ALTER TABLE pagos ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow all on pagos" ON pagos;
 CREATE POLICY "Allow all on pagos" ON pagos FOR ALL USING (true) WITH CHECK (true);
 
 -- ========== ORDERS (Kanban) ==========
-CREATE TABLE orders (
+CREATE TABLE IF NOT EXISTS orders (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   title TEXT NOT NULL,
   description TEXT,
@@ -804,6 +768,7 @@ CREATE TABLE orders (
 );
 
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow all on orders" ON orders;
 CREATE POLICY "Allow all on orders" ON orders FOR ALL USING (true) WITH CHECK (true);
 
 -- ========== SERVICE ORDERS (Servicio técnico) ==========
@@ -853,10 +818,11 @@ CREATE INDEX IF NOT EXISTS idx_service_orders_status ON service_orders(status);
 CREATE INDEX IF NOT EXISTS idx_service_orders_client ON service_orders(client_name);
 
 ALTER TABLE service_orders ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow all on service_orders" ON service_orders;
 CREATE POLICY "Allow all on service_orders" ON service_orders FOR ALL USING (true) WITH CHECK (true);
 
 -- ========== TASKS ==========
-CREATE TABLE tasks (
+CREATE TABLE IF NOT EXISTS tasks (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   title TEXT NOT NULL,
   completed BOOLEAN NOT NULL DEFAULT false,
@@ -872,10 +838,11 @@ CREATE TABLE tasks (
 );
 
 ALTER TABLE tasks ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow all on tasks" ON tasks;
 CREATE POLICY "Allow all on tasks" ON tasks FOR ALL USING (true) WITH CHECK (true);
 
 -- ========== DOCUMENTS ==========
-CREATE TABLE documents (
+CREATE TABLE IF NOT EXISTS documents (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   file_name TEXT NOT NULL,
   file_path TEXT NOT NULL, -- ruta en Supabase Storage
@@ -888,10 +855,11 @@ CREATE TABLE documents (
 );
 
 ALTER TABLE documents ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow all on documents" ON documents;
 CREATE POLICY "Allow all on documents" ON documents FOR ALL USING (true) WITH CHECK (true);
 
 -- ========== EXPENSES (Gastos Operacionales) ==========
-CREATE TABLE expenses (
+CREATE TABLE IF NOT EXISTS expenses (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   date DATE NOT NULL DEFAULT CURRENT_DATE,
   category expense_category NOT NULL,
@@ -913,6 +881,7 @@ CREATE TABLE expenses (
 );
 
 ALTER TABLE expenses ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow all on expenses" ON expenses;
 CREATE POLICY "Allow all on expenses" ON expenses FOR ALL USING (true) WITH CHECK (true);
 
 -- Índices para expenses
@@ -922,7 +891,7 @@ CREATE INDEX IF NOT EXISTS idx_expenses_status ON expenses USING btree (status);
 CREATE INDEX IF NOT EXISTS idx_expenses_project_id ON expenses USING btree (project_id);
 
 -- ========== CALENDAR EVENTS ==========
-CREATE TABLE events (
+CREATE TABLE IF NOT EXISTS events (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   title TEXT NOT NULL,
   description TEXT,
@@ -955,17 +924,13 @@ CREATE TABLE events (
 -- ALTER TABLE events ADD COLUMN IF NOT EXISTS recurrence_rule JSONB;
 -- ALTER TABLE events ADD COLUMN IF NOT EXISTS recurrence_sequence INTEGER;
 
--- ========== COURSE CLASSES ==========
--- Si la tabla clases ya existe en tu BD, agrega el enlace opcional de videollamada.
-ALTER TABLE IF EXISTS clases
-  ADD COLUMN IF NOT EXISTS meet_link TEXT;
-
 ALTER TABLE events ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow all on events" ON events;
 CREATE POLICY "Allow all on events" ON events FOR ALL USING (true) WITH CHECK (true);
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_events_ical_uid ON events (ical_uid);
 
-CREATE TABLE event_attendees (
+CREATE TABLE IF NOT EXISTS event_attendees (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   event_id UUID NOT NULL REFERENCES events(id) ON DELETE CASCADE,
   email TEXT NOT NULL,
@@ -978,16 +943,18 @@ CREATE TABLE event_attendees (
   UNIQUE (event_id, email)
 );
 
-CREATE INDEX idx_event_attendees_event ON event_attendees (event_id);
+CREATE INDEX IF NOT EXISTS idx_event_attendees_event ON event_attendees (event_id);
 ALTER TABLE event_attendees ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Authenticated users read event attendees" ON event_attendees;
 CREATE POLICY "Authenticated users read event attendees"
   ON event_attendees FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Owners manage event attendees" ON event_attendees;
 CREATE POLICY "Owners manage event attendees"
   ON event_attendees FOR ALL TO authenticated
   USING (EXISTS (SELECT 1 FROM events e WHERE e.id = event_attendees.event_id AND e.created_by = auth.uid()))
   WITH CHECK (EXISTS (SELECT 1 FROM events e WHERE e.id = event_attendees.event_id AND e.created_by = auth.uid()));
 
-CREATE TABLE calendar_invitation_requests (
+CREATE TABLE IF NOT EXISTS calendar_invitation_requests (
   request_id UUID PRIMARY KEY,
   owner_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   event_id UUID REFERENCES events(id) ON DELETE SET NULL,
@@ -999,54 +966,12 @@ CREATE TABLE calendar_invitation_requests (
 );
 
 ALTER TABLE calendar_invitation_requests ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Owners read calendar invitation requests" ON calendar_invitation_requests;
 CREATE POLICY "Owners read calendar invitation requests"
   ON calendar_invitation_requests FOR SELECT TO authenticated USING (owner_id = auth.uid());
 
-CREATE TABLE meet_rooms (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  owner_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  event_id UUID REFERENCES events(id) ON DELETE SET NULL,
-  title TEXT NOT NULL CHECK (char_length(title) BETWEEN 1 AND 160),
-  description TEXT CHECK (description IS NULL OR char_length(description) <= 2000),
-  room_token TEXT NOT NULL UNIQUE CHECK (room_token ~ '^ntek-[0-9a-f-]{32,64}$'),
-  room_url TEXT NOT NULL UNIQUE CHECK (room_url ~ '^https://meet\.jit\.si/ntek-[0-9a-f-]{32,64}$'),
-  provider TEXT NOT NULL DEFAULT 'jitsi' CHECK (provider = 'jitsi'),
-  expires_at TIMESTAMPTZ NOT NULL,
-  revoked_at TIMESTAMPTZ,
-  last_opened_at TIMESTAMPTZ,
-  open_count INTEGER NOT NULL DEFAULT 0 CHECK (open_count >= 0),
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  CHECK (expires_at > created_at)
-);
-CREATE INDEX idx_meet_rooms_owner_created ON meet_rooms (owner_id, created_at DESC);
-CREATE INDEX idx_meet_rooms_owner_expiration ON meet_rooms (owner_id, expires_at);
-ALTER TABLE meet_rooms ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Owners read meet rooms" ON meet_rooms FOR SELECT TO authenticated USING (owner_id = auth.uid());
-CREATE POLICY "Owners create meet rooms" ON meet_rooms FOR INSERT TO authenticated
-  WITH CHECK (owner_id = auth.uid() AND revoked_at IS NULL AND open_count = 0);
-CREATE POLICY "Owners update meet rooms" ON meet_rooms FOR UPDATE TO authenticated
-  USING (owner_id = auth.uid()) WITH CHECK (owner_id = auth.uid());
-CREATE POLICY "Owners delete meet rooms" ON meet_rooms FOR DELETE TO authenticated USING (owner_id = auth.uid());
-CREATE OR REPLACE FUNCTION public.open_meet_room(p_room_id UUID)
-RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
-DECLARE target public.meet_rooms%ROWTYPE;
-BEGIN
-  IF auth.uid() IS NULL THEN RAISE EXCEPTION 'Debes iniciar sesión.' USING ERRCODE = '42501'; END IF;
-  SELECT * INTO target FROM public.meet_rooms WHERE id = p_room_id AND owner_id = auth.uid() FOR UPDATE;
-  IF NOT FOUND THEN RETURN jsonb_build_object('ok', false, 'status', 'not_found'); END IF;
-  IF target.revoked_at IS NOT NULL THEN RETURN jsonb_build_object('ok', false, 'status', 'revoked'); END IF;
-  IF target.expires_at <= NOW() THEN RETURN jsonb_build_object('ok', false, 'status', 'expired'); END IF;
-  UPDATE public.meet_rooms SET open_count = open_count + 1, last_opened_at = NOW(), updated_at = NOW()
-  WHERE id = p_room_id;
-  RETURN jsonb_build_object('ok', true, 'room_url', target.room_url);
-END;
-$$;
-REVOKE ALL ON FUNCTION public.open_meet_room(UUID) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.open_meet_room(UUID) TO authenticated;
-
 -- ========== ACTIVITY LOG ==========
-CREATE TABLE activity_log (
+CREATE TABLE IF NOT EXISTS activity_log (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
   user_name TEXT,
@@ -1060,60 +985,19 @@ CREATE TABLE activity_log (
 ALTER TABLE activity_log ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON public.activity_log FROM anon, authenticated;
 GRANT SELECT, INSERT ON public.activity_log TO authenticated;
+DROP POLICY IF EXISTS "Authenticated users read activity log" ON activity_log;
 CREATE POLICY "Authenticated users read activity log"
   ON activity_log FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Users insert own activity log" ON activity_log;
 CREATE POLICY "Users insert own activity log"
   ON activity_log FOR INSERT TO authenticated WITH CHECK (user_id = auth.uid());
 
 -- ========== VIEWS ÚTILES ==========
 
 -- Vista: KPIs del dashboard
-CREATE OR REPLACE VIEW dashboard_kpis AS
-SELECT
-  (SELECT COUNT(*) FROM projects WHERE status = 'in_development') AS active_projects,
-  (SELECT COALESCE(SUM(amount), 0) FROM invoices
-    WHERE status IN ('paid', 'pending')
-    AND EXTRACT(MONTH FROM issued_at) = EXTRACT(MONTH FROM CURRENT_DATE)
-    AND EXTRACT(YEAR FROM issued_at) = EXTRACT(YEAR FROM CURRENT_DATE)
-  ) AS monthly_billing,
-  (SELECT COUNT(*) FROM clients WHERE status = 'active') AS active_clients,
-  (SELECT COUNT(*) FROM tasks WHERE completed = true) AS completed_tasks,
-  (SELECT COUNT(*) FROM tasks) AS total_tasks;
-
 -- Vista: Facturas con info del cliente
-CREATE OR REPLACE VIEW invoices_with_client AS
-SELECT
-  i.*,
-  c.name AS client_name,
-  c.company AS client_company,
-  p.name AS project_name
-FROM invoices i
-LEFT JOIN clients c ON i.client_id = c.id
-LEFT JOIN projects p ON i.project_id = p.id
-ORDER BY i.created_at DESC;
-
 -- Vista: Proyectos con info del cliente y conteo de miembros
-CREATE OR REPLACE VIEW projects_with_details AS
-SELECT
-  p.*,
-  c.name AS client_name,
-  c.company AS client_company,
-  (SELECT COUNT(*) FROM project_members pm WHERE pm.project_id = p.id) AS member_count
-FROM projects p
-LEFT JOIN clients c ON p.client_id = c.id
-ORDER BY p.created_at DESC;
-
 -- Vista: Documentos con info del uploader
-CREATE OR REPLACE VIEW documents_with_uploader AS
-SELECT
-  d.*,
-  pr.full_name AS uploader_name,
-  p.name AS project_name
-FROM documents d
-LEFT JOIN profiles pr ON d.uploaded_by = pr.id
-LEFT JOIN projects p ON d.project_id = p.id
-ORDER BY d.created_at DESC;
-
 -- ========== FUNCIONES ==========
 
 -- Auto-actualizar updated_at
@@ -1126,20 +1010,30 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Aplicar trigger a todas las tablas con updated_at
+DROP TRIGGER IF EXISTS update_profiles_updated_at ON profiles;
 CREATE TRIGGER update_profiles_updated_at BEFORE UPDATE ON profiles FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+DROP TRIGGER IF EXISTS update_dashboard_roles_updated_at ON dashboard_roles;
 CREATE TRIGGER update_dashboard_roles_updated_at BEFORE UPDATE ON dashboard_roles FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+DROP TRIGGER IF EXISTS update_internship_profiles_updated_at ON internship_profiles;
 CREATE TRIGGER update_internship_profiles_updated_at BEFORE UPDATE ON internship_profiles FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+DROP TRIGGER IF EXISTS update_internship_logs_updated_at ON internship_logs;
 CREATE TRIGGER update_internship_logs_updated_at BEFORE UPDATE ON internship_logs FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+DROP TRIGGER IF EXISTS update_clients_updated_at ON clients;
 CREATE TRIGGER update_clients_updated_at BEFORE UPDATE ON clients FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+DROP TRIGGER IF EXISTS update_projects_updated_at ON projects;
 CREATE TRIGGER update_projects_updated_at BEFORE UPDATE ON projects FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+DROP TRIGGER IF EXISTS update_invoices_updated_at ON invoices;
 CREATE TRIGGER update_invoices_updated_at BEFORE UPDATE ON invoices FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+DROP TRIGGER IF EXISTS update_facturacion_items_updated_at ON facturacion_items;
 CREATE TRIGGER update_facturacion_items_updated_at BEFORE UPDATE ON facturacion_items FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+DROP TRIGGER IF EXISTS update_orders_updated_at ON orders;
 CREATE TRIGGER update_orders_updated_at BEFORE UPDATE ON orders FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+DROP TRIGGER IF EXISTS update_tasks_updated_at ON tasks;
 CREATE TRIGGER update_tasks_updated_at BEFORE UPDATE ON tasks FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+DROP TRIGGER IF EXISTS update_events_updated_at ON events;
 CREATE TRIGGER update_events_updated_at BEFORE UPDATE ON events FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+DROP TRIGGER IF EXISTS update_expenses_updated_at ON expenses;
 CREATE TRIGGER update_expenses_updated_at BEFORE UPDATE ON expenses FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-CREATE TRIGGER update_conversations_updated_at BEFORE UPDATE ON conversations FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-
 -- Función: Obtener siguiente número de factura
 CREATE OR REPLACE FUNCTION get_next_invoice_number()
 RETURNS TEXT AS $$
@@ -1196,13 +1090,17 @@ $$;
 
 REVOKE ALL ON FUNCTION cleanup_activity_log(INTERVAL) FROM PUBLIC;
 
-CREATE EXTENSION IF NOT EXISTS pg_cron;
+-- Si pg_cron ya está habilitado, configura la retención semanal.
 
 -- Reemplaza el trabajo si el esquema se ejecuta nuevamente, evitando duplicados.
 DO $$
 DECLARE
   existing_job_id BIGINT;
 BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_cron') THEN
+    RAISE NOTICE 'pg_cron no está habilitado: retención semanal no programada.';
+    RETURN;
+  END IF;
   SELECT jobid INTO existing_job_id
   FROM cron.job
   WHERE jobname = 'cleanup_activity_log_weekly';
@@ -1326,162 +1224,61 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('project-assets', 'project-assets', true)
 ON CONFLICT (id) DO NOTHING;
 
--- Policies de storage (público, sin RLS por ahora)
+-- Políticas de acceso a los buckets existentes.
+DROP POLICY IF EXISTS "Allow public upload to documents" ON storage.objects;
 CREATE POLICY "Allow public upload to documents" ON storage.objects
   FOR INSERT WITH CHECK (bucket_id = 'documents');
 
+DROP POLICY IF EXISTS "Allow public read from documents" ON storage.objects;
 CREATE POLICY "Allow public read from documents" ON storage.objects
   FOR SELECT USING (bucket_id = 'documents');
 
+DROP POLICY IF EXISTS "Allow public delete from documents" ON storage.objects;
 CREATE POLICY "Allow public delete from documents" ON storage.objects
   FOR DELETE USING (bucket_id = 'documents');
 
+DROP POLICY IF EXISTS "Allow public upload to avatars" ON storage.objects;
 CREATE POLICY "Allow public upload to avatars" ON storage.objects
   FOR INSERT WITH CHECK (bucket_id = 'avatars');
 
+DROP POLICY IF EXISTS "Allow public read from avatars" ON storage.objects;
 CREATE POLICY "Allow public read from avatars" ON storage.objects
   FOR SELECT USING (bucket_id = 'avatars');
 
+DROP POLICY IF EXISTS "Allow public upload to project-assets" ON storage.objects;
 CREATE POLICY "Allow public upload to project-assets" ON storage.objects
   FOR INSERT WITH CHECK (bucket_id = 'project-assets');
 
+DROP POLICY IF EXISTS "Allow public read from project-assets" ON storage.objects;
 CREATE POLICY "Allow public read from project-assets" ON storage.objects
   FOR SELECT USING (bucket_id = 'project-assets');
 
--- ========== SEED DATA (Datos iniciales) ==========
-
--- Team members
-INSERT INTO team_members (full_name, role_title, avatar_url, availability, weekly_hours) VALUES
-  ('Rodrigo Sandoval', 'Mobile & UI/UX', 'assets/roro.png', 'available', 32),
-  ('Nicolás Araya', 'Fullstack & IA', 'assets/nico.png', 'busy', 40),
-  ('Tomás Yevenes', 'DevOps & Fullstack', 'assets/tomas.png', 'available', 38);
-
--- Clients
-INSERT INTO clients (name, company, relationship, email, phone, avatar_url, status, total_billed) VALUES
-  ('Bárbara San Martín', 'Centro Médico Carpediem', 'owner', 'barbara@carpediem.cl', '+56 9 1234 5678', 'assets/barbara.jpeg', 'active', 3800000),
-  ('Marcela San Martin', 'Ingeodata', 'manager', 'marcela@ingeodata.cl', '+56 9 2345 6789', NULL, 'active', 1500000),
-  ('Carola Figueroa', 'IA Ñuble', 'manager', 'carola@ianuble.cl', '+56 9 3456 7890', 'assets/carola.jpg', 'active', 5200000),
-  ('Yasna Navarrete', 'Clínica Kennedy', 'legal_rep', 'yasna@kennedy.cl', '+56 9 4567 8901', 'assets/yasna.jpg', 'active', 4100000),
-  ('Carlos Jardua', 'Restaurante Viña Jardua', 'owner', 'carlos@jarduawines.cl', '+56 9 5678 9012', NULL, 'inactive', 800000);
-
--- Projects (usamos subconsultas para obtener client_id)
-INSERT INTO projects (name, client_id, status, progress, technologies, start_date, estimated_end_date) VALUES
-  ('Centro Médico Carpediem v2',
-    (SELECT id FROM clients WHERE company = 'Centro Médico Carpediem' LIMIT 1),
-    'in_development', 68, ARRAY['React', 'Node.js', 'PostgreSQL'], '2025-09-01', '2026-03-15'),
-  ('Kennedy App Móvil',
-    (SELECT id FROM clients WHERE company = 'Clínica Kennedy' LIMIT 1),
-    'in_development', 45, ARRAY['Flutter', 'Firebase'], '2025-10-01', '2026-04-30'),
-  ('Plataforma IA Ñuble v3',
-    (SELECT id FROM clients WHERE company = 'IA Ñuble' LIMIT 1),
-    'review', 90, ARRAY['Python', 'TensorFlow', 'Next.js'], '2025-06-01', '2026-02-28'),
-  ('Portal Web Ingeodata',
-    (SELECT id FROM clients WHERE company = 'Ingeodata' LIMIT 1),
-    'completed', 100, ARRAY['React', 'Node.js'], '2025-08-01', '2026-01-31'),
-  ('Ecofarmacovigilancia v2', NULL,
-    'proposal', 0, ARRAY['Python', 'Vue.js'], NULL, NULL);
-
--- Invoices
-INSERT INTO invoices (invoice_number, client_id, project_id, amount, status, issued_at, due_at) VALUES
-  ('INV-0041',
-    (SELECT id FROM clients WHERE company = 'Restaurante Viña Jardua' LIMIT 1),
-    NULL, 800000, 'paid', '2026-01-10', '2026-01-25'),
-  ('INV-0042',
-    (SELECT id FROM clients WHERE company = 'Ingeodata' LIMIT 1),
-    (SELECT id FROM projects WHERE name = 'Portal Web Ingeodata' LIMIT 1),
-    1500000, 'paid', '2026-01-15', '2026-01-30'),
-  ('INV-0043',
-    (SELECT id FROM clients WHERE company = 'Centro Médico Carpediem' LIMIT 1),
-    (SELECT id FROM projects WHERE name = 'Centro Médico Carpediem v2' LIMIT 1),
-    1200000, 'overdue', '2026-01-20', '2026-02-08'),
-  ('INV-0044',
-    (SELECT id FROM clients WHERE company = 'Clínica Kennedy' LIMIT 1),
-    (SELECT id FROM projects WHERE name = 'Kennedy App Móvil' LIMIT 1),
-    1800000, 'pending', '2026-01-28', '2026-02-15'),
-  ('INV-0045',
-    (SELECT id FROM clients WHERE company = 'IA Ñuble' LIMIT 1),
-    (SELECT id FROM projects WHERE name = 'Plataforma IA Ñuble v3' LIMIT 1),
-    2500000, 'pending', '2026-02-01', '2026-02-20');
-
--- Tasks
-INSERT INTO tasks (title, completed, priority, category, project_id, due_date) VALUES
-  ('Revisar PR #112a44 — Auth Carpediem', false, 'high', 'Code Review',
-    (SELECT id FROM projects WHERE name = 'Centro Médico Carpediem v2' LIMIT 1), '2026-02-06'),
-  ('Preparar demo Sprint 4 — Kennedy App', false, 'high', 'Presentación',
-    (SELECT id FROM projects WHERE name = 'Kennedy App Móvil' LIMIT 1), '2026-02-12'),
-  ('Enviar propuesta técnica — Ecofarma v2', false, 'medium', 'Ventas',
-    (SELECT id FROM projects WHERE name = 'Ecofarmacovigilancia v2' LIMIT 1), '2026-02-10'),
-  ('Configurar monitoreo — Plataforma IA Ñuble', false, 'medium', 'DevOps',
-    (SELECT id FROM projects WHERE name = 'Plataforma IA Ñuble v3' LIMIT 1), '2026-02-14'),
-  ('Desplegar Ingeodata v1.2 a producción', true, 'high', 'Deploy',
-    (SELECT id FROM projects WHERE name = 'Portal Web Ingeodata' LIMIT 1), '2026-02-04'),
-  ('Reunión weekly con equipo', true, 'medium', 'Meeting', NULL, '2026-02-05');
-
--- Orders (Kanban)
-INSERT INTO orders (title, description, category, status, priority, assigned_to, due_date) VALUES
-  ('Rediseño landing Ecofarma', 'Crear nuevos mockups para la v2 del sitio', 'Diseño', 'pending', 'high',
-    (SELECT id FROM team_members WHERE full_name = 'Rodrigo Sandoval' LIMIT 1), '2026-02-15'),
-  ('API integración pagos Kennedy', 'Conectar pasarela de pago con Transbank', 'Backend', 'pending', 'medium',
-    (SELECT id FROM team_members WHERE full_name = 'Nicolás Araya' LIMIT 1), '2026-02-18'),
-  ('Setup CI/CD Ecofarma', 'Configurar pipeline de despliegue', 'DevOps', 'pending', 'low',
-    (SELECT id FROM team_members WHERE full_name = 'Tomás Yevenes' LIMIT 1), '2026-02-22'),
-  ('Módulo agenda Carpediem', 'Implementar sistema de reserva de citas online', 'Frontend', 'in_progress', 'high',
-    (SELECT id FROM team_members WHERE full_name = 'Nicolás Araya' LIMIT 1), '2026-02-10'),
-  ('UI pantallas Kennedy App', 'Maquetar pantallas de historial y perfil', 'Mobile', 'in_progress', 'high',
-    (SELECT id FROM team_members WHERE full_name = 'Rodrigo Sandoval' LIMIT 1), '2026-02-12'),
-  ('Modelo NLP IA Ñuble', 'Fine-tuning del modelo de análisis de textos', 'IA', 'review', 'medium',
-    (SELECT id FROM team_members WHERE full_name = 'Tomás Yevenes' LIMIT 1), '2026-02-08'),
-  ('QA Sprint 3 Carpediem', 'Pruebas de integración y UAT', 'Testing', 'review', 'medium',
-    (SELECT id FROM team_members WHERE full_name = 'Nicolás Araya' LIMIT 1), '2026-02-09'),
-  ('Auth módulo Carpediem', 'Sistema de login con OAuth2', 'Backend', 'done', 'high',
-    (SELECT id FROM team_members WHERE full_name = 'Nicolás Araya' LIMIT 1), '2026-02-03'),
-  ('Deploy Ingeodata prod', 'Despliegue a producción exitoso', 'Deploy', 'done', 'medium',
-    (SELECT id FROM team_members WHERE full_name = 'Tomás Yevenes' LIMIT 1), '2026-02-01');
-
--- Events
-INSERT INTO events (title, description, event_type, event_date, start_time, end_time) VALUES
-  ('Weekly Equipo Solven Labs', 'Revisión de sprints y planificación semanal', 'meeting', '2026-02-06', '10:00', '11:00'),
-  ('Entrega Sprint 3 — Carpediem', 'Demo del módulo de agendamiento', 'deadline', '2026-02-06', '14:00', NULL),
-  ('Call con Yasna — Kennedy', 'Revisión de avances app móvil', 'meeting', '2026-02-06', '16:00', '16:30'),
-  ('Demo Sprint 4 — Kennedy App', 'Presentación de avances al cliente', 'demo', '2026-02-12', '10:00', '11:30'),
-  ('Kickoff Ecofarma v2', 'Reunión de inicio del proyecto', 'kickoff', '2026-02-15', '10:00', '11:30'),
-  ('Revisión modelo NLP', 'Revisar métricas del modelo IA Ñuble', 'meeting', '2026-02-20', '15:00', '16:00');
-
--- Activity log
-INSERT INTO activity_log (user_name, activity_type, description, entity_name) VALUES
-  ('Nicolás Araya', 'project', 'completó el módulo de autenticación', 'App Restaurante Jardua'),
-  ('Tomás Yevenes', 'deploy', 'desplegó v2.1', 'Plataforma Carpediem'),
-  ('Sistema', 'invoice', 'Nueva factura #INV-0045 generada', 'IA Ñuble'),
-  ('Rodrigo Sandoval', 'document', 'subió diseños UI al proyecto', 'Kennedy App'),
-  ('Sistema', 'client', 'Cliente aprobó la propuesta de rediseño web', 'Ingeodata');
-
 -- ========== ÍNDICES ==========
-CREATE INDEX idx_clients_status ON clients(status);
-CREATE INDEX idx_projects_status ON projects(status);
-CREATE INDEX idx_projects_client ON projects(client_id);
-CREATE INDEX idx_invoices_status ON invoices(status);
-CREATE INDEX idx_invoices_client ON invoices(client_id);
-CREATE INDEX idx_invoices_due ON invoices(due_at);
-CREATE INDEX idx_orders_status ON orders(status);
-CREATE INDEX idx_orders_assigned ON orders(assigned_to);
-CREATE INDEX idx_tasks_completed ON tasks(completed);
-CREATE INDEX idx_tasks_project ON tasks(project_id);
-CREATE INDEX idx_documents_project ON documents(project_id);
-CREATE INDEX idx_documents_folder ON documents(folder);
-CREATE INDEX idx_messages_conversation ON messages(conversation_id);
-CREATE INDEX idx_events_date ON events(event_date);
-CREATE INDEX idx_events_recurrence_group ON events(recurrence_group_id) WHERE recurrence_group_id IS NOT NULL;
-CREATE INDEX idx_activity_log_created ON activity_log(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_clients_status ON clients(status);
+CREATE INDEX IF NOT EXISTS idx_projects_status ON projects(status);
+CREATE INDEX IF NOT EXISTS idx_projects_client ON projects(client_id);
+CREATE INDEX IF NOT EXISTS idx_invoices_status ON invoices(status);
+CREATE INDEX IF NOT EXISTS idx_invoices_client ON invoices(client_id);
+CREATE INDEX IF NOT EXISTS idx_invoices_due ON invoices(due_at);
+CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
+CREATE INDEX IF NOT EXISTS idx_orders_assigned ON orders(assigned_to);
+CREATE INDEX IF NOT EXISTS idx_tasks_completed ON tasks(completed);
+CREATE INDEX IF NOT EXISTS idx_tasks_project ON tasks(project_id);
+CREATE INDEX IF NOT EXISTS idx_documents_project ON documents(project_id);
+CREATE INDEX IF NOT EXISTS idx_documents_folder ON documents(folder);
+CREATE INDEX IF NOT EXISTS idx_events_date ON events(event_date);
+CREATE INDEX IF NOT EXISTS idx_events_recurrence_group ON events(recurrence_group_id) WHERE recurrence_group_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_activity_log_created ON activity_log(created_at DESC);
 
 -- ==========================================================================
 -- MIGRACIÓN: Portal de Estado de Proyecto para Clientes
--- Ejecutar en Supabase SQL Editor después del schema inicial
+-- Integrado en esta ejecución completa.
 -- ==========================================================================
 
 -- ========== COLUMNAS ADICIONALES EN PROJECTS ==========
 
 -- Token único corto para que clientes accedan al portal (público, compartible)
-ALTER TABLE projects 
+ALTER TABLE projects
   ADD COLUMN IF NOT EXISTS client_token TEXT UNIQUE,
   ADD COLUMN IF NOT EXISTS client_visible BOOLEAN NOT NULL DEFAULT true,
   ADD COLUMN IF NOT EXISTS client_notes TEXT;
@@ -1508,6 +1305,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_set_client_token ON projects;
 CREATE TRIGGER trigger_set_client_token
   BEFORE INSERT ON projects
   FOR EACH ROW EXECUTE FUNCTION set_client_token();
@@ -1529,9 +1327,13 @@ $$;
 -- ========== PROJECT UPDATES ==========
 -- Actualizaciones visibles para el cliente (timeline de avances)
 
-CREATE TYPE update_type AS ENUM ('milestone', 'update', 'delivery', 'issue', 'note');
+DO $enum$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace WHERE n.nspname = 'public' AND t.typname = 'update_type') THEN
+    CREATE TYPE public.update_type AS ENUM ('milestone', 'update', 'delivery', 'issue', 'note');
+  END IF;
+END $enum$;
 
-CREATE TABLE project_updates (
+CREATE TABLE IF NOT EXISTS project_updates (
   id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   project_id  UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   title       TEXT NOT NULL,
@@ -1544,47 +1346,21 @@ CREATE TABLE project_updates (
 );
 
 ALTER TABLE project_updates ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow all on project_updates" ON project_updates;
 CREATE POLICY "Allow all on project_updates" ON project_updates FOR ALL USING (true) WITH CHECK (true);
 
-CREATE TRIGGER update_project_updates_updated_at 
-  BEFORE UPDATE ON project_updates 
+DROP TRIGGER IF EXISTS update_project_updates_updated_at ON project_updates;
+CREATE TRIGGER update_project_updates_updated_at
+  BEFORE UPDATE ON project_updates
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
-CREATE INDEX idx_project_updates_project ON project_updates(project_id);
-CREATE INDEX idx_project_updates_created ON project_updates(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_project_updates_project ON project_updates(project_id);
+CREATE INDEX IF NOT EXISTS idx_project_updates_created ON project_updates(created_at DESC);
 
 -- Vista pública para el portal de clientes
-CREATE OR REPLACE VIEW client_project_view AS
-SELECT
-  p.id,
-  p.client_token,
-  p.name,
-  p.description,
-  p.status,
-  p.progress,
-  p.technologies,
-  p.start_date,
-  p.estimated_end_date,
-  p.client_notes,
-  p.client_visible,
-  c.company AS client_company,
-  c.name    AS client_name,
-  (
-    SELECT json_agg(u ORDER BY u.created_at DESC)
-    FROM (
-      SELECT id, title, description, type, created_at
-      FROM project_updates pu
-      WHERE pu.project_id = p.id AND pu.visible_to_client = true
-      ORDER BY pu.created_at DESC
-    ) u
-  ) AS updates
-FROM projects p
-LEFT JOIN clients c ON p.client_id = c.id
-WHERE p.client_visible = true;
-
 -- ============================================================
 -- Solven Labs — Finanzas & Contratos Migration
--- Run in Supabase SQL Editor
+-- Integrado en esta ejecución completa.
 -- ============================================================
 
 -- 1. FINANZAS — Ingresos / Ventas
@@ -1603,6 +1379,7 @@ CREATE TABLE IF NOT EXISTS fin_ingresos (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 ALTER TABLE fin_ingresos ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "fin_ingresos_all" ON fin_ingresos;
 CREATE POLICY "fin_ingresos_all" ON fin_ingresos FOR ALL USING (true) WITH CHECK (true);
 CREATE INDEX IF NOT EXISTS idx_fin_ingresos_fecha ON fin_ingresos(fecha DESC);
 
@@ -1623,6 +1400,7 @@ CREATE TABLE IF NOT EXISTS fin_gastos (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 ALTER TABLE fin_gastos ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "fin_gastos_all" ON fin_gastos;
 CREATE POLICY "fin_gastos_all" ON fin_gastos FOR ALL USING (true) WITH CHECK (true);
 CREATE INDEX IF NOT EXISTS idx_fin_gastos_fecha ON fin_gastos(fecha DESC);
 
@@ -1645,37 +1423,11 @@ CREATE TABLE IF NOT EXISTS contratos_personal (
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 ALTER TABLE contratos_personal ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "contratos_personal_all" ON contratos_personal;
 CREATE POLICY "contratos_personal_all" ON contratos_personal FOR ALL USING (true) WITH CHECK (true);
 
--- 4. CONTRATOS — Finiquitos
-CREATE TABLE IF NOT EXISTS contratos_finiquitos (
-  id             UUID        PRIMARY KEY DEFAULT uuid_generate_v4(),
-  empleado       TEXT        NOT NULL,
-  fecha          DATE,
-  indemnizacion  BIGINT      NOT NULL DEFAULT 0,
-  motivo         TEXT        NOT NULL DEFAULT 'renuncia',
-  estado         TEXT        NOT NULL DEFAULT 'borrador',
-  observaciones  TEXT,
-  created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-ALTER TABLE contratos_finiquitos ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "contratos_finiquitos_all" ON contratos_finiquitos FOR ALL USING (true) WITH CHECK (true);
-
--- 5. CONTRATOS — Anexos
-CREATE TABLE IF NOT EXISTS contratos_anexos (
-  id          UUID        PRIMARY KEY DEFAULT uuid_generate_v4(),
-  contrato    TEXT        NOT NULL,
-  descripcion TEXT        NOT NULL,
-  tipo        TEXT        NOT NULL DEFAULT 'otro',
-  fecha       DATE,
-  estado      TEXT        NOT NULL DEFAULT 'borrador',
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-ALTER TABLE contratos_anexos ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "contratos_anexos_all" ON contratos_anexos FOR ALL USING (true) WITH CHECK (true);
-
 -- ─── MIGRATIONS: extend contratos tables with richer employee data ───────────
--- Run these if you already have the tables created above
+-- Compatibilidad con instalaciones existentes.
 
 ALTER TABLE contratos_personal
   ADD COLUMN IF NOT EXISTS rut             TEXT,
@@ -1692,37 +1444,10 @@ ALTER TABLE contratos_personal
   ADD COLUMN IF NOT EXISTS afp             TEXT,
   ADD COLUMN IF NOT EXISTS prevision       TEXT;
 
-ALTER TABLE contratos_finiquitos
-  ADD COLUMN IF NOT EXISTS rut               TEXT,
-  ADD COLUMN IF NOT EXISTS cargo             TEXT,
-  ADD COLUMN IF NOT EXISTS sueldo_base       BIGINT NOT NULL DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS dias_vacaciones   INT    NOT NULL DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS monto_vacaciones  BIGINT NOT NULL DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS monto_aviso       BIGINT NOT NULL DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS otros_beneficios  BIGINT NOT NULL DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS access_token      TEXT,
-  ADD COLUMN IF NOT EXISTS access_expires_at TIMESTAMPTZ,
-  ADD COLUMN IF NOT EXISTS signed_at         TIMESTAMPTZ,
-  ADD COLUMN IF NOT EXISTS signed_name       TEXT;
-
-ALTER TABLE contratos_anexos
-  ADD COLUMN IF NOT EXISTS empleado       TEXT,
-  ADD COLUMN IF NOT EXISTS rut            TEXT,
-  ADD COLUMN IF NOT EXISTS cargo_anterior TEXT,
-  ADD COLUMN IF NOT EXISTS cargo_nuevo    TEXT,
-  ADD COLUMN IF NOT EXISTS sueldo_anterior BIGINT NOT NULL DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS sueldo_nuevo    BIGINT NOT NULL DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS observaciones  TEXT,
-  ADD COLUMN IF NOT EXISTS access_token      TEXT,
-  ADD COLUMN IF NOT EXISTS access_expires_at TIMESTAMPTZ,
-  ADD COLUMN IF NOT EXISTS signed_at         TIMESTAMPTZ,
-  ADD COLUMN IF NOT EXISTS signed_name       TEXT;
-
 -- ==========================================================================
--- RESERVAS PAGADAS DE VISITAS TÉCNICAS
--- Ejecutar esta migración antes de desplegar las Edge Functions de reservas.
--- Una reserva pendiente nunca se inserta en `events`; solo la función segura de
--- confirmación crea el evento después de verificar el pago con Mercado Pago.
+-- HISTORIAL DE VISITAS TÉCNICAS
+-- Conservado: el dashboard y la disponibilidad todavía consultan estas reservas.
+-- No se crean funciones para iniciar ni confirmar pagos con Mercado Pago.
 -- ============================================================================
 
 CREATE TABLE IF NOT EXISTS public.visit_reservations (
@@ -1769,117 +1494,19 @@ ALTER TABLE public.events
 
 DROP POLICY IF EXISTS "Allow all on events" ON public.events;
 DROP POLICY IF EXISTS "Authenticated users manage events" ON public.events;
+DROP POLICY IF EXISTS "Authenticated users read events" ON public.events;
 CREATE POLICY "Authenticated users read events"
   ON public.events FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Owners create events" ON public.events;
 CREATE POLICY "Owners create events"
   ON public.events FOR INSERT TO authenticated WITH CHECK (created_by = auth.uid());
+DROP POLICY IF EXISTS "Owners update events" ON public.events;
 CREATE POLICY "Owners update events"
   ON public.events FOR UPDATE TO authenticated
   USING (created_by = auth.uid()) WITH CHECK (created_by = auth.uid());
+DROP POLICY IF EXISTS "Owners delete events" ON public.events;
 CREATE POLICY "Owners delete events"
   ON public.events FOR DELETE TO authenticated USING (created_by = auth.uid());
-
-CREATE OR REPLACE FUNCTION public.confirm_paid_visit_reservation(
-  p_reservation_id UUID,
-  p_payment_id TEXT,
-  p_mp_status TEXT,
-  p_amount NUMERIC,
-  p_currency TEXT
-) RETURNS JSONB
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-DECLARE
-  reservation_row public.visit_reservations%ROWTYPE;
-  created_event_id UUID;
-BEGIN
-  SELECT * INTO reservation_row
-  FROM public.visit_reservations
-  WHERE id = p_reservation_id
-  FOR UPDATE;
-
-  IF NOT FOUND THEN
-    RETURN jsonb_build_object('ok', false, 'status', 'not_found');
-  END IF;
-
-  IF reservation_row.status = 'approved' THEN
-    RETURN jsonb_build_object('ok', true, 'status', 'approved', 'event_id', reservation_row.event_id);
-  END IF;
-
-  -- Serializa todas las confirmaciones que compiten por la misma fecha y hora.
-  PERFORM pg_advisory_xact_lock(hashtext(reservation_row.visit_date::text));
-
-  IF p_mp_status <> 'approved' THEN
-    UPDATE public.visit_reservations
-    SET mercado_pago_payment_id = p_payment_id,
-        mercado_pago_status = p_mp_status,
-        updated_at = NOW()
-    WHERE id = p_reservation_id;
-    RETURN jsonb_build_object('ok', false, 'status', p_mp_status);
-  END IF;
-
-  IF p_amount <> reservation_row.amount OR upper(coalesce(p_currency, '')) <> reservation_row.currency THEN
-    UPDATE public.visit_reservations
-    SET status = 'payment_mismatch',
-        mercado_pago_payment_id = p_payment_id,
-        mercado_pago_status = p_mp_status,
-        updated_at = NOW()
-    WHERE id = p_reservation_id;
-    RETURN jsonb_build_object('ok', false, 'status', 'payment_mismatch');
-  END IF;
-
-  IF EXISTS (
-    SELECT 1 FROM public.events
-    WHERE event_date = reservation_row.visit_date
-      AND start_time IS NOT NULL
-      AND start_time < reservation_row.end_time
-      AND COALESCE(end_time, start_time + INTERVAL '1 hour') > reservation_row.visit_time
-  ) OR EXISTS (
-    SELECT 1 FROM public.visit_reservations
-    WHERE id <> reservation_row.id
-      AND visit_date = reservation_row.visit_date
-      AND visit_time = reservation_row.visit_time
-      AND status = 'approved'
-  ) THEN
-    UPDATE public.visit_reservations
-    SET status = 'needs_review',
-        mercado_pago_payment_id = p_payment_id,
-        mercado_pago_status = p_mp_status,
-        updated_at = NOW()
-    WHERE id = p_reservation_id;
-    RETURN jsonb_build_object('ok', false, 'status', 'needs_review');
-  END IF;
-
-  INSERT INTO public.events (
-    title, description, event_type, event_date, start_time, end_time
-  ) VALUES (
-    'Visita técnica · ' || reservation_row.customer_name,
-    'Reserva pagada y validada automáticamente.' || E'\n' ||
-    'Servicio: ' || reservation_row.service_name || E'\n' ||
-    'Cliente: ' || reservation_row.customer_name || E'\n' ||
-    'Correo: ' || reservation_row.customer_email || E'\n' ||
-    'WhatsApp: ' || reservation_row.customer_phone || E'\n' ||
-    'Pago Mercado Pago: ' || p_payment_id,
-    'meeting', reservation_row.visit_date, reservation_row.visit_time, reservation_row.end_time
-  ) RETURNING id INTO created_event_id;
-
-  UPDATE public.visit_reservations
-  SET status = 'approved',
-      mercado_pago_preference_id = mercado_pago_preference_id,
-      mercado_pago_payment_id = p_payment_id,
-      mercado_pago_status = p_mp_status,
-      event_id = created_event_id,
-      approved_at = NOW(),
-      updated_at = NOW()
-  WHERE id = p_reservation_id;
-
-  RETURN jsonb_build_object('ok', true, 'status', 'approved', 'event_id', created_event_id);
-END;
-$$;
-
-REVOKE ALL ON FUNCTION public.confirm_paid_visit_reservation(UUID, TEXT, TEXT, NUMERIC, TEXT) FROM PUBLIC, anon, authenticated;
-GRANT EXECUTE ON FUNCTION public.confirm_paid_visit_reservation(UUID, TEXT, TEXT, NUMERIC, TEXT) TO service_role;
 
 -- ============================================================================
 -- REUNIONES INICIALES SIN COSTO
@@ -1985,73 +1612,6 @@ $$;
 REVOKE ALL ON FUNCTION public.book_free_consultation(TEXT, TEXT, TEXT, TEXT, TEXT, DATE, TIME, TIME)
   FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.book_free_consultation(TEXT, TEXT, TEXT, TEXT, TEXT, DATE, TIME, TIME)
-  TO service_role;
-
--- Reserva atómicamente una visita pendiente y respeta cualquier intervalo ya
--- ocupado. La función pública de pago usa este RPC con service_role.
-CREATE OR REPLACE FUNCTION public.create_pending_visit_reservation(
-  p_service_name TEXT,
-  p_customer_name TEXT,
-  p_customer_email TEXT,
-  p_customer_phone TEXT,
-  p_visit_date DATE,
-  p_visit_time TIME,
-  p_end_time TIME,
-  p_expires_at TIMESTAMPTZ
-) RETURNS JSONB
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-DECLARE
-  created_reservation public.visit_reservations%ROWTYPE;
-BEGIN
-  IF p_visit_time IS NULL OR p_end_time IS NULL OR p_end_time <= p_visit_time THEN
-    RETURN jsonb_build_object('ok', false, 'status', 'invalid_interval');
-  END IF;
-
-  PERFORM pg_advisory_xact_lock(hashtext(p_visit_date::text));
-
-  UPDATE public.visit_reservations
-  SET status = 'expired', updated_at = NOW()
-  WHERE status = 'pending' AND expires_at < NOW();
-
-  IF EXISTS (
-    SELECT 1 FROM public.events
-    WHERE event_date = p_visit_date
-      AND start_time IS NOT NULL
-      AND start_time < p_end_time
-      AND COALESCE(end_time, start_time + INTERVAL '1 hour') > p_visit_time
-  ) OR EXISTS (
-    SELECT 1 FROM public.visit_reservations
-    WHERE visit_date = p_visit_date
-      AND visit_time < p_end_time
-      AND end_time > p_visit_time
-      AND (status = 'approved' OR (status = 'pending' AND expires_at > NOW()))
-  ) THEN
-    RETURN jsonb_build_object('ok', false, 'status', 'unavailable');
-  END IF;
-
-  INSERT INTO public.visit_reservations (
-    service_name, customer_name, customer_email, customer_phone,
-    visit_date, visit_time, end_time, amount, currency, status, expires_at
-  ) VALUES (
-    p_service_name, p_customer_name, p_customer_email, p_customer_phone,
-    p_visit_date, p_visit_time, p_end_time, 5000, 'CLP', 'pending', p_expires_at
-  ) RETURNING * INTO created_reservation;
-
-  RETURN jsonb_build_object(
-    'ok', true,
-    'status', 'pending',
-    'reservation_id', created_reservation.id,
-    'expires_at', created_reservation.expires_at
-  );
-END;
-$$;
-
-REVOKE ALL ON FUNCTION public.create_pending_visit_reservation(TEXT, TEXT, TEXT, TEXT, DATE, TIME, TIME, TIMESTAMPTZ)
-  FROM PUBLIC, anon, authenticated;
-GRANT EXECUTE ON FUNCTION public.create_pending_visit_reservation(TEXT, TEXT, TEXT, TEXT, DATE, TIME, TIME, TIMESTAMPTZ)
   TO service_role;
 
 -- Inhabilita una fecha completa: cancela reservas vinculadas, elimina sus
@@ -2282,184 +1842,8 @@ REVOKE ALL ON FUNCTION public.delete_calendar_event_series(UUID) FROM PUBLIC, an
 GRANT EXECUTE ON FUNCTION public.delete_calendar_event_series(UUID) TO authenticated;
 
 -- ============================================================================
--- SUSCRIPCIONES RECURRENTES DE MANTENCIÓN Solven Labs / MERCADO PAGO
--- Los montos válidos se determinan en la función Edge, nunca en el navegador.
--- ============================================================================
-
-CREATE TABLE IF NOT EXISTS public.maintenance_subscriptions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  plan_code TEXT NOT NULL CHECK (plan_code IN ('presencia','impulso','operacion','custom')),
-  plan_name TEXT NOT NULL,
-  amount INTEGER NOT NULL,
-  currency TEXT NOT NULL DEFAULT 'CLP' CHECK (currency = 'CLP'),
-  customer_name TEXT NOT NULL,
-  customer_email TEXT NOT NULL,
-  customer_phone TEXT NOT NULL,
-  mercado_pago_preapproval_id TEXT UNIQUE,
-  checkout_url TEXT,
-  mercado_pago_status TEXT,
-  status TEXT NOT NULL DEFAULT 'pending',
-  next_payment_date TIMESTAMPTZ,
-  last_payment_date TIMESTAMPTZ,
-  activated_at TIMESTAMPTZ,
-  cancelled_at TIMESTAMPTZ,
-  deleted_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-ALTER TABLE public.maintenance_subscriptions
-  DROP CONSTRAINT IF EXISTS maintenance_subscriptions_plan_code_check;
-ALTER TABLE public.maintenance_subscriptions
-  ADD CONSTRAINT maintenance_subscriptions_plan_code_check
-  CHECK (plan_code IN ('presencia','impulso','operacion','custom'));
-ALTER TABLE public.maintenance_subscriptions
-  DROP CONSTRAINT IF EXISTS maintenance_subscriptions_amount_check;
-ALTER TABLE public.maintenance_subscriptions
-  ADD CONSTRAINT maintenance_subscriptions_amount_check
-  CHECK (
-    (plan_code = 'presencia' AND amount = 39900) OR
-    (plan_code = 'impulso' AND amount = 89900) OR
-    (plan_code = 'operacion' AND amount = 179900) OR
-    (plan_code = 'custom' AND amount BETWEEN 1000 AND 5000000)
-  );
-
-CREATE TABLE IF NOT EXISTS public.maintenance_subscription_payments (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  subscription_id UUID NOT NULL REFERENCES public.maintenance_subscriptions(id) ON DELETE CASCADE,
-  mercado_pago_authorized_payment_id TEXT UNIQUE,
-  mercado_pago_payment_id TEXT UNIQUE,
-  status TEXT NOT NULL,
-  amount INTEGER NOT NULL,
-  currency TEXT NOT NULL DEFAULT 'CLP',
-  charged_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX IF NOT EXISTS idx_maintenance_subscriptions_status
-  ON public.maintenance_subscriptions(status);
-ALTER TABLE public.maintenance_subscriptions ADD COLUMN IF NOT EXISTS checkout_url TEXT;
-ALTER TABLE public.maintenance_subscriptions ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;
-CREATE INDEX IF NOT EXISTS idx_maintenance_subscriptions_visible
-  ON public.maintenance_subscriptions(created_at DESC)
-  WHERE deleted_at IS NULL;
-CREATE INDEX IF NOT EXISTS idx_maintenance_subscription_payments_subscription
-  ON public.maintenance_subscription_payments(subscription_id, created_at DESC);
-
-ALTER TABLE public.maintenance_subscriptions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.maintenance_subscription_payments ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Dashboard reads maintenance subscriptions" ON public.maintenance_subscriptions;
-CREATE POLICY "Dashboard reads maintenance subscriptions"
-  ON public.maintenance_subscriptions FOR SELECT TO authenticated USING (true);
-DROP POLICY IF EXISTS "Dashboard reads maintenance subscription payments" ON public.maintenance_subscription_payments;
-CREATE POLICY "Dashboard reads maintenance subscription payments"
-  ON public.maintenance_subscription_payments FOR SELECT TO authenticated USING (true);
-
-ALTER TABLE public.facturacion_items ADD COLUMN IF NOT EXISTS external_source TEXT;
-ALTER TABLE public.facturacion_items ADD COLUMN IF NOT EXISTS external_id TEXT;
-CREATE UNIQUE INDEX IF NOT EXISTS idx_facturacion_items_external
-  ON public.facturacion_items(external_source, external_id)
-  WHERE external_source IS NOT NULL AND external_id IS NOT NULL;
-
-CREATE OR REPLACE FUNCTION public.register_maintenance_subscription_payment(
-  p_subscription_id UUID,
-  p_authorized_payment_id TEXT,
-  p_payment_id TEXT,
-  p_status TEXT,
-  p_amount NUMERIC,
-  p_currency TEXT,
-  p_charged_at TIMESTAMPTZ
-) RETURNS JSONB
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-DECLARE
-  subscription_row public.maintenance_subscriptions%ROWTYPE;
-  payment_key TEXT;
-  payment_row_id UUID;
-BEGIN
-  SELECT * INTO subscription_row
-  FROM public.maintenance_subscriptions
-  WHERE id = p_subscription_id
-  FOR UPDATE;
-
-  IF NOT FOUND THEN
-    RETURN jsonb_build_object('ok', false, 'status', 'subscription_not_found');
-  END IF;
-
-  payment_key := coalesce(nullif(p_payment_id, ''), p_authorized_payment_id);
-
-  IF lower(p_status) = 'approved' AND (
-    p_amount <> subscription_row.amount OR upper(coalesce(p_currency, '')) <> subscription_row.currency
-  ) THEN
-    UPDATE public.maintenance_subscriptions
-    SET status = 'payment_mismatch', updated_at = NOW()
-    WHERE id = p_subscription_id;
-    RETURN jsonb_build_object('ok', false, 'status', 'payment_mismatch');
-  END IF;
-
-  SELECT id INTO payment_row_id
-  FROM public.maintenance_subscription_payments
-  WHERE subscription_id = p_subscription_id
-    AND (
-      mercado_pago_authorized_payment_id = nullif(p_authorized_payment_id, '') OR
-      mercado_pago_payment_id = nullif(p_payment_id, '')
-    )
-  LIMIT 1;
-
-  IF payment_row_id IS NULL THEN
-    INSERT INTO public.maintenance_subscription_payments (
-      subscription_id, mercado_pago_authorized_payment_id, mercado_pago_payment_id,
-      status, amount, currency, charged_at
-    ) VALUES (
-      p_subscription_id, nullif(p_authorized_payment_id, ''), nullif(p_payment_id, ''),
-      lower(p_status), round(p_amount), upper(p_currency), p_charged_at
-    );
-  ELSE
-    UPDATE public.maintenance_subscription_payments
-    SET mercado_pago_authorized_payment_id = coalesce(mercado_pago_authorized_payment_id, nullif(p_authorized_payment_id, '')),
-        mercado_pago_payment_id = coalesce(mercado_pago_payment_id, nullif(p_payment_id, '')),
-        status = lower(p_status), amount = round(p_amount), currency = upper(p_currency),
-        charged_at = p_charged_at, updated_at = NOW()
-    WHERE id = payment_row_id;
-  END IF;
-
-  IF lower(p_status) = 'approved' THEN
-    UPDATE public.maintenance_subscriptions
-    SET status = 'authorized', mercado_pago_status = 'authorized',
-        activated_at = coalesce(activated_at, NOW()), last_payment_date = p_charged_at,
-        updated_at = NOW()
-    WHERE id = p_subscription_id;
-
-    INSERT INTO public.facturacion_items (
-      invoice_number, customer_name, title, type, billing_cycle, payment_terms,
-      renewal_date, amount, due_date, status, notes, external_source, external_id
-    ) VALUES (
-      'MP-' || payment_key,
-      subscription_row.customer_name,
-      'Mantención mensual · ' || subscription_row.plan_name,
-      'suscripcion', 'monthly', 'Cobro automático Mercado Pago',
-      (coalesce(p_charged_at, NOW()) + INTERVAL '1 month')::date,
-      round(p_amount), coalesce(p_charged_at, NOW())::date, 'paid',
-      'Cobro recurrente validado por Mercado Pago.', 'mercadopago_subscription', payment_key
-    ) ON CONFLICT (external_source, external_id)
-      WHERE external_source IS NOT NULL AND external_id IS NOT NULL
-      DO NOTHING;
-  END IF;
-
-  RETURN jsonb_build_object('ok', true, 'status', lower(p_status));
-END;
-$$;
-
-REVOKE ALL ON FUNCTION public.register_maintenance_subscription_payment(UUID, TEXT, TEXT, TEXT, NUMERIC, TEXT, TIMESTAMPTZ) FROM PUBLIC, anon, authenticated;
-GRANT EXECUTE ON FUNCTION public.register_maintenance_subscription_payment(UUID, TEXT, TEXT, TEXT, NUMERIC, TEXT, TIMESTAMPTZ) TO service_role;
-
--- ============================================================================
--- MANTENCIONES FACTURADAS CON PAGO MANUAL EN EL PORTAL DEL CLIENTE
--- No crea mandatos ni preaprobaciones: Mercado Pago se abre solo al pagar.
+-- HISTORIAL DE MANTENCIONES
+-- Conservado para las consultas de facturación del dashboard; sin cobro en línea.
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS public.maintenance_billing_plans (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -2527,84 +1911,6 @@ REVOKE ALL ON public.maintenance_bills FROM anon;
 GRANT SELECT ON public.maintenance_billing_plans TO authenticated;
 GRANT SELECT ON public.maintenance_bills TO authenticated;
 
--- ============================================================================
--- Las alertas operativas se calculan en el navegador. No se guardan, no usan
--- Realtime, cron ni Edge Functions. Mantener esta limpieza al final permite
--- actualizar instalaciones existentes y deja las instalaciones nuevas sin el
--- subsistema persistente anterior.
--- Las alertas del dashboard se calculan en el navegador y no se persisten.
--- Esta limpieza también elimina el trigger histórico que bloqueaba facturas_presii
--- al insertar una notificación sin recipient_profile_id.
-
-DO $$
-DECLARE
-  target RECORD;
-BEGIN
-  FOR target IN SELECT * FROM (VALUES
-    ('site_messages', 'notify_site_message_insert'),
-    ('orders', 'notify_order_insert'),
-    ('service_orders', 'notify_service_order_insert'),
-    ('tasks', 'notify_task_insert'),
-    ('tasks', 'notify_ntek_tasks'),
-    ('projects', 'notify_project_insert'),
-    ('events', 'notify_ntek_events'),
-    ('facturacion_items', 'notify_ntek_facturacion'),
-    ('facturas_presii', 'notify_factura_presii_insert'),
-    ('facturas_presii', 'notify_ntek_facturas_presii'),
-    ('maintenance_bills', 'notify_ntek_maintenance_bills'),
-    ('internship_logs', 'notify_ntek_logs'),
-    ('clients', 'notify_client_insert')
-  ) AS triggers(table_name, trigger_name)
-  LOOP
-    IF to_regclass('public.' || target.table_name) IS NOT NULL THEN
-      EXECUTE format('DROP TRIGGER IF EXISTS %I ON public.%I', target.trigger_name, target.table_name);
-    END IF;
-  END LOOP;
-
-  IF to_regclass('public.dashboard_notifications') IS NOT NULL THEN
-    DROP TRIGGER IF EXISTS dispatch_ntek_push_insert ON public.dashboard_notifications;
-  END IF;
-END $$;
-
-DO $$
-DECLARE
-  job RECORD;
-BEGIN
-  IF EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_cron') THEN
-    FOR job IN
-      SELECT jobid
-      FROM cron.job
-      WHERE jobname IN ('ntek-push-retry', 'ntek-notification-reminders')
-    LOOP
-      PERFORM cron.unschedule(job.jobid);
-    END LOOP;
-  END IF;
-END $$;
-
-DROP FUNCTION IF EXISTS public.dispatch_ntek_push_after_insert();
-DROP FUNCTION IF EXISTS public.retry_ntek_pending_push();
-DROP FUNCTION IF EXISTS public.enqueue_ntek_due_notifications();
-DROP FUNCTION IF EXISTS public.create_ntek_calendar_notification_from_row() CASCADE;
-DROP FUNCTION IF EXISTS public.create_ntek_notification_from_row() CASCADE;
-DROP FUNCTION IF EXISTS public.claim_ntek_push_notification(UUID);
-DROP FUNCTION IF EXISTS public.record_ntek_system_health(TEXT, TEXT, JSONB);
-DROP FUNCTION IF EXISTS public.create_ntek_notification(
-  TEXT, TEXT, TEXT, TEXT, UUID, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, JSONB, UUID[], UUID
-);
-DROP FUNCTION IF EXISTS public.create_dashboard_notification() CASCADE;
-DROP FUNCTION IF EXISTS public.ntek_profile_can_access(UUID, TEXT);
-
-DROP TABLE IF EXISTS public.dashboard_notification_reads CASCADE;
-DROP TABLE IF EXISTS public.dashboard_notifications CASCADE;
-DROP TABLE IF EXISTS public.push_subscriptions CASCADE;
-DROP TABLE IF EXISTS public.notification_settings CASCADE;
-DROP TABLE IF EXISTS public.ntek_system_health_state CASCADE;
-
--- activity_log conserva cambios relevantes, no telemetría de navegación.
-DELETE FROM public.activity_log
-WHERE lower(trim(COALESCE(description, ''))) ~
-  '^(navegó|navego|visitó|visito|abrió|abrio|visualizó|visualizo|consultó|consulto)([[:space:]]|$)';
-
 CREATE OR REPLACE FUNCTION public.discard_low_value_activity_log()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -2629,7 +1935,6 @@ FOR EACH ROW
 EXECUTE FUNCTION public.discard_low_value_activity_log();
 
 -- Ficha de Levantamiento de Requerimientos.
-BEGIN;
 CREATE OR REPLACE FUNCTION public.can_manage_requirements()
 RETURNS BOOLEAN LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
   SELECT public.is_dashboard_admin() OR EXISTS (
@@ -2685,5 +1990,240 @@ CREATE TRIGGER stamp_requirement_intake BEFORE INSERT OR UPDATE ON public.requir
 FOR EACH ROW EXECUTE FUNCTION public.stamp_requirement_intake();
 UPDATE public.dashboard_roles SET pages = array_append(pages, 'requirements')
 WHERE slug IN ('administracion', 'admin', 'administrator', 'administrador') AND NOT ('requirements' = ANY(pages));
-COMMIT;
+
+-- ========== DEPENDENCIAS ACTIVAS DEL DASHBOARD ==========
+CREATE TABLE IF NOT EXISTS public.order_subtasks (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id UUID NOT NULL REFERENCES public.orders(id) ON DELETE CASCADE,
+  title TEXT NOT NULL, completed BOOLEAN NOT NULL DEFAULT false,
+  due_date DATE, sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_order_subtasks_order ON public.order_subtasks(order_id, sort_order);
+ALTER TABLE public.order_subtasks ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Dashboard manages order subtasks" ON public.order_subtasks;
+CREATE POLICY "Dashboard manages order subtasks" ON public.order_subtasks
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+GRANT ALL ON public.order_subtasks TO authenticated, service_role;
+
+CREATE TABLE IF NOT EXISTS public.thermal_receipts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  receipt_number BIGINT GENERATED BY DEFAULT AS IDENTITY UNIQUE,
+  document_type TEXT NOT NULL, issued_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  customer_name TEXT, customer_rut TEXT, customer_contact TEXT,
+  items JSONB NOT NULL DEFAULT '[]'::jsonb,
+  tax_mode TEXT, net_amount NUMERIC NOT NULL DEFAULT 0,
+  tax_amount NUMERIC NOT NULL DEFAULT 0, total_amount NUMERIC NOT NULL DEFAULT 0,
+  payment_method TEXT, amount_received NUMERIC, change_amount NUMERIC,
+  note TEXT, footer_note TEXT, paper_width INTEGER NOT NULL DEFAULT 58,
+  created_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+ALTER TABLE public.thermal_receipts ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Dashboard reads receipts" ON public.thermal_receipts;
+CREATE POLICY "Dashboard reads receipts" ON public.thermal_receipts
+  FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Users create own receipts" ON public.thermal_receipts;
+CREATE POLICY "Users create own receipts" ON public.thermal_receipts
+  FOR INSERT TO authenticated WITH CHECK (created_by = auth.uid());
+DROP POLICY IF EXISTS "Owners delete receipts" ON public.thermal_receipts;
+CREATE POLICY "Owners delete receipts" ON public.thermal_receipts
+  FOR DELETE TO authenticated USING (created_by = auth.uid() OR public.is_dashboard_admin());
+GRANT SELECT, INSERT, DELETE ON public.thermal_receipts TO authenticated;
+GRANT ALL ON public.thermal_receipts TO service_role;
+GRANT USAGE, SELECT ON SEQUENCE public.thermal_receipts_receipt_number_seq TO authenticated, service_role;
+
+-- Correo: necesario también para seleccionar el remitente de las invitaciones.
+-- La entrega de correo requiere el servicio externo configurado por la aplicación.
+CREATE TABLE IF NOT EXISTS public.mailboxes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  owner_id UUID NOT NULL DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE CASCADE,
+  address TEXT NOT NULL UNIQUE, display_name TEXT,
+  active BOOLEAN NOT NULL DEFAULT true,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS public.mail_messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  mailbox_id UUID NOT NULL REFERENCES public.mailboxes(id) ON DELETE CASCADE,
+  message_id TEXT, from_address TEXT, from_name TEXT,
+  reply_to_address TEXT, reply_to_name TEXT, to_address TEXT,
+  to_addresses JSONB DEFAULT '[]'::jsonb, cc_addresses JSONB DEFAULT '[]'::jsonb,
+  bcc_addresses JSONB DEFAULT '[]'::jsonb,
+  subject TEXT, body_text TEXT, body_html TEXT, headers JSONB DEFAULT '{}'::jsonb,
+  received_at TIMESTAMPTZ DEFAULT now(), sent_at TIMESTAMPTZ,
+  is_read BOOLEAN NOT NULL DEFAULT false, read_at TIMESTAMPTZ,
+  direction TEXT NOT NULL DEFAULT 'inbound', delivery_status TEXT,
+  in_reply_to TEXT, message_references JSONB DEFAULT '[]'::jsonb
+);
+CREATE INDEX IF NOT EXISTS idx_mail_messages_mailbox_received ON public.mail_messages(mailbox_id, received_at DESC);
+ALTER TABLE public.mailboxes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.mail_messages ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Owners read mailboxes" ON public.mailboxes;
+CREATE POLICY "Owners read mailboxes" ON public.mailboxes FOR SELECT TO authenticated
+  USING (owner_id = auth.uid());
+DROP POLICY IF EXISTS "Owners read mail" ON public.mail_messages;
+CREATE POLICY "Owners read mail" ON public.mail_messages FOR SELECT TO authenticated
+  USING (EXISTS (SELECT 1 FROM public.mailboxes m WHERE m.id = mailbox_id AND m.owner_id = auth.uid()));
+DROP POLICY IF EXISTS "Owners delete mail" ON public.mail_messages;
+CREATE POLICY "Owners delete mail" ON public.mail_messages FOR DELETE TO authenticated
+  USING (EXISTS (SELECT 1 FROM public.mailboxes m WHERE m.id = mailbox_id AND m.owner_id = auth.uid()));
+GRANT SELECT ON public.mailboxes TO authenticated;
+GRANT SELECT, DELETE ON public.mail_messages TO authenticated;
+GRANT ALL ON public.mailboxes, public.mail_messages TO service_role;
+
+-- Gestión manual de reservas usada por la pantalla Reservas.
+-- No inicia cobros ni verifica pagos; solo administradores pueden confirmar.
+CREATE OR REPLACE FUNCTION public.manage_public_booking(
+  p_source TEXT, p_booking_id UUID, p_action TEXT,
+  p_date DATE DEFAULT NULL, p_start_time TIME DEFAULT NULL, p_end_time TIME DEFAULT NULL
+) RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE
+  target_table TEXT;
+  date_column TEXT;
+  time_column TEXT;
+  confirmed_status TEXT;
+  booking JSONB;
+  event_id_value UUID;
+  booking_date DATE;
+  booking_start TIME;
+  booking_end TIME;
+  lock_date DATE;
+BEGIN
+  IF auth.uid() IS NULL OR NOT public.is_dashboard_admin() THEN
+    RAISE EXCEPTION 'Solo administración puede gestionar reservas.' USING ERRCODE = '42501';
+  END IF;
+  IF p_source NOT IN ('visit', 'consultation') OR p_action NOT IN ('confirm', 'reschedule', 'cancel', 'delete')
+     OR p_source IS NULL OR p_action IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'status', 'invalid_action');
+  END IF;
+  target_table := CASE p_source WHEN 'visit' THEN 'visit_reservations' ELSE 'free_consultation_bookings' END;
+  date_column := CASE p_source WHEN 'visit' THEN 'visit_date' ELSE 'booking_date' END;
+  time_column := CASE p_source WHEN 'visit' THEN 'visit_time' ELSE 'booking_time' END;
+  confirmed_status := CASE p_source WHEN 'visit' THEN 'approved' ELSE 'confirmed' END;
+  EXECUTE format('SELECT to_jsonb(b) FROM public.%I b WHERE id = $1', target_table) INTO booking USING p_booking_id;
+  IF booking IS NULL THEN RETURN jsonb_build_object('ok', false, 'status', 'not_found'); END IF;
+  -- Same date locks used by public booking; acquire both dates in a stable order.
+  FOR lock_date IN SELECT DISTINCT d FROM unnest(ARRAY[(booking->>date_column)::DATE, p_date]) d WHERE d IS NOT NULL ORDER BY d LOOP
+    PERFORM pg_advisory_xact_lock(hashtext(lock_date::TEXT));
+  END LOOP;
+  EXECUTE format('SELECT to_jsonb(b) FROM public.%I b WHERE id = $1 FOR UPDATE', target_table) INTO booking USING p_booking_id;
+  IF booking IS NULL THEN RETURN jsonb_build_object('ok', false, 'status', 'not_found'); END IF;
+  event_id_value := (booking->>'event_id')::UUID;
+  IF p_action IN ('cancel', 'delete') THEN
+    EXECUTE format('UPDATE public.%I SET status = $2, event_id = NULL, updated_at = now() WHERE id = $1', target_table)
+      USING p_booking_id, 'cancelled';
+    DELETE FROM public.events WHERE id = event_id_value;
+    IF p_action = 'delete' THEN EXECUTE format('DELETE FROM public.%I WHERE id = $1', target_table) USING p_booking_id; END IF;
+    RETURN jsonb_build_object('ok', true);
+  END IF;
+  booking_date := CASE WHEN p_action = 'reschedule' THEN p_date ELSE (booking->>date_column)::DATE END;
+  booking_start := CASE WHEN p_action = 'reschedule' THEN p_start_time ELSE (booking->>time_column)::TIME END;
+  booking_end := CASE WHEN p_action = 'reschedule' THEN p_end_time ELSE (booking->>'end_time')::TIME END;
+  IF booking_date IS NULL OR booking_start IS NULL OR booking_end IS NULL OR booking_end <= booking_start THEN
+    RETURN jsonb_build_object('ok', false, 'status', 'invalid_interval');
+  END IF;
+  IF EXISTS (SELECT 1 FROM public.events e WHERE e.event_date = booking_date
+      AND e.id IS DISTINCT FROM event_id_value
+      AND e.start_time < booking_end AND COALESCE(e.end_time, e.start_time + INTERVAL '1 hour') > booking_start)
+    OR EXISTS (SELECT 1 FROM public.visit_reservations r WHERE r.visit_date = booking_date
+      AND NOT (p_source = 'visit' AND r.id = p_booking_id)
+      AND r.visit_time < booking_end AND r.end_time > booking_start
+      AND (r.status = 'approved' OR (r.status = 'pending' AND r.expires_at > now()))) THEN
+    RETURN jsonb_build_object('ok', false, 'status', 'unavailable');
+  END IF;
+  IF event_id_value IS NULL THEN
+    INSERT INTO public.events(title, description, event_date, start_time, end_time)
+    VALUES ('Reserva · ' || (booking->>'customer_name'), booking->>'customer_email', booking_date, booking_start, booking_end)
+    RETURNING id INTO event_id_value;
+  ELSE
+    UPDATE public.events SET event_date = booking_date, start_time = booking_start, end_time = booking_end WHERE id = event_id_value;
+  END IF;
+  EXECUTE format('UPDATE public.%I SET %I = $2, %I = $3, end_time = $4, status = $5, event_id = $6, updated_at = now() WHERE id = $1', target_table, date_column, time_column)
+    USING p_booking_id, booking_date, booking_start, booking_end, confirmed_status, event_id_value;
+  RETURN jsonb_build_object('ok', true, 'event_id', event_id_value);
+END;
+$$;
+REVOKE ALL ON FUNCTION public.manage_public_booking(TEXT, UUID, TEXT, DATE, TIME, TIME) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.manage_public_booking(TEXT, UUID, TEXT, DATE, TIME, TIME) TO authenticated;
+
+-- ========== VISTAS (tras completar las columnas) ==========
+CREATE OR REPLACE VIEW dashboard_kpis AS
+SELECT
+  (SELECT COUNT(*) FROM projects WHERE status = 'in_development') AS active_projects,
+  (SELECT COALESCE(SUM(amount), 0) FROM invoices
+    WHERE status IN ('paid', 'pending')
+    AND EXTRACT(MONTH FROM issued_at) = EXTRACT(MONTH FROM CURRENT_DATE)
+    AND EXTRACT(YEAR FROM issued_at) = EXTRACT(YEAR FROM CURRENT_DATE)
+  ) AS monthly_billing,
+  (SELECT COUNT(*) FROM clients WHERE status = 'active') AS active_clients,
+  (SELECT COUNT(*) FROM tasks WHERE completed = true) AS completed_tasks,
+  (SELECT COUNT(*) FROM tasks) AS total_tasks;
+
+CREATE OR REPLACE VIEW invoices_with_client AS
+SELECT
+  i.*,
+  c.name AS client_name,
+  c.company AS client_company,
+  p.name AS project_name
+FROM invoices i
+LEFT JOIN clients c ON i.client_id = c.id
+LEFT JOIN projects p ON i.project_id = p.id
+ORDER BY i.created_at DESC;
+
+CREATE OR REPLACE VIEW projects_with_details AS
+SELECT
+  p.id, p.name, p.client_id, p.status, p.progress, p.description,
+  p.technologies, p.logo_url, p.start_date, p.estimated_end_date,
+  p.domain_status, p.frontend_status, p.backend_status,
+  p.supabase_database_status, p.supabase_auth_status, p.supabase_storage_status,
+  p.ssl_status, p.health_check_url, p.actual_end_date, p.budget,
+  p.created_at, p.updated_at,
+  c.name AS client_name,
+  c.company AS client_company,
+  (SELECT COUNT(*) FROM project_members pm WHERE pm.project_id = p.id) AS member_count,
+  p.client_token, p.client_visible, p.client_notes
+FROM projects p
+LEFT JOIN clients c ON p.client_id = c.id
+ORDER BY p.created_at DESC;
+
+CREATE OR REPLACE VIEW documents_with_uploader AS
+SELECT
+  d.*,
+  pr.full_name AS uploader_name,
+  p.name AS project_name
+FROM documents d
+LEFT JOIN profiles pr ON d.uploaded_by = pr.id
+LEFT JOIN projects p ON d.project_id = p.id
+ORDER BY d.created_at DESC;
+
+CREATE OR REPLACE VIEW client_project_view AS
+SELECT
+  p.id,
+  p.client_token,
+  p.name,
+  p.description,
+  p.status,
+  p.progress,
+  p.technologies,
+  p.start_date,
+  p.estimated_end_date,
+  p.client_notes,
+  p.client_visible,
+  c.company AS client_company,
+  c.name    AS client_name,
+  (
+    SELECT json_agg(u ORDER BY u.created_at DESC)
+    FROM (
+      SELECT id, title, description, type, created_at
+      FROM project_updates pu
+      WHERE pu.project_id = p.id AND pu.visible_to_client = true
+      ORDER BY pu.created_at DESC
+    ) u
+  ) AS updates
+FROM projects p
+LEFT JOIN clients c ON p.client_id = c.id
+WHERE p.client_visible = true;
+
 NOTIFY pgrst, 'reload schema';
+COMMIT;

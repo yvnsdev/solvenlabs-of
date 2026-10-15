@@ -135,14 +135,11 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Styles -->
-  <link rel="stylesheet" href="styles.css?v=solven-ebct-3">
-  <link rel="stylesheet" href="site-footer.css?v=solven-ebct-3">
-  <link rel="stylesheet" href="team-profiles.css?v=solven-ebct-3">
-  <link rel="stylesheet" href="project-advisor.css?v=solven-ebct-3">
+  <link rel="stylesheet" href="index.css?v=sitme-achievements-5">
 
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@1.35.0/dist/umd/lucide.min.js" integrity="sha384-eZXpDHN86IMQuxntjYbYprDla50QW8NC+8P9nUywt9PSVNqZE2Ri3YZ2WWKoliDw" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <link rel="stylesheet" href="/solven-brand.css?v=solven-ebct-3">
+
 </head>
 
 <body>
@@ -208,11 +205,11 @@
       <!-- Acciones -->
       <div class="navbar__actions">
         <!-- CTA -->
-          <a href="/proyecto" class="btn btn--primary btn--sm navbar__project-cta"
-          aria-label="Ver avances de mi proyecto y pagar facturación pendiente" data-project-cta
-          data-labels="Ver avances y pagar">
+          <a href="#agenda-sin-costo" data-free-booking class="btn btn--primary btn--sm navbar__project-cta"
+          aria-label="Agendar reunión" data-project-cta
+          data-labels="Agendar reunión">
             <i data-lucide="arrow-up-right" class="icon icon--sm" aria-hidden="true"></i>
-            <span data-project-cta-text aria-hidden="true">Ver avances y pagar</span>
+            <span data-project-cta-text aria-hidden="true">Agendar reunión</span>
         </a>
 
         <!-- Mobile toggle -->
@@ -240,11 +237,11 @@
       </div>
     </nav>
     <div class="mobile-menu__cta">
-      <a href="/proyecto" class="btn btn--primary mobile-menu__project-cta" style="width: 100%;"
-        aria-label="Ver avances de mi proyecto y pagar facturación pendiente" data-project-cta
-        data-labels="Ver avances y pagar">
+      <a href="#agenda-sin-costo" data-free-booking class="btn btn--primary mobile-menu__project-cta" style="width: 100%;"
+        aria-label="Agendar reunión" data-project-cta
+        data-labels="Agendar reunión">
         <i data-lucide="arrow-up-right" class="icon icon--sm" aria-hidden="true"></i>
-        <span data-project-cta-text aria-hidden="true">Ver avances y pagar</span>
+        <span data-project-cta-text aria-hidden="true">Agendar reunión</span>
       </a>
     </div>
   </div>
@@ -492,7 +489,24 @@
       <article class="case-card project-spotlight project-spotlight--sitme reveal" data-case="sitme" data-category="salud">
         <div class="project-spotlight__brand"><span class="project-spotlight__eyebrow">IA + salud femenina</span><div class="project-spotlight__identity"><img src="assets/sitme-logo.png" alt="SITME" class="project-spotlight__logo" loading="lazy"><p class="project-spotlight__tagline">Tamizaje y seguimiento de endometriosis</p></div><span class="project-spotlight__orb" aria-hidden="true"></span><img src="assets/sitme-tamizaje-clinico.png" alt="Pantalla de tamizaje clínico de SITME" class="project-spotlight__preview" loading="lazy"></div>
         <div class="project-spotlight__caption"><div><h3>Tamizaje y seguimiento de endometriosis</h3><p>Información que acompaña desde la primera sospecha.</p></div><button type="button" class="project-spotlight__open" aria-label="Conocer el proyecto SITME"><i data-lucide="arrow-up-right" aria-hidden="true"></i></button></div>
-        <div class="project-spotlight__recognition"><span><i data-lucide="award" aria-hidden="true"></i> FONDEF VIU 2026</span><span><i data-lucide="trophy" aria-hidden="true"></i> 3.er lugar EVIC</span><span>Tesis con Impacto UBB</span></div>
+        <section class="project-achievements" aria-labelledby="sitme-achievements-title">
+          <div class="project-achievements__header"><h4 class="project-achievements__heading" id="sitme-achievements-title">Logros y reconocimientos</h4><span class="project-achievements__count">3 hitos</span></div>
+          <ul class="project-achievements__list">
+            <li class="project-achievements__item project-achievements__item--featured">
+              <span class="project-achievements__icon" aria-hidden="true"><i data-lucide="badge-check"></i></span>
+              <div class="project-achievements__copy"><span class="project-achievements__label">Fondo adjudicado</span><strong>FONDEF VIU</strong><span class="project-achievements__detail">Impulso a la investigación aplicada de SITME.</span></div>
+              <span class="project-achievements__year">2026</span>
+            </li>
+            <li class="project-achievements__item project-achievements__item--award">
+              <span class="project-achievements__icon" aria-hidden="true"><i data-lucide="trophy"></i></span>
+              <div class="project-achievements__copy"><span class="project-achievements__label">EVIC</span><strong class="project-achievements__place">3.<sup>er</sup> <span>lugar</span></strong><span class="project-achievements__detail">Reconocimiento al proyecto SITME.</span></div>
+            </li>
+            <li class="project-achievements__item">
+              <span class="project-achievements__icon" aria-hidden="true"><i data-lucide="graduation-cap"></i></span>
+              <div class="project-achievements__copy"><span class="project-achievements__label">Universidad del Bío-Bío</span><strong>Tesis con Impacto</strong><span class="project-achievements__detail">Reconocimiento al trabajo de tesis.</span></div>
+            </li>
+          </ul>
+        </section>
       </article>
       <article class="case-card project-spotlight project-spotlight--urgencias reveal" data-case="san-fabian" data-category="salud">
         <div class="project-spotlight__brand"><span class="project-spotlight__eyebrow">IA + gestión de urgencias</span><div class="project-spotlight__wordmark"><i data-lucide="activity" aria-hidden="true"></i><span>SICPU<small>Priorizar. Coordinar. Atender.</small></span></div><span class="project-spotlight__orb" aria-hidden="true"></span><img src="assets/sicpu.png" alt="Vista del sistema de clasificación y priorización de urgencias" class="project-spotlight__preview" loading="lazy"></div>
@@ -705,7 +719,7 @@
                   src="https://cdn.pagerduty.com/wp-content/uploads/2021/03/uptimerobot-logo-09.png" alt="UptimeRobot">
               </div>
               <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="assets/webpay.png"
+                  src="https://s3.us-west-2.amazonaws.com/dev-byflow.com/uploads/iconos_adicionales_figma_webpay_258d8eda34_9b635f36cf.webp"
                   alt="Webpay">
               </div>
               <div class="tech-item"><img loading="lazy" decoding="async"
@@ -755,7 +769,7 @@
                   src="https://cdn.pagerduty.com/wp-content/uploads/2021/03/uptimerobot-logo-09.png" alt="UptimeRobot">
               </div>
               <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="assets/webpay.png"
+                  src="https://s3.us-west-2.amazonaws.com/dev-byflow.com/uploads/iconos_adicionales_figma_webpay_258d8eda34_9b635f36cf.webp"
                   alt="Webpay">
               </div>
               <div class="tech-item"><img loading="lazy" decoding="async"
@@ -1489,141 +1503,6 @@
   </div>
 
   <!-- Checkout de visita técnica -->
-  <div id="visit-checkout-modal" class="modal visit-checkout" role="dialog" aria-modal="true"
-    aria-labelledby="visit-checkout-title">
-    <div class="modal__backdrop"></div>
-    <div class="modal__content visit-checkout__content">
-      <div class="modal__header visit-checkout__header">
-        <div>
-          <span class="visit-checkout__eyebrow">Reserva de visita técnica</span>
-          <h3 id="visit-checkout-title" class="modal__title">Elige tu horario y confirma tu visita</h3>
-        </div>
-        <button type="button" class="modal__close" aria-label="Cerrar reserva">
-          <i data-lucide="x" class="icon"></i>
-        </button>
-      </div>
-      <div class="modal__body visit-checkout__body">
-        <div class="visit-checkout__summary">
-          <div class="visit-checkout__summary-icon"><i data-lucide="wrench" class="icon"></i></div>
-          <div>
-            <span>Servicio que necesitas</span>
-            <strong data-visit-service-name>Visita técnica Solven Labs</strong>
-          </div>
-          <div class="visit-checkout__fee">
-            <span>Reserva</span>
-            <strong>$5.000</strong>
-          </div>
-        </div>
-
-        <div class="visit-checkout__notice">
-          <i data-lucide="info" class="icon icon--sm"></i>
-          <p>Los $5.000 confirman el horario y <strong>se abonan íntegramente al valor final del servicio</strong>.</p>
-        </div>
-
-        <div class="visit-checkout__meeting">
-          <p>¿No estás seguro? Agenda una reunión y te contamos más.</p>
-          <button type="button" class="btn btn--primary visit-checkout__action" data-visit-free-meeting>
-            <i data-lucide="messages-square" class="icon icon--sm"></i>
-            Agendar reunión sin costo
-          </button>
-        </div>
-
-        <ol class="visit-checkout__steps">
-          <li class="visit-checkout__step" data-visit-step="schedule">
-            <span class="visit-checkout__step-number">1</span>
-            <div class="visit-checkout__step-content">
-              <strong>Elige cuándo te viene bien</strong>
-              <p>Atendemos de lunes a sábado, entre las 10:00 y las 18:00. Mantendremos el horario por 20 minutos mientras completas el pago; todavía no se agregará al calendario.</p>
-              <form class="visit-booking-form" data-visit-booking-form novalidate>
-                <div class="visit-booking-form__grid">
-                  <label class="visit-booking-form__field">
-                    <span>Fecha</span>
-                    <input type="date" name="visit_date" required data-visit-date>
-                  </label>
-                  <label class="visit-booking-form__field">
-                    <span>Hora</span>
-                    <select name="visit_time" required data-visit-time>
-                      <option value="">Selecciona un horario</option>
-                      <option value="10:00">10:00</option>
-                      <option value="11:00">11:00</option>
-                      <option value="12:00">12:00</option>
-                      <option value="13:00">13:00</option>
-                      <option value="14:00">14:00</option>
-                      <option value="15:00">15:00</option>
-                      <option value="16:00">16:00</option>
-                      <option value="17:00">17:00</option>
-                    </select>
-                  </label>
-                  <label class="visit-booking-form__field">
-                    <span>Tu nombre</span>
-                    <input type="text" name="customer_name" autocomplete="name" maxlength="100" required
-                      placeholder="Nombre y apellido">
-                  </label>
-                  <label class="visit-booking-form__field">
-                    <span>WhatsApp</span>
-                    <input type="tel" name="customer_phone" autocomplete="tel" maxlength="30" required
-                      placeholder="+56 9 1234 5678">
-                  </label>
-                  <label class="visit-booking-form__field visit-booking-form__field--full">
-                    <span>Correo</span>
-                    <input type="email" name="customer_email" autocomplete="email" maxlength="160" required
-                      placeholder="tu@empresa.cl">
-                  </label>
-                </div>
-                <p class="visit-booking-form__error" data-visit-error role="alert" hidden></p>
-                <button type="submit" class="btn btn--primary visit-checkout__action" data-visit-create>
-                  <i data-lucide="calendar-check" class="icon icon--sm"></i>
-                  Continuar al pago seguro
-                </button>
-              </form>
-            </div>
-          </li>
-          <li class="visit-checkout__step is-locked" data-visit-step="payment">
-            <span class="visit-checkout__step-number">2</span>
-            <div class="visit-checkout__step-content">
-              <strong>Confirma con el pago de $5.000</strong>
-              <p data-visit-payment-copy>Primero elige tu horario. Luego tendrás 20 minutos para completar el pago seguro.</p>
-              <a href="#" aria-disabled="true"
-                class="btn btn--payment visit-checkout__action is-disabled" data-visit-payment>
-                <img src="assets/mercado-pago.svg" alt="" class="visit-checkout__mp-logo">
-                Pagar $5.000 y confirmar
-              </a>
-            </div>
-          </li>
-          <li class="visit-checkout__step is-locked" data-visit-step="confirm">
-            <span class="visit-checkout__step-number">3</span>
-            <div class="visit-checkout__step-content">
-              <strong>Tu reserva queda confirmada automáticamente</strong>
-              <p data-visit-status-copy>Esperaremos la confirmación segura del pago. Solo entonces aparecerá la visita en nuestro calendario.</p>
-              <span class="visit-checkout__manual-status" data-visit-status>
-                <i data-lucide="lock-keyhole" class="icon icon--sm"></i>
-                Aún sin confirmar
-              </span>
-            </div>
-          </li>
-        </ol>
-
-        <p class="visit-checkout__pending"><i data-lucide="shield-check" class="icon icon--sm"></i> El dashboard no recibe reservas pendientes: el evento se crea únicamente cuando el pago queda aprobado.</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="payment-result-modal" id="payment-result-modal" role="dialog" aria-modal="true" aria-labelledby="payment-result-title" hidden>
-    <button type="button" class="payment-result-modal__backdrop" data-payment-result-close aria-label="Cerrar"></button>
-    <div class="payment-result-modal__panel" tabindex="-1">
-      <button type="button" class="payment-result-modal__close" data-payment-result-close aria-label="Cerrar resultado del pago">
-        <i data-lucide="x" class="icon"></i>
-      </button>
-      <div class="payment-result-modal__halo" data-payment-result-halo>
-        <img src="assets/solvi.svg" alt="Solvi" class="payment-result-modal__image" data-payment-result-image>
-      </div>
-      <span class="payment-result-modal__badge" data-payment-result-badge>Validando pago</span>
-      <h2 class="payment-result-modal__title" id="payment-result-title" data-payment-result-title>Estamos validando tu pago</h2>
-      <p class="payment-result-modal__message" data-payment-result-message>Espera un momento mientras confirmamos el resultado del pago.</p>
-      <button type="button" class="btn btn--primary payment-result-modal__action" data-payment-result-close>Entendido</button>
-    </div>
-  </div>
-
   <!-- Modal de casos -->
   <div id="case-modal" class="modal case-modal" role="dialog" aria-modal="true" aria-labelledby="case-modal-title">
     <div class="modal__backdrop"></div>
@@ -2439,7 +2318,7 @@
 
   <!-- Acceso flotante de Solvi -->
 
-  <!-- Plantilla local de contador; se activa y personaliza desde app.js cuando se solicite. -->
+  <!-- Plantilla local de contador; se activa y personaliza desde index.js cuando se solicite. -->
   <aside class="webinar-countdown" data-webinar-countdown data-webinar-start="2026-12-31T23:59:59-03:00"
     aria-label="Tiempo restante para la campaña Solven Labs" hidden aria-hidden="true">
     <button type="button" class="webinar-countdown__restore" aria-label="Mostrar contador de campaña"
@@ -2516,13 +2395,9 @@
   </div>
 
   <!-- Scripts -->
-  <script src="hero-network.js?v=solven-ebct-3" defer></script>
-  <script src="project-advisor.js?v=solven-ebct-3"></script>
-  <script src="app.js?v=solven-ebct-3"></script>
+  <script src="index.js?v=page-bundles-1"></script>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-  <script>
-    lucide.createIcons();
-  </script>
+
 </body>
 
 </html>

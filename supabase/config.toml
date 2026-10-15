@@ -1,46 +1,12 @@
 project_id = "oxyhuxnkhogmuholomis"
 
-[functions.create-visit-reservation]
-entrypoint = "./functions/create-visit-reservation/index.js"
-
-[functions.visit-reservation-status]
-entrypoint = "./functions/visit-reservation-status/index.js"
-
 [functions.booking-availability]
 entrypoint = "./functions/booking-availability/index.js"
 
-[functions.create-free-consultation]
-entrypoint = "./functions/create-free-consultation/index.js"
-
-[functions.mercadopago-visit-webhook]
-verify_jwt = false
-entrypoint = "./functions/mercadopago-visit-webhook/index.js"
-
-[functions.mercadopago-subscription-webhook]
-verify_jwt = false
-entrypoint = "./functions/mercadopago-subscription-webhook/index.js"
-
-[functions.manage-maintenance-subscription]
-entrypoint = "./functions/manage-maintenance-subscription/index.js"
-
-[functions.create-maintenance-billing]
-entrypoint = "./functions/create-maintenance-billing/index.js"
-
-[functions.manage-maintenance-billing]
-entrypoint = "./functions/manage-maintenance-billing/index.js"
-
-[functions.delete-team-member]
-entrypoint = "./functions/delete-team-member/index.js"
-
-[functions.project-maintenance-billing]
-verify_jwt = false
-entrypoint = "./functions/project-maintenance-billing/index.js"
-
-# La función valida el token mediante /auth/v1/user.
 [functions.calendar-invitations]
+# Validates the token using /auth/v1/user.
 verify_jwt = false
 entrypoint = "./functions/calendar-invitations/index.js"
 
-[functions.mercadopago-maintenance-webhook]
-verify_jwt = false
-entrypoint = "./functions/mercadopago-maintenance-webhook/index.js"
+[functions.create-free-consultation]
+entrypoint = "./functions/create-free-consultation/index.js"
