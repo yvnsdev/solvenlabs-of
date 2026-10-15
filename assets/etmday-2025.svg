@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 350" role="img" aria-labelledby="title desc">
+  <title id="title">EtMday 2025</title>
+  <desc id="desc">Emprende tu Mente</desc>
+  <g transform="translate(40 30)">
+    <rect x="0" y="0" width="108" height="14" fill="#7145c6"/>
+    <rect x="108" y="0" width="108" height="14" fill="#e04bdd"/>
+    <rect x="216" y="0" width="108" height="14" fill="#ff4308"/>
+    <rect x="324" y="0" width="108" height="14" fill="#72cf35"/>
+    <rect x="432" y="0" width="108" height="14" fill="#19bed4"/>
+    <rect x="540" y="0" width="108" height="14" fill="#ffd400"/>
+    <text x="0" y="150" fill="#111" font-family="Arial, Helvetica, sans-serif" font-size="130" letter-spacing="-10">EtMday</text>
+    <text x="3" y="226" fill="#111" font-family="Arial, Helvetica, sans-serif" font-size="57" letter-spacing="-2">Emprende tu Mente</text>
+    <text x="3" y="290" fill="#111" font-family="Arial, Helvetica, sans-serif" font-size="52">2025</text>
+  </g>
+</svg>

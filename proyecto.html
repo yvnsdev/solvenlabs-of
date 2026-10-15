@@ -1,0 +1,2816 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal de Clientes: proyectos y mantenciones | Solven Labs</title>
+  <meta name="description" content="Consulta el estado de tu proyecto Solven Labs y revisa tus mantenciones pendientes en un solo portal de clientes.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://solvenlabs.cl/proyecto">
+  <meta property="og:title" content="Portal de Clientes | Solven Labs">
+  <meta property="og:description" content="Consulta el estado de tu proyecto y tus mantenciones pendientes.">
+  <meta property="og:url" content="https://solvenlabs.cl/proyecto">
+  <link rel="icon" type="image/png" href="/assets/favicon%20chopped.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@1.35.0/dist/umd/lucide.min.js" integrity="sha384-eZXpDHN86IMQuxntjYbYprDla50QW8NC+8P9nUywt9PSVNqZE2Ri3YZ2WWKoliDw" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script>
+    (() => {
+      const url = new URL(window.location.href);
+      const hasPrivateQuery = ['token', 'maintenance_rut', 'maintenance_payment', 'maintenance_bills']
+        .some(key => url.searchParams.has(key));
+      const hasPrivatePath = /^\/(?:project|proyecto)\/.+/.test(url.pathname);
+      if (hasPrivateQuery || hasPrivatePath) {
+        document.querySelector('meta[name="robots"]')?.setAttribute('content', 'noindex, nofollow');
+      }
+    })();
+  </script>
+
+  <style>
+    /* ========== RESET & BASE ========== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary:       #2e547d;
+      --primary-dark:  #1b3b5e;
+      --primary-light: #38628e;
+      --primary-glow:  rgba(46,84,125,0.12);
+      --bg:            #f6f8fa;
+      --surface:       #ffffff;
+      --surface-2:     #eef4f6;
+      --border:        #dbe8ec;
+      --border-light:  #ebf2f5;
+      --text:          #111827;
+      --text-2:        #4b5563;
+      --text-3:        #9ca3af;
+      --success:       #165aa3;
+      --warning:       #d97706;
+      --danger:        #dc2626;
+      --info:          #2563eb;
+      --radius:        12px;
+      --radius-sm:     8px;
+      --radius-lg:     18px;
+      --shadow:        0 1px 4px rgba(0,0,0,0.07);
+      --shadow-md:     0 4px 16px rgba(0,0,0,0.09);
+      --shadow-lg:     0 8px 32px rgba(0,0,0,0.11);
+    }
+    html { font-size: 16px; scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
+    button { cursor: pointer; border: none; background: none; font-family: inherit; }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+    }
+    :focus-visible { outline: 3px solid rgba(37,99,235,0.55); outline-offset: 3px; }
+
+    /* ========== TOPBAR ========== */
+    .topbar {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-light);
+      padding: 0 24px;
+      height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .topbar__logo { display: flex; align-items: center; gap: 10px; }
+    .topbar__logo img { height: 32px; }
+    .topbar__badge {
+      font-size: 0.7rem; font-weight: 600; letter-spacing: 0.06em;
+      color: var(--primary); background: var(--primary-glow);
+      border-radius: 99px; padding: 3px 10px;
+      border: 1px solid rgba(46,84,125,0.25);
+    }
+    .topbar__back {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.85rem; color: var(--text-2);
+      transition: color 0.2s;
+    }
+    .topbar__back:hover { color: var(--primary); }
+    .topbar__back svg { width: 14px; height: 14px; }
+
+    /* ========== HERO / SEARCH ========== */
+    .hero {
+      background: linear-gradient(135deg, #1b3b5e 0%, #2e547d 50%, #38628e 100%);
+      padding: 72px 24px 80px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .hero__content { position: relative; max-width: 980px; margin: 0 auto; }
+    .hero__title {
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-weight: 700; color: #fff;
+      line-height: 1.2; margin-bottom: 12px;
+    }
+    .hero__subtitle { font-size: 1.05rem; color: rgba(255,255,255,0.8); margin-bottom: 32px; line-height: 1.6; }
+
+    .portal-entry-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; text-align: left; }
+    .portal-entry-card { min-width: 0; padding: 24px; border: 1px solid rgba(255,255,255,0.3); border-radius: var(--radius-lg); background: rgba(255,255,255,0.12); backdrop-filter: blur(10px); box-shadow: 0 12px 28px rgba(0,0,0,0.12); }
+    .portal-entry-card__heading { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 18px; }
+    .portal-entry-card__icon { width: 40px; height: 40px; display: grid; place-items: center; flex: 0 0 auto; border-radius: 12px; color: var(--primary-dark); background: #fff; }
+    .portal-entry-card__icon svg { width: 20px; height: 20px; }
+    .portal-entry-card__title { color: #fff; font-size: 1.06rem; font-weight: 700; line-height: 1.3; }
+    .portal-entry-card__text { margin-top: 3px; color: rgba(255,255,255,0.78); font-size: .86rem; line-height: 1.5; }
+
+    /* Search box */
+    .search-box {
+      background: #fff;
+      border-radius: var(--radius-lg);
+      padding: 8px 8px 8px 20px;
+      display: flex; align-items: center; gap: 10px;
+      box-shadow: var(--shadow-lg);
+      width: 100%; max-width: none; margin: 0;
+    }
+    .search-box__icon { color: var(--text-3); flex-shrink: 0; width: 20px; height: 20px; }
+    .search-box__input {
+      flex: 1; border: none; outline: none;
+      font-size: 0.95rem; font-family: inherit;
+      color: var(--text); background: transparent;
+      min-width: 0;
+    }
+    .search-box__input::placeholder { color: var(--text-3); }
+    .search-box__btn {
+      flex-shrink: 0;
+      background: var(--primary);
+      color: #fff; font-weight: 600;
+      font-size: 0.9rem; padding: 10px 22px;
+      border-radius: var(--radius);
+      transition: background 0.2s, transform 0.1s;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .search-box__btn:hover { background: var(--primary-dark); }
+    .search-box__btn:active { transform: scale(0.97); }
+    .search-box__btn svg { width: 16px; height: 16px; }
+    .ticket-form__footer #ticket-cancel {
+      border: 1px solid var(--border);
+    }
+    .ticket-form__footer #ticket-cancel:hover { border-color: var(--primary); }
+
+    .maintenance-entry {
+      width: 100%; margin: 0; padding: 12px 18px;
+      display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+      border: 1px solid rgba(255,255,255,0.48); border-radius: var(--radius);
+      background: rgba(255,255,255,0.12); color: #fff; font-size: 0.92rem; font-weight: 650;
+      backdrop-filter: blur(8px); transition: background 0.2s ease, transform 0.2s ease;
+    }
+    .maintenance-entry:hover { background: rgba(255,255,255,0.2); transform: translateY(-1px); }
+    .maintenance-entry svg { width: 18px; height: 18px; flex: 0 0 auto; }
+    .payment-brand-logo { display: inline-block; box-sizing: border-box; width: 24px; height: 24px; padding: 3px; vertical-align: middle; border-radius: 50%; background: #fff; object-fit: contain; }
+
+    @media (max-width: 680px) {
+      .hero { padding: 54px 16px 60px; }
+      .portal-entry-grid { grid-template-columns: 1fr; }
+      .portal-entry-card { padding: 20px; }
+    }
+
+    .maintenance-modal[hidden] { display: none !important; }
+    .maintenance-modal { position: fixed; inset: 0; z-index: 3000; display: grid; place-items: center; padding: 18px; }
+    .maintenance-modal__backdrop { position: absolute; inset: 0; border: 0; background: rgba(8,13,18,.72); backdrop-filter: blur(8px); }
+    .maintenance-modal__panel { position: relative; z-index: 1; width: min(680px,100%); max-height: 90vh; overflow: auto; padding: 28px; border: 1px solid rgba(46,84,125,.18); border-radius: 24px; background: #fff; box-shadow: 0 28px 80px rgba(0,0,0,.28); }
+    .maintenance-modal__close { position: absolute; top: 14px; right: 14px; width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; background: var(--surface-2); color: var(--text-2); }
+    .maintenance-modal__close svg { width: 18px; height: 18px; }
+    .maintenance-modal__eyebrow { color: var(--primary); font-size: .75rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+    .maintenance-modal__title { margin: 7px 44px 8px 0; font-size: clamp(1.4rem,4vw,1.9rem); line-height: 1.15; }
+    .maintenance-modal__lead { color: var(--text-2); font-size: .92rem; line-height: 1.55; }
+    .maintenance-search { margin-top: 20px; display: flex; gap: 9px; }
+    .maintenance-search__input { min-width: 0; flex: 1; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; color: var(--text); font: inherit; }
+    .maintenance-search__button { flex: 0 0 auto; padding: 12px 18px; border-radius: 10px; background: var(--primary); color: #fff; font-weight: 700; }
+    .maintenance-search__button:disabled { opacity: .65; cursor: wait; }
+    .maintenance-result { margin-top: 20px; }
+    .maintenance-customer { display: grid; grid-template-columns: 1fr auto; gap: 8px 18px; margin-bottom: 14px; padding: 16px; border-radius: 14px; background: var(--surface-2); }
+    .maintenance-customer__name { font-weight: 750; }
+    .maintenance-customer__rut, .maintenance-customer__plan { color: var(--text-2); font-size: .82rem; }
+    .maintenance-customer__total { grid-row: 1 / span 2; grid-column: 2; align-self: center; color: var(--primary); font-size: 1.15rem; font-weight: 800; text-align: right; }
+    .maintenance-bill { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 10px 16px; padding: 16px 0; border-bottom: 1px solid var(--border-light); }
+    .maintenance-bill:last-child { border-bottom: 0; }
+    .maintenance-bill__title { font-size: .94rem; font-weight: 700; }
+    .maintenance-bill__meta { margin-top: 5px; color: var(--text-2); font-size: .79rem; line-height: 1.45; }
+    .maintenance-bill__amount { font-weight: 800; text-align: right; }
+    .maintenance-bill__pay { grid-column: 1 / -1; width: 100%; min-height: 44px; padding: 10px 16px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 10px; background: #009ee3; color: #fff; font-weight: 750; }
+    .maintenance-bill__pay:hover { background: #008ed0; }
+    .maintenance-bill__pay:disabled { opacity: .65; cursor: wait; }
+    .maintenance-empty { padding: 24px 16px; border: 1px dashed var(--border); border-radius: 14px; color: var(--text-2); text-align: center; line-height: 1.55; }
+
+    /* ========== MAIN CONTAINER ========== */
+    .container { max-width: 900px; margin: 0 auto; padding: 0 16px; }
+    .main { padding: 48px 0; }
+
+    /* ========== PROJECT MODAL ========== */
+    .project-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 110;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(17,24,39,0.58);
+      backdrop-filter: blur(10px);
+      overflow: auto;
+    }
+    .project-modal[hidden] { display: none !important; }
+    .project-modal__panel {
+      position: relative;
+      width: min(1120px, 100%);
+      max-width: min(1120px, 100%);
+      margin: 0;
+      padding: 26px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(247,250,251,0.98));
+      border: 1px solid rgba(255,255,255,0.7);
+      border-radius: 28px;
+      box-shadow: var(--shadow-lg);
+      max-height: min(90vh, 920px);
+      overflow: auto;
+    }
+    .project-modal__close {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(17,24,39,0.06);
+      color: var(--text-2);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease, transform 0.2s ease, color 0.2s ease;
+      z-index: 2;
+    }
+    .project-modal__close:hover {
+      background: rgba(46,84,125,0.12);
+      color: var(--primary);
+      transform: scale(1.04);
+    }
+    .project-modal__close svg { width: 18px; height: 18px; }
+
+    /* ========== SPINNER ========== */
+    .spinner-wrap {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 16px; padding: 80px 0; color: var(--text-3);
+    }
+    .spinner-wrap svg { animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ========== ERROR / EMPTY ========== */
+    .empty-state {
+      text-align: center; padding: 80px 24px;
+    }
+    .empty-state__icon {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: var(--border-light);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px; color: var(--text-3);
+    }
+    .empty-state__title { font-size: 1.2rem; font-weight: 600; margin-bottom: 8px; }
+    .empty-state__text { font-size: 0.95rem; color: var(--text-2); line-height: 1.6; }
+
+    /* ========== PROJECT HEADER ========== */
+    .proj-header {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 28px 32px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-light);
+      margin-bottom: 24px;
+      display: flex; align-items: flex-start; gap: 20px;
+    }
+    .proj-header__icon {
+      width: 64px; height: 64px; flex-shrink: 0;
+      border-radius: var(--radius);
+      background: var(--primary-glow);
+      border: 1px solid rgba(46,84,125,0.2);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--primary);
+    }
+    .proj-header__icon svg { width: 28px; height: 28px; }
+    .proj-header__info { flex: 1; min-width: 0; }
+    .proj-header__name {
+      font-size: 1.5rem; font-weight: 700; margin-bottom: 4px;
+      line-height: 1.3;
+    }
+    .proj-header__client { font-size: 0.9rem; color: var(--text-2); margin-bottom: 12px; }
+    .proj-header__tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag {
+      font-size: 0.78rem; font-weight: 500;
+      color: var(--primary-dark); background: var(--primary-glow);
+      border: 1px solid rgba(46,84,125,0.18);
+      border-radius: 99px; padding: 3px 10px;
+    }
+    .proj-header__right { flex-shrink: 0; text-align: right; }
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.82rem; font-weight: 600; letter-spacing: 0.02em;
+      border-radius: 99px; padding: 5px 14px;
+      border: 1px solid;
+    }
+    .status-badge svg { width: 13px; height: 13px; }
+    .status-badge--proposal     { color: var(--info);    background: rgba(37,99,235,0.08); border-color: rgba(37,99,235,0.25); }
+    .status-badge--active       { color: var(--primary); background: var(--primary-glow);  border-color: rgba(46,84,125,0.3); }
+    .status-badge--review       { color: var(--warning); background: rgba(217,119,6,0.08); border-color: rgba(217,119,6,0.3); }
+    .status-badge--completed    { color: var(--success); background: rgba(22,90,163,0.08); border-color: rgba(22,90,163,0.3); }
+    .status-badge--paused       { color: var(--text-2);  background: rgba(75,85,99,0.08);  border-color: rgba(75,85,99,0.3); }
+
+    /* ========== PROGRESS CARD ========== */
+    .progress-card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 24px 32px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-light);
+      margin-bottom: 24px;
+    }
+    .progress-card__header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 10px;
+    }
+    .progress-card__label { font-size: 0.9rem; font-weight: 600; color: var(--text-2); }
+    .progress-card__pct { font-size: 1.4rem; font-weight: 700; color: var(--primary); }
+    .progress-bar {
+      height: 10px; border-radius: 99px;
+      background: var(--border-light); overflow: hidden;
+      margin-bottom: 6px;
+    }
+    .progress-bar__fill {
+      height: 100%; border-radius: 99px;
+      background: linear-gradient(90deg, var(--primary), #668fbb);
+      transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+      width: 0%;
+    }
+    .progress-bar__fill--completed { background: linear-gradient(90deg, var(--success), #4a92de); }
+    .progress-bar__fill--review    { background: linear-gradient(90deg, var(--warning), #fbbf24); }
+
+    /* ========== EXECUTIVE SUMMARY ========== */
+    .brief-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    .brief-card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 18px 20px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-light);
+      min-width: 0;
+    }
+    .brief-card__label {
+      font-size: 0.74rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-3);
+      margin-bottom: 8px;
+    }
+    .brief-card__value {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.4;
+      margin-bottom: 6px;
+    }
+    .brief-card__meta {
+      font-size: 0.84rem;
+      color: var(--text-2);
+      line-height: 1.5;
+    }
+    .brief-highlight {
+      background: linear-gradient(135deg, rgba(46,84,125,0.08), rgba(37,99,235,0.06));
+      border: 1px solid rgba(46,84,125,0.14);
+      border-radius: var(--radius-lg);
+      padding: 18px 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .brief-highlight__icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: var(--primary-glow);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .brief-highlight__icon svg { width: 20px; height: 20px; }
+    .brief-highlight__title {
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-3);
+      margin-bottom: 4px;
+    }
+    .brief-highlight__text {
+      font-size: 0.95rem;
+      color: var(--text-2);
+      line-height: 1.6;
+    }
+
+    /* ========== STEPPER ========== */
+    .stepper-card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 28px 32px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-light);
+      margin-bottom: 24px;
+    }
+    .stepper-card__title {
+      font-size: 0.9rem; font-weight: 600; color: var(--text-2);
+      margin-bottom: 24px; text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .stepper {
+      display: flex; align-items: flex-start;
+      gap: 0; position: relative;
+    }
+    .stepper-step {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      position: relative; z-index: 1;
+    }
+    .stepper-step::before {
+      content: '';
+      position: absolute; top: 18px; left: 50%; right: -50%;
+      height: 2px; background: var(--border);
+      z-index: 0;
+    }
+    .stepper-step:last-child::before { display: none; }
+    .stepper-step__circle {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--border);
+      background: var(--surface); z-index: 1; position: relative;
+      transition: all 0.3s;
+      font-size: 0.85rem; font-weight: 700; color: var(--text-3);
+    }
+    .stepper-step__circle svg { width: 16px; height: 16px; }
+    .stepper-step--completed .stepper-step__circle {
+      background: var(--primary); border-color: var(--primary); color: #fff;
+    }
+    .stepper-step--completed::before { background: var(--primary); }
+    .stepper-step--active .stepper-step__circle {
+      background: var(--surface); border-color: var(--primary); color: var(--primary);
+      box-shadow: 0 0 0 4px var(--primary-glow);
+    }
+    .stepper-step--paused .stepper-step__circle {
+      background: rgba(217,119,6,0.08); border-color: var(--warning); color: var(--warning);
+      box-shadow: 0 0 0 4px rgba(217,119,6,0.1);
+    }
+    .stepper-step__label {
+      margin-top: 10px; text-align: center; font-size: 0.78rem;
+      font-weight: 500; color: var(--text-3); line-height: 1.4;
+    }
+    .stepper-step--completed .stepper-step__label { color: var(--primary); font-weight: 600; }
+    .stepper-step--active .stepper-step__label    { color: var(--text); font-weight: 600; }
+    .stepper-step--paused .stepper-step__label    { color: var(--warning); font-weight: 600; }
+
+    /* ========== DETAILS GRID ========== */
+    .details-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 16px; margin-bottom: 24px;
+    }
+    .detail-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 20px 22px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-light);
+      display: flex; align-items: flex-start; gap: 14px;
+    }
+    .detail-card__icon {
+      width: 38px; height: 38px; flex-shrink: 0; border-radius: var(--radius-sm);
+      background: var(--primary-glow); color: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .detail-card__icon svg { width: 18px; height: 18px; }
+    .detail-card__label { font-size: 0.78rem; color: var(--text-3); font-weight: 500; margin-bottom: 3px; }
+    .detail-card__value { font-size: 0.95rem; font-weight: 600; color: var(--text); }
+    .detail-card__value--muted { color: var(--text-2); font-weight: 400; }
+
+    /* ========== DESCRIPTION CARD ========== */
+    .desc-card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 24px 32px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-light);
+      margin-bottom: 24px;
+    }
+    .desc-card__title {
+      font-size: 0.9rem; font-weight: 600; color: var(--text-2);
+      margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .desc-card__text { font-size: 0.95rem; color: var(--text-2); line-height: 1.7; }
+    .desc-card__notes {
+      margin-top: 16px; padding: 14px 16px;
+      background: var(--primary-glow);
+      border-left: 3px solid var(--primary);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      font-size: 0.9rem; color: var(--text-2);
+      line-height: 1.6;
+    }
+
+    /* ========== TIMELINE ========== */
+    .timeline-card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 28px 32px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-light);
+      margin-bottom: 24px;
+    }
+    .timeline-card__title {
+      font-size: 0.9rem; font-weight: 600; color: var(--text-2);
+      margin-bottom: 24px; text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .timeline { display: flex; flex-direction: column; gap: 0; position: relative; }
+    .timeline::before {
+      content: ''; position: absolute; left: 18px; top: 8px; bottom: 8px;
+      width: 2px; background: var(--border-light);
+    }
+    .timeline-item { display: flex; gap: 20px; position: relative; padding-bottom: 28px; }
+    .timeline-item:last-child { padding-bottom: 0; }
+    .timeline-item__dot {
+      width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      position: relative; z-index: 1;
+      border: 2px solid;
+    }
+    .timeline-item__dot svg { width: 16px; height: 16px; }
+    .timeline-item__dot--milestone { background: rgba(46,84,125,0.08);  border-color: var(--primary); color: var(--primary); }
+    .timeline-item__dot--update    { background: rgba(37,99,235,0.08);  border-color: var(--info);    color: var(--info); }
+    .timeline-item__dot--delivery  { background: rgba(22,90,163,0.08);  border-color: var(--success); color: var(--success); }
+    .timeline-item__dot--issue     { background: rgba(220,38,38,0.08);  border-color: var(--danger);  color: var(--danger); }
+    .timeline-item__dot--note      { background: rgba(217,119,6,0.08);  border-color: var(--warning); color: var(--warning); }
+    .timeline-item__body { flex: 1; min-width: 0; padding-top: 4px; }
+    .timeline-item__title { font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; }
+    .timeline-item__desc { font-size: 0.88rem; color: var(--text-2); line-height: 1.6; }
+    .timeline-item__date { font-size: 0.78rem; color: var(--text-3); margin-top: 6px; }
+    .timeline-empty { color: var(--text-3); font-size: 0.9rem; text-align: center; padding: 24px 0; }
+
+    /* ========== TICKETS ========== */
+    .ticket-fab {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: #fff;
+      box-shadow: 0 14px 34px rgba(46, 84, 125, 0.28);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 115;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .ticket-fab:hover { transform: translateY(-2px); box-shadow: 0 18px 38px rgba(46, 84, 125, 0.34); }
+    .ticket-fab svg { width: 22px; height: 22px; }
+    .ticket-fab[hidden] { display: none !important; }
+
+    .ticket-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 120;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+    }
+    .ticket-modal[hidden] { display: none !important; }
+    .ticket-modal__backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(17, 24, 39, 0.56);
+      backdrop-filter: blur(6px);
+    }
+    .ticket-modal__panel {
+      position: relative;
+      width: min(920px, 100%);
+      max-height: min(82vh, 840px);
+      overflow: auto;
+      background: var(--surface);
+      border-radius: 20px;
+      border: 1px solid var(--border-light);
+      box-shadow: var(--shadow-lg);
+      padding: 22px;
+    }
+    .ticket-modal__header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    .ticket-modal__title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .ticket-modal__subtitle {
+      font-size: 0.92rem;
+      color: var(--text-2);
+      line-height: 1.5;
+    }
+    .ticket-modal__close {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--surface-2);
+      color: var(--text-2);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .ticket-modal__close svg { width: 16px; height: 16px; }
+    .ticket-form { display: flex; flex-direction: column; gap: 14px; }
+    .ticket-form__row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .ticket-form__group { display: flex; flex-direction: column; gap: 6px; }
+    .ticket-form__label { font-size: 0.84rem; font-weight: 600; color: var(--text-2); }
+    .ticket-form__input,
+    .ticket-form__select,
+    .ticket-form__textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 11px 12px;
+      font: inherit;
+      color: var(--text);
+      background: #fff;
+      outline: none;
+    }
+    .ticket-form__textarea { min-height: 110px; resize: vertical; }
+    .ticket-form__footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding-top: 4px;
+    }
+    .ticket-history-summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .ticket-summary-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border-light);
+      border-radius: 14px;
+      padding: 12px;
+    }
+    .ticket-summary-card__label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-3); margin-bottom: 4px; }
+    .ticket-summary-card__value { font-size: 1.05rem; font-weight: 700; color: var(--text); }
+    .ticket-list { display: flex; flex-direction: column; gap: 10px; }
+    .ticket-item {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 14px;
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      background: #fff;
+    }
+    .ticket-item__body { min-width: 0; flex: 1; }
+    .ticket-item__title { font-size: 0.96rem; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .ticket-item__desc { font-size: 0.88rem; line-height: 1.55; color: var(--text-2); margin-bottom: 5px; }
+    .ticket-item__meta { font-size: 0.78rem; color: var(--text-3); display: flex; gap: 8px; flex-wrap: wrap; }
+    .ticket-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      align-self: flex-start;
+      white-space: nowrap;
+      font-size: 0.72rem;
+      font-weight: 700;
+      border-radius: 999px;
+      padding: 5px 10px;
+      border: 1px solid transparent;
+    }
+    .ticket-status--pending { background: rgba(217,119,6,0.12); color: var(--warning); border-color: rgba(217,119,6,0.2); }
+    .ticket-status--in_progress { background: rgba(37,99,235,0.12); color: var(--info); border-color: rgba(37,99,235,0.2); }
+    .ticket-status--review { background: rgba(46,84,125,0.12); color: var(--primary); border-color: rgba(46,84,125,0.2); }
+    .ticket-status--done { background: rgba(22,90,163,0.12); color: var(--success); border-color: rgba(22,90,163,0.2); }
+
+    .portal-toast-container {
+      position: fixed;
+      left: 50%;
+      bottom: 20px;
+      transform: translateX(-50%);
+      z-index: 140;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+    .portal-toast {
+      min-width: min(420px, calc(100vw - 32px));
+      background: rgba(17, 24, 39, 0.94);
+      color: #fff;
+      border-radius: 999px;
+      padding: 12px 16px;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      pointer-events: auto;
+    }
+    .portal-toast__icon { width: 18px; height: 18px; flex-shrink: 0; }
+    .portal-toast__text { font-size: 0.9rem; line-height: 1.4; }
+    .portal-toast--success { background: rgba(22,90,163,0.96); }
+    .portal-toast--warning { background: rgba(217,119,6,0.96); }
+    .portal-toast--error { background: rgba(220,38,38,0.96); }
+
+    @media (max-width: 640px) {
+      .maintenance-entry { width: 100%; }
+      .maintenance-modal { padding: 10px; }
+      .maintenance-modal__panel { max-height: 94vh; padding: 22px 16px; border-radius: 20px; }
+      .maintenance-search { flex-direction: column; }
+      .maintenance-search__button { width: 100%; }
+      .maintenance-customer { grid-template-columns: 1fr; }
+      .maintenance-customer__total { grid-row: auto; grid-column: auto; text-align: left; }
+      .project-modal { padding: 10px; }
+      .project-modal__panel {
+        width: 100%;
+        max-height: 94vh;
+        padding: 18px 14px;
+        border-radius: 22px;
+      }
+      .project-modal__close {
+        top: 12px;
+        right: 12px;
+        width: 36px;
+        height: 36px;
+      }
+      .ticket-modal__panel { padding: 18px; }
+      .ticket-form__row { grid-template-columns: 1fr; }
+      .ticket-history-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .ticket-item { flex-direction: column; }
+      .ticket-status { align-self: flex-start; }
+      .ticket-fab {
+        right: 16px;
+        bottom: 16px;
+        width: 54px;
+        height: 54px;
+      }
+      .portal-toast { min-width: calc(100vw - 24px); }
+    }
+
+    /* ========== QUOTES, INVOICES, DELIVERABLES ========== */
+    .item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 0; border-bottom: 1px solid var(--border-light);
+    }
+    .item:last-child { border-bottom: none; }
+    .item__content { flex: 1; min-width: 0; }
+    .item__title { font-size: 0.9rem; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+    .item__subtitle { font-size: 0.78rem; color: var(--text-3); }
+    .item__value { font-size: 0.95rem; font-weight: 700; color: var(--text); text-align: right; }
+    .item__status { display: inline-block; font-size: 0.7rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; margin-top: 4px; }
+    .item__status--vigente { background: rgba(37,99,235,0.1); color: var(--info); }
+    .item__status--aceptada { background: rgba(22,90,163,0.1); color: var(--success); }
+    .item__status--rechazada { background: rgba(220,38,38,0.1); color: var(--danger); }
+    .item__status--pending { background: rgba(217,119,6,0.1); color: var(--warning); }
+    .item__status--paid { background: rgba(22,90,163,0.1); color: var(--success); }
+    .item__status--overdue { background: rgba(220,38,38,0.1); color: var(--danger); }
+    .item__payment { margin-top: 8px; }
+    .item__pay-btn {
+      border: 0; border-radius: 8px; padding: 8px 13px; cursor: pointer;
+      background: #009ee3; color: #fff; font: inherit; font-size: .78rem; font-weight: 700;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .item__pay-btn:hover { background: #008ed0; }
+    .item__pay-btn:disabled { opacity: .6; cursor: wait; }
+
+    .payment-result-modal[hidden] { display: none !important; }
+    .payment-result-modal { position: fixed; inset: 0; z-index: 5000; display: grid; place-items: center; padding: 20px; }
+    .payment-result-modal__backdrop { position: absolute; inset: 0; border: 0; cursor: pointer; background: rgba(8,13,18,.72); backdrop-filter: blur(8px); }
+    .payment-result-modal__panel { position: relative; z-index: 1; width: min(440px,100%); padding: 34px 30px 28px; border: 1px solid rgba(96,213,255,.2); border-radius: 24px; background: linear-gradient(160deg,#fff,#f6fdff); text-align: center; box-shadow: 0 28px 80px rgba(0,0,0,.3); animation: paymentResultIn .28s ease-out; }
+    .payment-result-modal__close { position: absolute; top: 14px; right: 14px; width: 38px; height: 38px; display: grid; place-items: center; border: 0; border-radius: 50%; cursor: pointer; background: rgba(15,23,42,.06); color: #334155; }
+    .payment-result-modal__close svg { width: 18px; height: 18px; }
+    .payment-result-modal__halo { width: 184px; height: 184px; margin: -6px auto 12px; display: grid; place-items: center; border-radius: 50%; background: radial-gradient(circle,rgba(72,160,255,.28),rgba(72,160,255,0) 68%); }
+    .payment-result-modal__image { width: 170px; height: 170px; object-fit: contain; filter: drop-shadow(0 12px 16px rgba(17,47,80,.18)); }
+    .payment-result-modal__badge { display: inline-flex; margin-bottom: 10px; padding: 6px 11px; border-radius: 999px; background: rgba(22,90,163,.1); color: #154980; font-size: .74rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+    .payment-result-modal__title { margin: 0; color: #101820; font-size: clamp(1.45rem,4vw,1.85rem); line-height: 1.15; }
+    .payment-result-modal__message { margin: 12px auto 22px; max-width: 350px; color: #3d5976; font-size: .95rem; line-height: 1.6; }
+    .payment-result-modal__action { border: 0; border-radius: 10px; padding: 11px 22px; cursor: pointer; background: var(--primary); color: #fff; font: inherit; font-weight: 700; }
+    .payment-result-modal.is-error .payment-result-modal__panel { background: linear-gradient(160deg,#fff,#fff7f7); border-color: rgba(220,38,38,.22); }
+    .payment-result-modal.is-error .payment-result-modal__halo { background: radial-gradient(circle,rgba(248,113,113,.22),rgba(248,113,113,0) 68%); }
+    .payment-result-modal.is-error .payment-result-modal__image { border-radius: 22px; }
+    .payment-result-modal.is-error .payment-result-modal__badge { background: rgba(220,38,38,.1); color: #b91c1c; }
+    .payment-result-modal.is-pending .payment-result-modal__badge { background: rgba(217,119,6,.1); color: #b45309; }
+    @keyframes paymentResultIn { from { opacity: 0; transform: translateY(14px) scale(.97); } to { opacity: 1; transform: none; } }
+
+    /* Summary cards for quotes/invoices */
+    .quote-summary, .invoice-summary {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 14px; margin-bottom: 20px;
+    }
+    .summary-box {
+      background: var(--primary-glow); border: 1px solid rgba(46,84,125,0.2);
+      border-radius: var(--radius-sm); padding: 14px; text-align: center;
+    }
+    .summary-box__label { font-size: 0.78rem; color: var(--text-2); font-weight: 500; margin-bottom: 6px; }
+    .summary-box__value { font-size: 1.05rem; font-weight: 700; color: var(--primary); }
+
+    /* ========== FOOTER ========== */
+    .footer {
+      border-top: 1px solid var(--border-light);
+      padding: 28px 24px;
+      text-align: center;
+      color: var(--text-3); font-size: 0.82rem;
+    }
+    .footer a { color: var(--primary); font-weight: 500; }
+
+    /* ========== ALERT ========== */
+    .alert {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(220,38,38,0.07);
+      border: 1px solid rgba(220,38,38,0.25);
+      color: var(--danger); border-radius: var(--radius-sm);
+      padding: 12px 16px; font-size: 0.88rem; margin-bottom: 20px;
+    }
+    .alert svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .alert--info { background: rgba(37,99,235,0.07); border-color: rgba(37,99,235,0.25); color: var(--info); }
+
+    /* ========== INITIAL STATE ========== */
+    .intro-cards {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px; margin-top: 48px;
+    }
+    .intro-card {
+      background: var(--surface); border-radius: var(--radius);
+      padding: 22px; border: 1px solid var(--border-light);
+      box-shadow: var(--shadow); text-align: center;
+    }
+    .intro-card__icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      background: var(--primary-glow); color: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 14px;
+    }
+    .intro-card__icon::before {
+      display: none;
+      color: var(--primary);
+      font-size: 1.35rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .intro-card__icon:not(:has(svg))::before { display: block; }
+    .intro-card__icon--tracking::before { content: "↗"; }
+    .intro-card__icon--milestones::before { content: "✓"; }
+    .intro-card__icon--secure::before { content: "●"; }
+    .intro-card__icon svg { width: 22px; height: 22px; }
+    .intro-card__title { font-size: 0.9rem; font-weight: 600; margin-bottom: 6px; }
+    .intro-card__text { font-size: 0.82rem; color: var(--text-2); line-height: 1.5; }
+
+    /* ========== UTILITIES ========== */
+    .hidden { display: none !important; }
+    .fade-in { animation: fadeIn 0.4s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ========== RESPONSIVE ========== */
+
+    /* --- Tablet (≤768px) --- */
+    @media (max-width: 768px) {
+      /* Topbar */
+      .topbar { padding: 0 16px; }
+      .topbar__badge { display: none; }
+
+      /* Hero */
+      .hero { padding: 48px 16px 56px; }
+      .hero__subtitle { font-size: 0.92rem; margin-bottom: 28px; }
+
+      /* Search */
+      .search-box { padding: 6px 6px 6px 16px; }
+      .search-box__btn { padding: 10px 16px; font-size: 0.85rem; }
+
+      /* Cards: reduce horizontal padding */
+      .progress-card,
+      .brief-card,
+      .brief-highlight,
+      .stepper-card,
+      .desc-card,
+      .timeline-card { padding: 20px 20px; }
+
+      /* Proj header */
+      .proj-header { padding: 20px 20px; gap: 14px; }
+      .proj-header__name { font-size: 1.25rem; }
+
+      /* Details grid already 1-col at 600px; widen threshold */
+      .details-grid { gap: 12px; }
+
+      /* Intro cards */
+      .intro-cards { margin-top: 32px; gap: 12px; }
+    }
+
+    /* --- Mobile landscape / medium (≤600px) --- */
+    @media (max-width: 600px) {
+      .details-grid { grid-template-columns: 1fr; }
+    }
+
+    /* --- Mobile (≤480px) --- */
+    @media (max-width: 480px) {
+      /* Base */
+      .container { padding: 0 12px; }
+      .main { padding: 28px 0 40px; }
+
+      /* Topbar */
+      .topbar { height: 54px; padding: 0 14px; }
+      .topbar__logo img { height: 26px; }
+      .topbar__back { font-size: 0.8rem; }
+
+      /* Hero */
+      .hero { padding: 40px 14px 48px; }
+      .hero__title { font-size: 1.5rem; }
+      .hero__subtitle { font-size: 0.88rem; margin-bottom: 24px; }
+
+      /* Search box: stack vertically */
+      .search-box {
+        flex-wrap: wrap;
+        padding: 12px 14px;
+        gap: 10px;
+        border-radius: var(--radius);
+      }
+      .search-box__icon { display: none; }
+      .search-box__input {
+        width: 100%;
+        flex: none;
+        font-size: 1rem;
+        padding: 4px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .search-box__btn {
+        width: 100%;
+        justify-content: center;
+        padding: 12px 0;
+        border-radius: var(--radius-sm);
+        font-size: 0.95rem;
+      }
+
+      /* Project header: stack badge below name */
+      .proj-header {
+        flex-wrap: wrap;
+        padding: 16px 16px;
+        gap: 12px;
+      }
+      .proj-header__icon { width: 48px; height: 48px; }
+      .proj-header__icon svg { width: 22px; height: 22px; }
+      .proj-header__info { flex: 1 1 calc(100% - 60px); min-width: 0; }
+      .proj-header__right {
+        width: 100%;
+        text-align: left;
+        padding-top: 4px;
+        border-top: 1px solid var(--border-light);
+      }
+      .proj-header__name { font-size: 1.15rem; }
+      .proj-header__client { margin-bottom: 8px; }
+
+      /* Progress card */
+      .progress-card { padding: 16px 16px; }
+      .progress-card__pct { font-size: 1.2rem; }
+
+      .brief-grid { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+      .brief-card { padding: 14px 14px; }
+      .brief-card__value { font-size: 0.94rem; }
+      .brief-highlight { padding: 14px 14px; margin-bottom: 16px; }
+
+      /* Stepper card */
+      .stepper-card { padding: 18px 16px; }
+      .stepper-card__title { margin-bottom: 16px; font-size: 0.78rem; }
+      .stepper-step__circle { width: 30px; height: 30px; font-size: 0.75rem; }
+      .stepper-step__circle svg { width: 13px; height: 13px; }
+      .stepper-step__label { font-size: 0.72rem; }
+      /* Vertical stepper on mobile */
+      .stepper { flex-direction: column; align-items: flex-start; gap: 0; }
+      .stepper-step { flex-direction: row; align-items: center; flex: none; width: 100%; gap: 14px; padding: 6px 0; }
+      .stepper-step::before { content:''; position:absolute; top:auto; left:15px; right:auto; bottom:-6px; width:2px; height:20px; background:var(--border); }
+      .stepper-step--completed::before { background: var(--primary); }
+      .stepper-step:last-child::before { display: none; }
+      .stepper-step__label { margin-top: 0; text-align: left; }
+
+      /* Details grid: always 1-col */
+      .details-grid { grid-template-columns: 1fr; gap: 10px; margin-bottom: 16px; }
+      .detail-card { padding: 14px 14px; }
+      .detail-card__icon { width: 34px; height: 34px; }
+      .detail-card__icon svg { width: 16px; height: 16px; }
+
+      /* Desc & timeline */
+      .desc-card { padding: 16px 16px; margin-bottom: 16px; }
+      .desc-card__notes { padding: 10px 12px; font-size: 0.85rem; }
+      .timeline-card { padding: 18px 16px; margin-bottom: 16px; }
+      .timeline-card__title { margin-bottom: 18px; }
+      .timeline::before { left: 14px; }
+      .timeline-item { gap: 14px; padding-bottom: 22px; }
+      .timeline-item__dot { width: 28px; height: 28px; }
+      .timeline-item__dot svg { width: 13px; height: 13px; }
+      .timeline-item__title { font-size: 0.88rem; }
+      .timeline-item__desc { font-size: 0.83rem; }
+
+      /* Intro cards */
+      .intro-cards { grid-template-columns: 1fr; gap: 10px; margin-top: 24px; }
+      .intro-card { padding: 18px 16px; display: flex; align-items: flex-start; gap: 14px; text-align: left; }
+      .intro-card__icon { margin: 0; flex-shrink: 0; width: 40px; height: 40px; }
+
+      /* Empty state */
+      .empty-state { padding: 48px 16px; }
+
+      /* Footer */
+      .footer { padding: 20px 16px; font-size: 0.78rem; }
+    }
+
+    /* --- Very small (≤360px) --- */
+    @media (max-width: 360px) {
+      .hero__title { font-size: 1.3rem; }
+      .proj-header__name { font-size: 1.05rem; }
+      .tag { font-size: 0.72rem; padding: 2px 8px; }
+      .brief-grid { grid-template-columns: 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* ========== DIRECCIÓN VISUAL Solven Labs 2026 · PORTAL ========== */
+    :root {
+      --primary: #0d4581;
+      --primary-dark: #07325f;
+      --primary-light: #5997da;
+      --primary-glow: rgba(22,89,160,.12);
+      --bg: #f3f7f9;
+      --surface: #ffffff;
+      --surface-2: #edf4f6;
+      --border: #d5e4e9;
+      --border-light: #e5eef1;
+      --text: #131b24;
+      --text-2: #476789;
+      --text-3: #87958c;
+      --radius: 14px;
+      --radius-lg: 20px;
+      --shadow: 0 10px 30px rgba(17,35,54,.06);
+      --shadow-md: 0 16px 38px rgba(17,35,54,.09);
+      --shadow-lg: 0 26px 62px rgba(7,21,35,.18);
+    }
+    body { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(135deg,#f6f9fb,#edf3f5); }
+    h1,h2,h3,h4,h5,h6,.hero__title,.proj-header__name,.maintenance-modal__title,.payment-result-modal__title { font-family: 'Manrope','DM Sans',sans-serif; letter-spacing: -.04em; }
+    :focus-visible { outline-color: rgba(13,69,129,.55); }
+
+    .topbar { height: 72px; padding-inline: clamp(16px,4vw,44px); background: rgba(250,252,253,.86); border-color: rgba(19,27,36,.08); backdrop-filter: blur(18px); }
+    .topbar__logo img { height: 42px; width: auto; max-width: none; }
+    .topbar__badge { padding: 5px 10px; color: #083c74; background: #e5f1f6; border-color: #c5dfe9; }
+    .topbar__back { padding: .55rem .8rem; border-radius: 999px; font-weight: 700; }
+    .topbar__back:hover { color: #083c74; background: #e8f2f6; }
+
+    .hero { padding: 76px 24px 82px; background: radial-gradient(circle at 82% 18%,rgba(111,204,238,.2),transparent 25%),radial-gradient(circle at 12% 105%,rgba(111,204,238,.14),transparent 28%),linear-gradient(135deg,#0b1621,#162e48); }
+    .hero { isolation: isolate; background: radial-gradient(circle at 84% 20%,rgba(102,163,228,.19),transparent 24%),radial-gradient(circle at 15% 94%,rgba(88,137,190,.16),transparent 26%),linear-gradient(135deg,#0b1621 0%,#12263b 52%,#0e1b28 100%); }
+    .hero::before { z-index: -1; opacity: .22; pointer-events: none; background-image: linear-gradient(rgba(196,239,255,.17) 1px,transparent 1px),linear-gradient(90deg,rgba(196,239,255,.17) 1px,transparent 1px); background-size: 54px 54px; mask-image: linear-gradient(to bottom,#000,transparent 85%); }
+    .hero__network-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+    .hero .hero__content { z-index: 1; }
+    .hero__content { max-width: 1080px; }
+    .hero__title { font-size: clamp(2rem,4.4vw,3.5rem); line-height: 1.08; }
+    .hero__subtitle { max-width: 650px; margin-inline: auto; color: rgba(238,250,255,.76); }
+    .portal-entry-grid { gap: 18px; }
+    .portal-entry-card { padding: 26px; border-color: rgba(199,240,255,.2); border-radius: 1.25rem; background: rgba(245,252,255,.09); box-shadow: inset 0 1px 0 rgba(255,255,255,.12),0 16px 30px rgba(0,0,0,.12); }
+    .portal-entry-card__icon { border-radius: .8rem; color: #083c74; background: #c9f1ff; }
+    .search-box { border-radius: 1rem; box-shadow: 0 14px 30px rgba(0,0,0,.16); }
+    .search-box__btn,.maintenance-search__button { border-radius: .75rem; background: #0d4581; }
+    .search-box__btn:hover,.maintenance-search__button:hover { background: #07325f; }
+    .ticket-form__footer #ticket-cancel { border-color: #b5cfd9; }
+    .maintenance-entry { border-radius: .85rem; border-color: rgba(199,240,255,.28); background: rgba(255,255,255,.09); }
+
+    .main { padding: clamp(2.5rem,6vw,5rem) 0; }
+    .project-modal,.ticket-modal { background: rgba(7,16,26,.64); backdrop-filter: blur(10px); }
+    .project-modal__panel,.ticket-modal__panel,.maintenance-modal__panel,.payment-result-modal__panel { border-color: #d3e3e9; border-radius: 1.4rem; box-shadow: 0 30px 80px rgba(5,17,30,.3); }
+    .project-modal__panel { background: linear-gradient(145deg,#fff,#f4f8fa); }
+    .project-modal__close,.ticket-modal__close,.maintenance-modal__close,.payment-result-modal__close { background: #e6f0f4; color: #083c74; }
+    .project-modal__close:hover,.ticket-modal__close:hover,.maintenance-modal__close:hover,.payment-result-modal__close:hover { background: #c9e8f3; color: #07325f; }
+    .proj-header,.section-card,.card,.info-card,.timeline-card { border-color: #d7e5eb; border-radius: 1.2rem; box-shadow: var(--shadow); }
+    .proj-header__icon { border-color: #c6e0ea; border-radius: 1rem; background: #e6f2f7; color: #083c74; }
+    .tag,.status-badge,.ticket-status { border-radius: 999px; }
+    .progress-bar__fill,.progress-fill { background: linear-gradient(90deg,#0d4581,#5d9bdd); }
+    .timeline-item__dot { border-color: #b9dce9; background: #e4f2f7; color: #083c74; }
+
+    .ticket-fab { background: #0d4581; box-shadow: 0 14px 32px rgba(13,69,129,.26); }
+    .ticket-fab:hover { background: #07325f; }
+    .ticket-modal__header { margin: -22px -22px 20px; padding: 22px; border-radius: 1.4rem 1.4rem 0 0; background: linear-gradient(110deg,#102032,#0d4581); }
+    .ticket-modal__title { color: #fff; }
+    .ticket-modal__subtitle { color: rgba(237,250,255,.72); }
+    .ticket-modal__header .ticket-modal__close { background: rgba(255,255,255,.16); color: #fff; }
+    .ticket-form__input,.ticket-form__select,.ticket-form__textarea,.maintenance-search__input { border-color: #cfe0e7; border-radius: .75rem; background: #fbfdfe; }
+    .ticket-form__input:focus,.ticket-form__select:focus,.ticket-form__textarea:focus,.maintenance-search__input:focus { border-color: #0d4581; box-shadow: 0 0 0 4px rgba(13,69,129,.1); }
+    .ticket-summary-card,.ticket-item,.maintenance-customer { border-color: #d9e7ec; background: #f4f8fa; }
+    .ticket-item { border-radius: 1rem; }
+
+    .maintenance-modal__panel { background: linear-gradient(145deg,#fff,#f4f8fa); }
+    .maintenance-modal__eyebrow { color: #083c74; }
+    .maintenance-customer { border: 1px solid #d7e5ea; }
+    .maintenance-bill { border-color: #dfeaee; }
+    .maintenance-bill__pay { border-radius: .8rem; background: #0d4581; }
+    .maintenance-bill__pay:hover { background: #07325f; }
+
+    .payment-result-modal__panel { border-color: #cde2e9; background: linear-gradient(145deg,#fff,#eff6f9); }
+    .payment-result-modal__halo { background: radial-gradient(circle,rgba(86,151,220,.2),transparent 68%); }
+    .payment-result-modal__badge { color: #083c74; background: #e3f2f7; border-color: #bddde8; }
+    .payment-result-modal__action { border-radius: .8rem; background: #0d4581; }
+    .payment-result-modal__action:hover { background: #07325f; }
+
+    .footer { border-top: 1px solid rgba(91,152,217,.2); background: #0b1520; color: rgba(234,249,255,.7); }
+    .footer a { color: #9bdcf4; }
+    @media (max-width: 640px) {
+      .topbar { height: 62px; }
+      .topbar__logo img { height: 32px; }
+      .hero { padding: 54px 16px 60px; }
+      .portal-entry-card { padding: 20px; }
+      .ticket-modal__header { margin: -18px -18px 18px; padding: 18px; border-radius: 1.1rem 1.1rem 0 0; }
+    }
+  </style>
+  <link rel="stylesheet" href="/site-footer.css?v=solven-ebct-3">
+  <link rel="stylesheet" href="/solven-brand.css?v=solven-ebct-3">
+</head>
+<body>
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <a href="/" class="topbar__logo">
+      <img src="/assets/logo%20extended%20chopped.png" alt="Solven Labs">
+      <span class="topbar__badge">Portal de Proyectos</span>
+    </a>
+    <a href="/" class="topbar__back">
+      <i data-lucide="arrow-left"></i>
+      Volver al sitio
+    </a>
+  </header>
+
+  <!-- HERO / SEARCH -->
+  <section class="hero">
+    <canvas id="network-canvas" class="hero__network-canvas" aria-hidden="true"></canvas>
+    <div class="hero__content">
+      <h1 class="hero__title">Portal de clientes</h1>
+      <p class="hero__subtitle">Elige lo que necesitas hacer: revisar el avance de tu proyecto o consultar una mantención pendiente.</p>
+      <img src="/assets/solvi.svg" alt="Solvi buscando" style="max-width:150px;width:100%;margin:0 auto 22px;display:block;" />
+      <div class="portal-entry-grid">
+        <section class="portal-entry-card" aria-labelledby="project-access-title">
+          <div class="portal-entry-card__heading">
+            <div class="portal-entry-card__icon"><i data-lucide="folder-kanban"></i></div>
+            <div>
+              <h2 class="portal-entry-card__title" id="project-access-title">Consultar estado de mi proyecto</h2>
+              <p class="portal-entry-card__text">Revisa avances, hitos, entregas y actualizaciones con tu código de seguimiento.</p>
+            </div>
+          </div>
+      <form class="search-box" id="project-search-form" novalidate>
+        <i data-lucide="search" class="search-box__icon"></i>
+        <label for="token-input" class="sr-only">Código de seguimiento del proyecto</label>
+        <input
+          type="text"
+          id="token-input"
+          class="search-box__input"
+          placeholder="Ej: a3f8bc12"
+          maxlength="40"
+          autocomplete="off"
+          autocapitalize="none"
+          spellcheck="false"
+          aria-describedby="project-search-help"
+          required
+        >
+        <button type="submit" class="search-box__btn" id="search-btn">
+          <i data-lucide="arrow-right"></i>
+          Ver proyecto
+        </button>
+      </form>
+        </section>
+      <p id="project-search-help" class="sr-only">El código se encuentra en el enlace enviado por Solven Labs.</p>
+        <section class="portal-entry-card" aria-labelledby="maintenance-access-title">
+          <div class="portal-entry-card__heading">
+            <div class="portal-entry-card__icon"><i data-lucide="receipt-text"></i></div>
+            <div>
+              <h2 class="portal-entry-card__title" id="maintenance-access-title">Pagar mantenciones pendientes</h2>
+              <p class="portal-entry-card__text">Consulta tus cobros de mantención con tu RUT y págalo de forma segura.</p>
+            </div>
+          </div>
+          <button type="button" class="maintenance-entry" id="maintenance-entry-button">
+            <i data-lucide="credit-card"></i>
+            Consultar y pagar mi mantención
+          </button>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="container">
+
+      <!-- Initial intro (shown before any search) -->
+      <div id="view-intro">
+        <div class="intro-cards">
+          <div class="intro-card">
+            <div class="intro-card__icon intro-card__icon--tracking"><i data-lucide="radar"></i></div>
+            <div class="intro-card__title">Seguimiento en vivo</div>
+            <div class="intro-card__text">Visualiza en qué etapa se encuentra tu proyecto de forma clara.</div>
+          </div>
+          <div class="intro-card">
+            <div class="intro-card__icon intro-card__icon--milestones"><i data-lucide="git-branch"></i></div>
+            <div class="intro-card__title">Hitos y avances</div>
+            <div class="intro-card__text">Revisa los hitos completados y las entregas que se aproximan.</div>
+          </div>
+          <div class="intro-card">
+            <div class="intro-card__icon intro-card__icon--secure"><i data-lucide="shield-check"></i></div>
+            <div class="intro-card__title">Acceso seguro</div>
+            <div class="intro-card__text">Solo tú y tu equipo tienen acceso con el código exclusivo de tu proyecto.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div id="view-loading" class="hidden" role="status" aria-live="polite">
+        <div class="spinner-wrap">
+          <i data-lucide="loader-2" style="width:36px;height:36px;color:var(--primary);"></i>
+          <span>Buscando proyecto...</span>
+        </div>
+      </div>
+
+      <!-- Error -->
+      <div id="view-error" class="hidden" role="alert">
+        <div class="empty-state">
+          <div class="empty-state__icon">
+            <i data-lucide="search-x" style="width:28px;height:28px;"></i>
+          </div>
+          <div class="empty-state__title">Proyecto no encontrado</div>
+          <div class="empty-state__text">
+            El código ingresado no corresponde a ningún proyecto activo.<br>
+            Verifica con tu equipo Solven Labs que sea correcto.
+          </div>
+        </div>
+      </div>
+
+      <!-- Project detail -->
+      <div id="view-project" class="project-modal hidden fade-in" role="dialog" aria-modal="true"
+        aria-labelledby="proj-name" aria-describedby="proj-client" aria-hidden="true">
+        <div class="project-modal__panel" tabindex="-1">
+          <button type="button" class="project-modal__close" id="project-modal-close" aria-label="Cerrar proyecto">
+            <i data-lucide="x"></i>
+          </button>
+
+        <!-- Header -->
+        <div class="proj-header" id="proj-header">
+          <div class="proj-header__icon">
+            <i data-lucide="folder-kanban"></i>
+          </div>
+          <div class="proj-header__info">
+            <h2 class="proj-header__name" id="proj-name">—</h2>
+            <p class="proj-header__client" id="proj-client">—</p>
+            <div class="proj-header__tags" id="proj-tags"></div>
+          </div>
+          <div class="proj-header__right">
+            <span class="status-badge" id="proj-status-badge">—</span>
+          </div>
+        </div>
+
+        <!-- Executive summary -->
+        <div class="brief-grid" id="proj-brief-grid"></div>
+        <div class="brief-highlight" id="proj-brief-highlight">
+          <div class="brief-highlight__icon"><i data-lucide="sparkles"></i></div>
+          <div>
+            <div class="brief-highlight__title">Resumen ejecutivo</div>
+            <div class="brief-highlight__text" id="proj-brief-text">Estamos cargando los datos principales del proyecto...</div>
+          </div>
+        </div>
+
+        <!-- Progress -->
+        <div class="progress-card">
+          <div class="progress-card__header">
+            <span class="progress-card__label">Progreso total</span>
+            <span class="progress-card__pct" id="proj-pct">0%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-bar__fill" id="proj-progress-fill"></div>
+          </div>
+        </div>
+
+        <!-- Project KPIs -->
+        <div class="progress-card" id="proj-kpi-card" style="display:none;">
+          <div class="progress-card__header">
+            <span class="progress-card__label">Indicadores clave</span>
+            <span class="progress-card__pct" id="proj-kpi-status">Activo</span>
+          </div>
+          <div class="details-grid" style="margin-top: 12px;">
+            <div class="detail-card" style="padding: 10px 12px;">
+              <div class="detail-card__label">Valor cotizado</div>
+              <div class="detail-card__value" id="proj-kpi-quote-value">—</div>
+              <div class="detail-card__value detail-card__value--muted" id="proj-kpi-quote-state" style="font-size:0.78rem;margin-top:3px;">—</div>
+            </div>
+            <div class="detail-card" style="padding: 10px 12px;">
+              <div class="detail-card__label">Tiempo activo</div>
+              <div class="detail-card__value" id="proj-kpi-age">—</div>
+            </div>
+            <div class="detail-card" style="padding: 10px 12px;">
+              <div class="detail-card__label">Facturas pendientes</div>
+              <div class="detail-card__value" id="proj-kpi-invoices">—</div>
+            </div>
+            <div class="detail-card" style="padding: 10px 12px;">
+              <div class="detail-card__label">Documentos entregados</div>
+              <div class="detail-card__value" id="proj-kpi-docs">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stepper -->
+        <div class="stepper-card">
+          <div class="stepper-card__title">Etapas del proyecto</div>
+          <div class="stepper" id="proj-stepper"></div>
+        </div>
+
+        <!-- Details grid -->
+        <div class="details-grid" id="proj-details"></div>
+
+        <!-- Description + notes -->
+        <div class="desc-card" id="proj-desc-card" style="display:none;">
+          <div class="desc-card__title">Descripción</div>
+          <p class="desc-card__text" id="proj-desc"></p>
+          <div class="desc-card__notes" id="proj-notes" style="display:none;"></div>
+        </div>
+
+        <!-- Timeline updates -->
+        <div class="timeline-card">
+          <div class="timeline-card__title">Actualizaciones del Proyecto</div>
+          <div class="timeline" id="proj-timeline">
+            <div class="timeline-empty">Sin actualizaciones aún.</div>
+          </div>
+        </div>
+
+        <!-- Invoices section -->
+        <div class="timeline-card" id="proj-invoices-card" style="display:none;">
+          <div class="timeline-card__title">Facturas / Recibos</div>
+          <div class="invoice-summary" id="invoice-summary"></div>
+          <div id="proj-invoices">
+            <div class="timeline-empty">Sin facturas disponibles.</div>
+          </div>
+        </div>
+
+        <!-- Deliverables section -->
+        <div class="timeline-card" id="proj-deliverables-card" style="display:none;">
+          <div class="timeline-card__title">Documentos Entregables</div>
+          <div id="proj-deliverables">
+            <div class="timeline-empty">Sin documentos entregables aún.</div>
+          </div>
+        </div>
+
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__grid">
+        <!-- Brand -->
+        <div class="footer__brand">
+          <a href="/" class="footer__logo">
+            <img loading="lazy" decoding="async" src="/assets/logo%20blanco.png" alt="Solven Labs" class="footer__logo-img">
+          </a>
+          <p class="footer__desc">
+            Somos una EBCT apoyada por ANID. Transformamos ciencia y tecnología en soluciones con IA. Desde Concepción para todo Chile.
+          </p>
+          <form class="footer__newsletter" data-newsletter-form action="https://formsubmit.co/tomas@solvenlabs.cl" method="POST">
+            <input type="hidden" name="_subject" value="Nueva suscripcion newsletter Solven Labs">
+            <input type="hidden" name="_captcha" value="false">
+            <input type="hidden" name="_template" value="box">
+            <input type="email" name="email" class="footer__newsletter-input" placeholder="tu@email.com"
+              aria-label="Email para newsletter" required>
+            <button type="submit" class="footer__newsletter-btn">Recibir novedades</button>
+          </form>
+          <p class="footer__newsletter-success" role="status" aria-live="polite"></p>
+        </div>
+
+        <!-- Columna: Empresa (links principales) -->
+        <div class="footer__column footer__column--nav">
+          <h4 class="footer__column-title">Empresa</h4>
+          <nav class="footer__links">
+            <a href="/" class="footer__link">Inicio</a>
+            <a href="/servicios" class="footer__link" data-section="servicios">Qué hacemos</a>
+            <a href="/#casos" class="footer__link">Proyectos</a>
+            <a href="/#proceso" class="footer__link">Cómo trabajamos</a>
+            <a href="/#equipo" class="footer__link">Equipo</a>
+            <a href="/blog/" class="footer__link">Blog</a>
+            <a href="/#contacto" class="footer__link">Contacto</a>
+          </nav>
+        </div>
+
+        <!-- Columna: Legal -->
+        <div class="footer__column footer__column--nav">
+          <h4 class="footer__column-title">Legal</h4>
+          <nav class="footer__links">
+            <a href="/#terms-modal" class="footer__link">Términos y condiciones</a>
+            <a href="/#privacy-modal" class="footer__link">Privacidad y datos</a>
+            <a href="/#returns-modal" class="footer__link">Devoluciones y cancelaciones</a>
+          </nav>
+        </div>
+
+        <!-- Columna: Información tributaria -->
+        <div class="footer__column footer__column--tax">
+          <h4 class="footer__column-title">Información</h4>
+          <div class="footer__tax">
+            <div class="footer__tax-item">
+              <span class="footer__tax-label">Nombre legal</span>
+              <span class="footer__tax-value">Servicios Informaticos Yevenes &amp; Compañia Ltda.</span>
+            </div>
+            <div class="footer__tax-item">
+              <span class="footer__tax-label">Dirección</span>
+              <span class="footer__tax-value">
+                <i data-lucide="map-pin" class="footer__tax-icon"></i>
+                Colo-Colo 379 Of. 706, Edificio Amanecer, Concepción, Chile
+              </span>
+            </div>
+            <div class="footer__tax-item">
+              <span class="footer__tax-label">WhatsApp</span>
+              <span class="footer__tax-value">
+                <i data-lucide="phone" class="footer__tax-icon"></i>
+                <a href="https://wa.me/56977029753" class="footer__tax-link">+56 9 7702 9753</a>
+              </span>
+            </div>
+            <div class="footer__tax-item">
+              <span class="footer__tax-label">Correo</span>
+              <span class="footer__tax-value">
+                <i data-lucide="mail" class="footer__tax-icon"></i>
+                <a href="mailto:tomas@solvenlabs.cl" class="footer__tax-link">tomas@solvenlabs.cl</a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom bar -->
+      <div class="footer__bottom">
+        <div class="footer__social">
+
+
+          <a href="https://wa.me/56977029753" target="_blank" rel="noopener" class="footer__social-link"
+            aria-label="WhatsApp">
+            <i data-lucide="message-circle" class="icon"></i>
+          </a>
+          <a href="mailto:tomas@solvenlabs.cl" class="footer__social-link" aria-label="Email">
+            <i data-lucide="mail" class="icon"></i>
+          </a>
+        </div>
+        <p class="footer__copyright">
+          © 2026 Solven Labs. Tecnología que se siente cercana.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <button type="button" class="ticket-fab" id="ticket-fab" aria-label="Crear ticket" hidden>
+    <i data-lucide="message-square-plus"></i>
+  </button>
+
+  <div class="ticket-modal" id="ticket-modal" hidden>
+    <div class="ticket-modal__backdrop" data-ticket-close="true"></div>
+    <div class="ticket-modal__panel" role="dialog" aria-modal="true" aria-labelledby="ticket-modal-title">
+      <div class="ticket-modal__header">
+        <div>
+          <div class="ticket-modal__title" id="ticket-modal-title">Crear ticket</div>
+          <div class="ticket-modal__subtitle">Revisa el historial arriba y registra una solicitud, incidencia o cambio vinculado a este proyecto.</div>
+        </div>
+        <button type="button" class="ticket-modal__close" id="ticket-modal-close" aria-label="Cerrar ventana">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <div class="timeline-card" id="proj-tickets-card" style="display:none; margin-bottom: 16px;">
+        <div class="timeline-card__title">Tickets / Historial</div>
+        <div class="ticket-history-summary" id="proj-ticket-summary"></div>
+        <div class="ticket-list" id="proj-tickets">
+          <div class="timeline-empty">Sin tickets registrados aún.</div>
+        </div>
+      </div>
+
+      <form class="ticket-form" id="ticket-form">
+        <div class="ticket-form__row">
+          <div class="ticket-form__group">
+            <label class="ticket-form__label" for="ticket-title">Título</label>
+            <input id="ticket-title" class="ticket-form__input" type="text" placeholder="Ej: Error en módulo de pagos" required>
+          </div>
+          <div class="ticket-form__group">
+            <label class="ticket-form__label" for="ticket-category">Categoría</label>
+            <select id="ticket-category" class="ticket-form__select">
+              <option value="Soporte">Soporte</option>
+              <option value="Incidencia">Incidencia</option>
+              <option value="Mejora">Mejora</option>
+              <option value="Cambio">Cambio</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+        </div>
+        <div class="ticket-form__row">
+          <div class="ticket-form__group">
+            <label class="ticket-form__label" for="ticket-priority">Prioridad</label>
+            <select id="ticket-priority" class="ticket-form__select">
+              <option value="low">Baja</option>
+              <option value="medium" selected>Media</option>
+              <option value="high">Alta</option>
+            </select>
+          </div>
+          <div class="ticket-form__group">
+            <label class="ticket-form__label" for="ticket-due">Fecha objetivo</label>
+            <input id="ticket-due" class="ticket-form__input" type="date">
+          </div>
+        </div>
+        <div class="ticket-form__group">
+          <label class="ticket-form__label" for="ticket-description">Descripción</label>
+          <textarea id="ticket-description" class="ticket-form__textarea" placeholder="Describe el problema o solicitud" required></textarea>
+        </div>
+        <div class="ticket-form__footer">
+          <button type="button" class="search-box__btn" id="ticket-cancel" style="background:var(--surface-2);color:var(--text-2);">Cancelar</button>
+          <button type="submit" class="search-box__btn">Crear ticket</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="maintenance-modal" id="maintenance-modal" hidden>
+    <button type="button" class="maintenance-modal__backdrop" data-maintenance-close aria-label="Cerrar"></button>
+    <section class="maintenance-modal__panel" role="dialog" aria-modal="true" aria-labelledby="maintenance-modal-title" tabindex="-1">
+      <button type="button" class="maintenance-modal__close" data-maintenance-close aria-label="Cerrar consulta de mantención"><i data-lucide="x"></i></button>
+      <div class="maintenance-modal__eyebrow">Portal de pagos Solven Labs</div>
+      <h2 class="maintenance-modal__title" id="maintenance-modal-title">Consulta tu mantención</h2>
+      <p class="maintenance-modal__lead">Ingresa el RUT asociado al servicio para revisar el detalle facturado y pagar de forma segura.</p>
+      <form class="maintenance-search" id="maintenance-search-form" novalidate>
+        <label for="maintenance-rut-input" class="sr-only">RUT del cliente</label>
+        <input type="text" id="maintenance-rut-input" class="maintenance-search__input" placeholder="Ej: 12.345.678-5" maxlength="12" inputmode="text" autocomplete="off" required>
+        <button type="submit" class="maintenance-search__button" id="maintenance-search-button">Buscar mantención</button>
+      </form>
+      <div class="maintenance-result" id="maintenance-result" aria-live="polite"></div>
+    </section>
+  </div>
+
+  <div class="payment-result-modal" id="payment-result-modal" role="dialog" aria-modal="true" aria-labelledby="payment-result-title" hidden>
+    <button type="button" class="payment-result-modal__backdrop" data-payment-result-close aria-label="Cerrar"></button>
+    <div class="payment-result-modal__panel" tabindex="-1">
+      <button type="button" class="payment-result-modal__close" data-payment-result-close aria-label="Cerrar resultado del pago"><i data-lucide="x"></i></button>
+      <div class="payment-result-modal__halo"><img src="/assets/solvi.svg" alt="Solvi" class="payment-result-modal__image" data-payment-result-image></div>
+      <span class="payment-result-modal__badge" data-payment-result-badge>Validando pago</span>
+      <h2 class="payment-result-modal__title" id="payment-result-title" data-payment-result-title>Estamos validando tu pago</h2>
+      <p class="payment-result-modal__message" data-payment-result-message>Espera un momento mientras confirmamos el resultado del pago.</p>
+      <button type="button" class="payment-result-modal__action" data-payment-result-close>Entendido</button>
+    </div>
+  </div>
+
+  <div class="portal-toast-container" id="portal-toast-container"></div>
+
+  <script src="/hero-network.js?v=solven-ebct-3" defer></script>
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.112.4';
+
+    const SUPABASE_URL = 'https://oxyhuxnkhogmuholomis.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_Hc5VQX3uTZ_K9BiQ9kf0rA_ri3wYpjS';
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
+    });
+
+    /* ── helpers ── */
+    const $ = id => document.getElementById(id);
+    const show = id => $(id).classList.remove('hidden');
+    const hide = id => $(id).classList.add('hidden');
+    let currentProjectData = null;
+    let currentProjectToken = null;
+    let maintenancePaymentInFlight = null;
+    const initialPaymentParams = new URLSearchParams(window.location.search);
+    let maintenanceReturnState = initialPaymentParams.get('maintenance_payment') || '';
+    let maintenanceReturnBillId = initialPaymentParams.get('maintenance_bill') || '';
+    let currentMaintenanceRut = initialPaymentParams.get('maintenance_rut') || '';
+    let maintenanceReturnPolls = 0;
+    let projectDialogTrigger = null;
+    let ticketDialogTrigger = null;
+    let maintenanceDialogTrigger = null;
+
+    const TICKET_STATUS = {
+      pending: { label: 'Pendiente', className: 'pending' },
+      in_progress: { label: 'En progreso', className: 'in_progress' },
+      review: { label: 'En revisión', className: 'review' },
+      done: { label: 'Resuelto', className: 'done' },
+    };
+
+    function setView(name) {
+      ['view-intro','view-loading','view-error','view-project'].forEach(v => hide(v));
+      show('view-' + name);
+      const projectDialog = $('view-project');
+      if (projectDialog) projectDialog.setAttribute('aria-hidden', name === 'project' ? 'false' : 'true');
+      const fab = $('ticket-fab');
+      const modal = $('ticket-modal');
+      if (fab) fab.hidden = name !== 'project';
+      if (modal && name !== 'project') modal.hidden = true;
+      document.body.style.overflow = name === 'project' ? 'hidden' : '';
+      if (name === 'project') setTimeout(() => $('project-modal-close')?.focus(), 50);
+    }
+
+    function escHtml(str) {
+      return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function fmtDate(d) {
+      if (!d) return '—';
+      try {
+        // Append T00:00:00 so the string is parsed as local time, not UTC.
+        // Without this, "2026-01-26" becomes UTC midnight → shows as the
+        // previous day in UTC-3 (Chile).
+        const safe = /^\d{4}-\d{2}-\d{2}$/.test(d) ? d + 'T00:00:00' : d;
+        return new Date(safe).toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' });
+      } catch { return d; }
+    }
+
+    function fmtNum(n) {
+      if (!n) return '$0';
+      return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(n).replace(/\s/g, '');
+    }
+
+    function fmtRelative(d) {
+      if (!d) return '';
+      const diff = Date.now() - new Date(d).getTime();
+      const mins = Math.floor(diff / 60000);
+      if (mins < 60) return `hace ${mins} min`;
+      const hrs = Math.floor(mins / 60);
+      if (hrs < 24) return `hace ${hrs}h`;
+      const days = Math.floor(hrs / 24);
+      if (days < 7) return `hace ${days} día${days > 1 ? 's' : ''}`;
+      return new Date(d).toLocaleDateString('es-CL', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    function normalizePortalFinanceStatus(status) {
+      const raw = String(status || '').trim().toLowerCase();
+      if (['paid', 'pagado', 'pagada', 'cobrado', 'cobrada'].includes(raw)) return 'pagado';
+      if (['emitida', 'emitido', 'issued'].includes(raw)) return 'emitida';
+      if (['registered', 'registrado', 'registrada'].includes(raw)) return 'registrado';
+      if (['anulado', 'anulada', 'cancelled', 'canceled'].includes(raw)) return 'anulado';
+      if (['overdue', 'vencido', 'vencida', 'payment_mismatch'].includes(raw)) return 'vencido';
+      if (['pendiente', 'pending'].includes(raw)) return 'pendiente';
+      return raw || 'registrado';
+    }
+
+    function normalizePortalRut(value) {
+      return String(value || '').replace(/[.\-\s]/g, '').toLowerCase();
+    }
+
+    function formatPortalRut(value) {
+      const clean = normalizePortalRut(value).replace(/[^0-9k]/g, '').slice(0, 9);
+      if (!clean) return '';
+      if (clean.length === 1) return clean.toUpperCase();
+      const body = clean.slice(0, -1);
+      return `${body.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}-${clean.slice(-1).toUpperCase()}`;
+    }
+
+    function normalizePortalSearch(value) {
+      return String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim();
+    }
+
+    function portalRowDate(value) {
+      if (!value) return '';
+      const date = new Date(value);
+      return Number.isNaN(date.valueOf()) ? String(value).slice(0, 10) : date.toISOString().slice(0, 10);
+    }
+
+    function portalDteName(tipo) {
+      return ({
+        '33': 'Factura',
+        '34': 'Factura exenta',
+        '39': 'Boleta',
+        '110': 'Factura de compra'
+      }[String(tipo || '')] || 'Documento');
+    }
+
+    function portalFinanceStatusMeta(status) {
+      const normalized = normalizePortalFinanceStatus(status);
+      return ({
+        pagado: { label: 'Pagada', className: 'paid' },
+        emitida: { label: 'Emitida', className: 'pending' },
+        pendiente: { label: 'Pendiente', className: 'pending' },
+        registrado: { label: 'Registrado', className: 'vigente' },
+        vencido: { label: 'Vencida', className: 'overdue' },
+        anulado: { label: 'Anulado', className: 'overdue' }
+      }[normalized] || { label: normalized.charAt(0).toUpperCase() + normalized.slice(1), className: 'pending' });
+    }
+
+    async function edgeFunctionErrorMessage(error, data, fallback) {
+      if (data?.error) return data.error;
+      try {
+        const responseBody = await error?.context?.clone?.().json();
+        if (responseBody?.error) return responseBody.error;
+      } catch {}
+      return error?.message || fallback;
+    }
+
+    async function payMaintenanceBill(billId, button, customerRut = '') {
+      if ((!currentProjectToken && !customerRut) || maintenancePaymentInFlight) return;
+      maintenancePaymentInFlight = billId;
+      if (button) { button.disabled = true; button.textContent = 'Abriendo el pago…'; }
+      try {
+        const access = customerRut
+          ? { customer_rut: normalizePortalRut(customerRut) }
+          : { project_token: currentProjectToken };
+        const { data, error } = await supabase.functions.invoke('project-maintenance-billing', {
+          body: { action: 'checkout', ...access, bill_id: billId }
+        });
+        if (error || data?.error) throw new Error(await edgeFunctionErrorMessage(error, data, 'No pudimos iniciar el pago.'));
+        if (!data?.checkout_url) throw new Error('No recibimos el enlace de pago.');
+        window.location.assign(data.checkout_url);
+      } catch (error) {
+        showPortalToast(error?.message || 'No pudimos iniciar el pago.', 'error');
+        maintenancePaymentInFlight = null;
+        if (button) { button.disabled = false; button.innerHTML = 'Continuar a pago seguro <img src="/assets/mercado-pago.svg" alt="Mercado Pago" class="payment-brand-logo">'; }
+      }
+    }
+
+    window.payMaintenanceBill = payMaintenanceBill;
+
+    function openMaintenanceModal() {
+      const modal = $('maintenance-modal');
+      if (!modal) return;
+      maintenanceDialogTrigger = document.activeElement;
+      modal.hidden = false;
+      document.body.style.overflow = 'hidden';
+      window.lucide?.createIcons();
+      setTimeout(() => $('maintenance-rut-input')?.focus(), 50);
+    }
+
+    function closeMaintenanceModal() {
+      const modal = $('maintenance-modal');
+      if (modal) modal.hidden = true;
+      if ($('view-project')?.classList.contains('hidden')) document.body.style.overflow = '';
+      if (maintenanceDialogTrigger instanceof HTMLElement) maintenanceDialogTrigger.focus();
+    }
+
+    function maintenanceStatusMeta(status) {
+      return ({
+        paid: { label: 'Pagada', className: 'paid' },
+        pending: { label: 'Pendiente', className: 'pending' },
+        overdue: { label: 'Vencida', className: 'overdue' },
+        payment_mismatch: { label: 'En revisión', className: 'overdue' }
+      }[String(status || '').toLowerCase()] || { label: 'No disponible', className: 'pending' });
+    }
+
+    function renderMaintenanceResult(payload) {
+      const result = $('maintenance-result');
+      if (!result) return;
+      const bills = payload?.bills || [];
+      const customer = payload?.customer;
+      if (!customer || !bills.length) {
+        result.innerHTML = '<div class="maintenance-empty">No encontramos mantenciones facturadas para este RUT. Revisa que esté correctamente escrito o comunícate con Solven Labs.</div>';
+        return;
+      }
+      const pendingTotal = bills
+        .filter(bill => ['pending', 'overdue'].includes(String(bill.status || '').toLowerCase()))
+        .reduce((sum, bill) => sum + Number(bill.amount || 0), 0);
+      result.innerHTML = `
+        <div class="maintenance-customer">
+          <div class="maintenance-customer__name">${escHtml(customer.name || 'Cliente Solven Labs')}</div>
+          <div class="maintenance-customer__rut">RUT ${escHtml(customer.rut || currentMaintenanceRut)}</div>
+          <div class="maintenance-customer__plan">${escHtml(customer.plan_name || 'Mantención mensual')}</div>
+          <div class="maintenance-customer__total">${pendingTotal ? `${fmtNum(pendingTotal)}<br><small>total pendiente</small>` : 'Sin saldo pendiente'}</div>
+        </div>
+        <div class="maintenance-bills">
+          ${bills.map(bill => {
+            const status = maintenanceStatusMeta(bill.status);
+            const payable = ['pending', 'overdue'].includes(String(bill.status || '').toLowerCase());
+            const period = bill.period_start
+              ? new Date(`${bill.period_start}T00:00:00`).toLocaleDateString('es-CL', { month: 'long', year: 'numeric' })
+              : 'Periodo mensual';
+            return `
+              <article class="maintenance-bill">
+                <div>
+                  <div class="maintenance-bill__title">${escHtml(bill.maintenance_billing_plans?.plan_name || customer.plan_name || 'Mantención mensual')}</div>
+                  <div class="maintenance-bill__meta">Periodo: ${escHtml(period)} · Emitida ${fmtDate(bill.issued_at)} · Vence ${fmtDate(bill.due_at)}</div>
+                  <span class="item__status item__status--${status.className}">${status.label}</span>
+                </div>
+                <div class="maintenance-bill__amount">${fmtNum(bill.amount || 0)}</div>
+                ${payable ? `<button type="button" class="maintenance-bill__pay" data-maintenance-pay="${escHtml(bill.id)}">Continuar a pago seguro <img src="/assets/mercado-pago.svg" alt="Mercado Pago" class="payment-brand-logo"></button>` : ''}
+              </article>`;
+          }).join('')}
+        </div>`;
+      window.lucide?.createIcons();
+    }
+
+    async function loadMaintenanceByRut(rut) {
+      const normalizedRut = normalizePortalRut(rut);
+      const result = $('maintenance-result');
+      const button = $('maintenance-search-button');
+      if (normalizedRut.length < 8) {
+        result.innerHTML = '<div class="maintenance-empty">Ingresa un RUT válido para realizar la consulta.</div>';
+        $('maintenance-rut-input')?.focus();
+        return;
+      }
+      currentMaintenanceRut = normalizedRut;
+      button.disabled = true;
+      button.textContent = 'Buscando…';
+      result.innerHTML = '<div class="spinner-wrap" style="padding:28px 0"><i data-lucide="loader-2"></i><span>Buscando mantenciones…</span></div>';
+      window.lucide?.createIcons();
+      try {
+        const { data, error } = await supabase.functions.invoke('project-maintenance-billing', {
+          body: { action: 'list', customer_rut: normalizedRut }
+        });
+        if (error || data?.error) throw new Error(await edgeFunctionErrorMessage(error, data, 'No pudimos consultar la mantención.'));
+        renderMaintenanceResult(data);
+        if (maintenanceReturnState && maintenanceReturnBillId) {
+          const returnedBill = (data?.bills || []).find(bill => bill.id === maintenanceReturnBillId);
+          const billStatus = String(returnedBill?.status || '').toLowerCase();
+          if (billStatus === 'paid') {
+            showPaymentResult('success');
+            maintenanceReturnState = '';
+          } else if (maintenanceReturnState === 'failure' || ['cancelled', 'payment_mismatch'].includes(billStatus)) {
+            showPaymentResult('error');
+            maintenanceReturnState = '';
+          } else if (maintenanceReturnPolls < 8) {
+            showPaymentResult('pending');
+            maintenanceReturnPolls += 1;
+            window.setTimeout(() => loadMaintenanceByRut(currentMaintenanceRut), 2500);
+          } else {
+            showPaymentResult('pending', 'La confirmación está tardando más de lo habitual. Puedes cerrar este mensaje; el cobro se actualizará cuando se confirme el pago.');
+          }
+          const cleanUrl = new URL(window.location.href);
+          cleanUrl.searchParams.delete('maintenance_payment');
+          cleanUrl.searchParams.delete('maintenance_bill');
+          cleanUrl.searchParams.delete('maintenance_rut');
+          history.replaceState({}, '', cleanUrl);
+        }
+      } catch (error) {
+        result.innerHTML = `<div class="maintenance-empty">${escHtml(error?.message || 'No pudimos consultar la mantención.')}</div>`;
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Buscar mantención';
+      }
+    }
+
+    function showPaymentResult(state, message = '') {
+      const modal = $('payment-result-modal');
+      if (!modal) return;
+      const content = {
+        success: { image: 'assets/solvi.svg', badge: 'Pago aprobado', title: '¡Tu pago fue validado con éxito!', message: 'Tu mantención quedó pagada correctamente y el comprobante ya está actualizado en el portal.' },
+        error: { image: 'assets/solvi.svg', badge: 'Pago no aprobado', title: 'No pudimos aprobar tu pago', message: 'La operación no se completó. Puedes cerrar este mensaje e intentarlo nuevamente desde tu factura.' },
+        pending: { image: 'assets/solvi.svg', badge: 'Validando pago', title: 'Estamos confirmando tu pago', message: 'El medio de pago respondió, pero aún estamos esperando la validación final. Esto puede tomar unos segundos.' }
+      }[state] || {};
+      modal.classList.toggle('is-error', state === 'error');
+      modal.classList.toggle('is-pending', state === 'pending');
+      const image = modal.querySelector('[data-payment-result-image]');
+      if (image) { image.src = content.image; image.alt = `Solvi · ${content.badge}`; }
+      modal.querySelector('[data-payment-result-badge]').textContent = content.badge;
+      modal.querySelector('[data-payment-result-title]').textContent = content.title;
+      modal.querySelector('[data-payment-result-message]').textContent = message || content.message;
+      modal.hidden = false;
+      modal.querySelector('.payment-result-modal__panel')?.focus();
+      window.lucide?.createIcons();
+    }
+
+    function closePaymentResult() { const modal = $('payment-result-modal'); if (modal) modal.hidden = true; }
+
+    function showPortalToast(message, type = 'success') {
+      const container = $('portal-toast-container');
+      if (!container) return;
+      const toast = document.createElement('div');
+      toast.className = `portal-toast portal-toast--${type}`;
+      toast.innerHTML = `
+        <i class="portal-toast__icon" data-lucide="${type === 'success' ? 'check-circle-2' : type === 'warning' ? 'alert-triangle' : 'alert-circle'}"></i>
+        <div class="portal-toast__text"></div>
+      `;
+      toast.querySelector('.portal-toast__text').textContent = message;
+      container.appendChild(toast);
+      if (window.lucide?.createIcons) window.lucide.createIcons();
+      setTimeout(() => toast.remove(), 3200);
+    }
+
+    function getTicketStatusMeta(status) {
+      return TICKET_STATUS[String(status || 'pending').toLowerCase()] || TICKET_STATUS.pending;
+    }
+
+    function renderTicketHistory(project) {
+      const tickets = project?.tickets || [];
+      const summaryEl = $('proj-ticket-summary');
+      const listEl = $('proj-tickets');
+      const counts = tickets.reduce((accumulator, ticket) => {
+        const key = String(ticket.status || 'pending').toLowerCase();
+        accumulator[key] = (accumulator[key] || 0) + 1;
+        return accumulator;
+      }, {});
+
+      if (summaryEl) {
+        summaryEl.innerHTML = `
+          <div class="ticket-summary-card"><div class="ticket-summary-card__label">Total tickets</div><div class="ticket-summary-card__value">${tickets.length}</div></div>
+          <div class="ticket-summary-card"><div class="ticket-summary-card__label">Pendientes</div><div class="ticket-summary-card__value">${counts.pending || 0}</div></div>
+          <div class="ticket-summary-card"><div class="ticket-summary-card__label">En progreso</div><div class="ticket-summary-card__value">${counts.in_progress || 0}</div></div>
+          <div class="ticket-summary-card"><div class="ticket-summary-card__label">Resueltos</div><div class="ticket-summary-card__value">${counts.done || 0}</div></div>
+        `;
+      }
+
+      if (!listEl) return;
+      if (!tickets.length) {
+        listEl.innerHTML = '<div class="timeline-empty">Sin tickets registrados aún.</div>';
+        return;
+      }
+
+      listEl.innerHTML = tickets.map(ticket => {
+        const meta = getTicketStatusMeta(ticket.status);
+        const dueText = ticket.due_date ? ` · Vence ${fmtDate(ticket.due_date)}` : '';
+        const description = ticket.description || 'Sin descripción adicional';
+        return `
+          <div class="ticket-item">
+            <div class="ticket-item__body">
+              <div class="ticket-item__title">${escHtml(ticket.title || 'Ticket')}</div>
+              <div class="ticket-item__desc">${escHtml(description)}</div>
+              <div class="ticket-item__meta"><span>${fmtRelative(ticket.created_at || ticket.updated_at)}</span><span>·</span><span>${escHtml(ticket.priority || 'medium')}</span>${ticket.category ? `<span>·</span><span>${escHtml(ticket.category)}</span>` : ''}${dueText ? `<span>${escHtml(dueText)}</span>` : ''}</div>
+            </div>
+            <span class="ticket-status ticket-status--${meta.className}">${meta.label}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openTicketModal() {
+      const modal = $('ticket-modal');
+      if (!modal || !currentProjectData) return;
+      $('ticket-title').value = '';
+      $('ticket-category').value = 'Soporte';
+      $('ticket-priority').value = 'medium';
+      $('ticket-due').value = '';
+      $('ticket-description').value = '';
+      ticketDialogTrigger = document.activeElement;
+      modal.hidden = false;
+      if (window.lucide?.createIcons) window.lucide.createIcons();
+      setTimeout(() => $('ticket-title')?.focus(), 50);
+    }
+
+    function closeTicketModal() {
+      const modal = $('ticket-modal');
+      if (modal) modal.hidden = true;
+      if (ticketDialogTrigger instanceof HTMLElement) ticketDialogTrigger.focus();
+    }
+
+    async function submitTicketFromPortal(event) {
+      event.preventDefault();
+      if (!currentProjectData?.id) return;
+
+      const title = $('ticket-title')?.value.trim();
+      const category = $('ticket-category')?.value || 'Soporte';
+      const priority = $('ticket-priority')?.value || 'medium';
+      const dueDate = $('ticket-due')?.value || null;
+      const description = $('ticket-description')?.value.trim();
+
+      if (!title || !description) {
+        showPortalToast('Completa título y descripción', 'warning');
+        return;
+      }
+
+      const { error } = await supabase.from('orders').insert({
+        title,
+        description,
+        category,
+        priority,
+        due_date: dueDate,
+        status: 'pending',
+        project_id: currentProjectData.id,
+      });
+
+      if (error) {
+        showPortalToast(`No se pudo crear el ticket: ${error.message}`, 'error');
+        return;
+      }
+
+      showPortalToast('Ticket creado correctamente', 'success');
+      closeTicketModal();
+      if (currentProjectToken) await loadByToken(currentProjectToken);
+    }
+
+    function bindTicketUi() {
+      $('ticket-fab')?.addEventListener('click', openTicketModal);
+      $('ticket-modal-close')?.addEventListener('click', closeTicketModal);
+      $('ticket-cancel')?.addEventListener('click', closeTicketModal);
+      $('ticket-modal')?.addEventListener('click', event => {
+        if (event.target?.dataset?.ticketClose === 'true') closeTicketModal();
+      });
+      $('ticket-form')?.addEventListener('submit', submitTicketFromPortal);
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && !$('ticket-modal')?.hidden) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          closeTicketModal();
+        }
+      });
+    }
+
+    function closeProjectModal() {
+      setView('intro');
+      if (window.location.search) {
+        history.replaceState({}, '', '/proyecto');
+      }
+      if (projectDialogTrigger instanceof HTMLElement) projectDialogTrigger.focus();
+    }
+
+    /* ── status config ── */
+    const STATUSES = {
+      proposal:       { label: 'Propuesta',      badge: 'proposal',  icon: 'file-text' },
+      in_development: { label: 'En Desarrollo',   badge: 'active',    icon: 'code-2' },
+      review:         { label: 'En Revisión',     badge: 'review',    icon: 'eye' },
+      completed:      { label: 'Completado',      badge: 'completed', icon: 'check-circle-2' },
+      paused:         { label: 'En Pausa',        badge: 'paused',    icon: 'pause-circle' },
+    };
+
+    const STEPS = [
+      { key: 'proposal',       label: 'Propuesta',    icon: 'file-text'       },
+      { key: 'in_development', label: 'Desarrollo',   icon: 'code-2'          },
+      { key: 'review',         label: 'Revisión',     icon: 'eye'             },
+      { key: 'completed',      label: 'Completado',   icon: 'check-circle-2'  },
+    ];
+
+    const UPDATE_ICONS = {
+      milestone: 'flag',
+      update:    'bell',
+      delivery:  'package',
+      issue:     'alert-triangle',
+      note:      'message-square',
+    };
+
+    const UPDATE_LABELS = {
+      milestone: 'Hito',
+      update: 'Actualización',
+      delivery: 'Entrega',
+      issue: 'Incidencia',
+      note: 'Nota',
+    };
+
+    /* ── render ── */
+    function renderProject(p) {
+      currentProjectData = p;
+      const status = p.status || 'proposal';
+      const cfg = STATUSES[status] || STATUSES.proposal;
+
+      // Header
+      $('proj-name').textContent   = p.name || '—';
+      const clientLabel = p.client_company ? `${p.client_company}` : (p.client_name || '—');
+      $('proj-client').textContent = p.updated_at
+        ? `${clientLabel} · Actualizado ${fmtRelative(p.updated_at)}`
+        : clientLabel;
+      $('proj-tags').innerHTML = (p.technologies || []).map(t => `<span class="tag">${escHtml(t)}</span>`).join('');
+
+      // Status badge
+      $('proj-status-badge').innerHTML = `<i data-lucide="${cfg.icon}"></i> ${cfg.label}`;
+      $('proj-status-badge').className = `status-badge status-badge--${cfg.badge}`;
+
+      // Progress
+      const pct = p.progress || 0;
+
+      const updates = p.updates || [];
+      const latestUpdate = updates[0] || null;
+      const quoteItems = p.cotizaciones || [];
+      const ticketItems = p.tickets || [];
+      const invoiceItems = p.facturas || [];
+      const documentItems = p.documentos || [];
+      const teamMembers = p.teamMembers || [];
+      const latestInvoice = invoiceItems[0] || null;
+      const latestDocument = documentItems[0] || null;
+      const isInvoicePaid = item => ['pagada', 'pagado'].includes(String(item.estado || '').toLowerCase());
+      const isInvoicePending = item => !isInvoicePaid(item) && String(item.estado || 'pendiente').toLowerCase() !== 'anulada';
+      const pendingInvoices = invoiceItems.filter(isInvoicePending).length;
+      const pendingInvoiceTotal = invoiceItems
+        .filter(isInvoicePending)
+        .reduce((sum, item) => sum + Number(item.total || 0), 0);
+      const docsCount = documentItems.length;
+      const pendingDueItems = invoiceItems
+        .filter(item => isInvoicePending(item) && item.fecha_vencimiento)
+        .sort((a, b) => new Date(a.fecha_vencimiento) - new Date(b.fecha_vencimiento));
+      const nextDueItem = pendingDueItems[0] || null;
+      const nextDueText = nextDueItem
+        ? fmtDate(nextDueItem.fecha_vencimiento)
+        : (p.estimated_end_date ? fmtDate(p.estimated_end_date) : (latestUpdate ? fmtRelative(latestUpdate.created_at) : 'Sin fecha definida'));
+      const nextDueMeta = nextDueItem
+        ? `Factura ${nextDueItem.folio || 'sin folio'} · ${fmtNum(nextDueItem.total || 0)}`
+        : (p.estimated_end_date ? `Entrega estimada · ${fmtDate(p.estimated_end_date)}` : 'Sin vencimientos registrados');
+      const teamNames = teamMembers.map(member => member.name).filter(Boolean);
+      const teamPreview = teamNames.slice(0, 2).join(', ');
+      const briefCards = [
+        {
+          label: 'Última actualización',
+          value: latestUpdate ? latestUpdate.title : 'Sin actualizaciones',
+          meta: latestUpdate
+            ? `${fmtRelative(latestUpdate.created_at)} · ${UPDATE_LABELS[latestUpdate.type] || 'Actualización'}`
+            : 'No hay avances visibles todavía'
+        },
+        {
+          label: 'Próxima fecha crítica',
+          value: nextDueText,
+          meta: nextDueMeta
+        },
+        {
+          label: 'Progreso real',
+          value: `${pct}% completado`,
+          meta: status === 'completed' ? 'Proyecto finalizado' : 'Seguimiento activo con avance visible'
+        },
+        {
+          label: 'Último entregable',
+          value: latestDocument ? latestDocument.file_name : 'Sin documentos',
+          meta: latestDocument
+            ? `${latestDocument.folder || 'otros'} · ${fmtRelative(latestDocument.created_at)}`
+            : 'Todavía no se han subido archivos'
+        }
+      ];
+
+      const briefGrid = $('proj-brief-grid');
+      if (briefGrid) {
+        briefGrid.innerHTML = briefCards.map(card => `
+          <div class="brief-card">
+            <div class="brief-card__label">${card.label}</div>
+            <div class="brief-card__value">${escHtml(card.value)}</div>
+            <div class="brief-card__meta">${escHtml(card.meta)}</div>
+          </div>
+        `).join('');
+      }
+
+      const briefText = $('proj-brief-text');
+      if (briefText) {
+        const summaryParts = [];
+        const addUnique = (text) => {
+          const normalized = String(text || '').trim();
+          if (normalized && !summaryParts.includes(normalized)) summaryParts.push(normalized);
+        };
+        if (latestUpdate) addUnique(`Avance más reciente: ${latestUpdate.title} (${fmtRelative(latestUpdate.created_at)}).`);
+        if (nextDueItem) addUnique(`Próximo vencimiento real: factura ${nextDueItem.folio || 'sin folio'} para ${fmtDate(nextDueItem.fecha_vencimiento)}.`);
+        else if (p.estimated_end_date) addUnique(`La fecha estimada de entrega es ${fmtDate(p.estimated_end_date)}.`);
+        if (latestDocument) addUnique(`Último entregable: ${latestDocument.file_name} en ${latestDocument.folder || 'otros'}.`);
+        if (teamNames.length) addUnique(`Equipo asignado: ${teamPreview}${teamNames.length > 2 ? ` y ${teamNames.length - 2} más` : ''}.`);
+        if (p.client_notes) addUnique(p.client_notes.endsWith('.') ? p.client_notes : `${p.client_notes}.`);
+        if (summaryParts.length === 0) summaryParts.push('Aún no hay información destacada para mostrar.');
+        briefText.textContent = summaryParts.join(' ');
+      }
+
+      $('proj-pct').textContent = `${pct}%`;
+      const fill = $('proj-progress-fill');
+      fill.style.width = '0%';
+      fill.className = 'progress-bar__fill' + (
+        status === 'completed' ? ' progress-bar__fill--completed' :
+        status === 'review'    ? ' progress-bar__fill--review'    : ''
+      );
+      setTimeout(() => { fill.style.width = `${pct}%`; }, 100);
+
+      // Stepper
+      const stepperEl = $('proj-stepper');
+      const currentIdx = status === 'paused' ? -1 : STEPS.findIndex(s => s.key === status);
+      stepperEl.innerHTML = STEPS.map((step, i) => {
+        let cls = '';
+        if (status === 'paused' && STEPS[i].key === status) cls = 'stepper-step--paused';
+        else if (status === 'paused') cls = 'stepper-step--future';
+        else if (i < currentIdx)  cls = 'stepper-step--completed';
+        else if (i === currentIdx) cls = 'stepper-step--active';
+        else cls = 'stepper-step--future';
+        /* For completed, all steps are completed */
+        if (status === 'completed') cls = 'stepper-step--completed';
+        return `
+          <div class="stepper-step ${cls}">
+            <div class="stepper-step__circle">
+              ${i < currentIdx || status === 'completed'
+                ? `<i data-lucide="check" style="width:16px;height:16px;"></i>`
+                : status === 'paused' && step.key === 'in_development'
+                  ? `<i data-lucide="pause" style="width:16px;height:16px;"></i>`
+                  : `<i data-lucide="${step.icon}" style="width:16px;height:16px;"></i>`
+              }
+            </div>
+            <div class="stepper-step__label">${step.label}</div>
+          </div>
+        `;
+      }).join('');
+
+      // Details
+      const pctComplete = pct;
+      const statusLabel = cfg.label;
+      const detailItems = [
+        { icon: 'calendar',       label: 'Inicio',                value: fmtDate(p.start_date),          show: !!p.start_date },
+        { icon: 'calendar-check', label: 'Entrega estimada',      value: fmtDate(p.estimated_end_date),  show: !!p.estimated_end_date },
+        { icon: 'activity',       label: 'Progreso',              value: `${pct}%`,                       show: true },
+        { icon: 'layers',         label: 'Tecnologías',           value: (p.technologies||[]).join(', ') || '—', show: true },
+        { icon: 'file-text',      label: 'Cotizaciones vigentes', value: (p.cotizacionesVigentes || 0) + '', show: !!p.cotizacionesVigentes },
+        { icon: 'file-check',     label: 'Facturas pendientes',   value: (p.facturasPendientes || 0) + '', show: !!p.facturasPendientes },
+      ];
+      $('proj-details').innerHTML = detailItems.filter(d => d.show).map(d => `
+        <div class="detail-card">
+          <div class="detail-card__icon"><i data-lucide="${d.icon}"></i></div>
+          <div>
+            <div class="detail-card__label">${d.label}</div>
+            <div class="detail-card__value">${escHtml(d.value)}</div>
+          </div>
+        </div>
+      `).join('');
+
+      // KPI section
+      const startDate = p.start_date ? new Date(p.start_date) : null;
+      const today = new Date();
+      const activeDays = startDate ? Math.max(1, Math.ceil((today.getTime() - startDate.getTime()) / 86400000)) : 0;
+      const activeLabel = activeDays > 0 ? `${activeDays} día${activeDays === 1 ? '' : 's'}` : 'Sin inicio';
+      const pendingInvoicesLabel = pendingInvoices > 0 ? `${pendingInvoices} · ${fmtNum(pendingInvoiceTotal)}` : 'Al día';
+      const docsLabel = docsCount > 0 ? `${docsCount} archivo${docsCount === 1 ? '' : 's'}` : 'Sin archivos';
+      const quoteTotal = quoteItems.reduce((sum, item) => sum + Number(item.total || 0), 0);
+      const acceptedQuotes = quoteItems.filter(item => item.estado === 'aceptada').length;
+      const currentQuoteState = quoteItems.length === 0
+        ? 'Sin cotización'
+        : acceptedQuotes > 0
+          ? 'Aceptada'
+          : quoteItems.some(item => item.estado === 'vigente')
+            ? 'Vigente'
+            : (quoteItems[0]?.estado ? String(quoteItems[0].estado).charAt(0).toUpperCase() + String(quoteItems[0].estado).slice(1) : 'Sin estado');
+
+      $('proj-kpi-quote-value').textContent = quoteItems.length > 0 ? fmtNum(quoteTotal) : '—';
+      $('proj-kpi-quote-state').textContent = currentQuoteState;
+      $('proj-kpi-age').textContent = activeLabel;
+      $('proj-kpi-invoices').textContent = pendingInvoicesLabel;
+      $('proj-kpi-docs').textContent = docsLabel;
+      $('proj-kpi-status').textContent = p.status === 'completed' ? 'Completado' : 'En curso';
+      $('proj-kpi-card').style.display = 'block';
+
+      // Description + notes
+      const descCard = $('proj-desc-card');
+      if (p.description || p.client_notes) {
+        descCard.style.display = '';
+        if (p.description) $('proj-desc').textContent = p.description;
+        const notesEl = $('proj-notes');
+        if (p.client_notes) { notesEl.textContent = p.client_notes; notesEl.style.display = ''; }
+        else notesEl.style.display = 'none';
+      } else descCard.style.display = 'none';
+
+      // Timeline
+      const timelineEl = $('proj-timeline');
+      if (!updates.length) {
+        timelineEl.innerHTML = '<div class="timeline-empty">Sin actualizaciones disponibles aún.</div>';
+      } else {
+        timelineEl.innerHTML = updates.map(u => {
+          const icon = UPDATE_ICONS[u.type] || 'bell';
+          return `
+            <div class="timeline-item">
+              <div class="timeline-item__dot timeline-item__dot--${escHtml(u.type || 'update')}">
+                <i data-lucide="${icon}"></i>
+              </div>
+              <div class="timeline-item__body">
+                <div class="timeline-item__title">${escHtml(u.title)}</div>
+                ${u.description ? `<div class="timeline-item__desc">${escHtml(u.description)}</div>` : ''}
+                <div class="timeline-item__date">${fmtRelative(u.created_at)}</div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      const ticketsCard = $('proj-tickets-card');
+      if (ticketsCard) {
+        ticketsCard.style.display = '';
+        renderTicketHistory(p);
+      }
+
+      // Facturas
+      const facturas = p.facturas || [];
+      const invoicesCard = $('proj-invoices-card');
+      const invoicesEl = $('proj-invoices');
+      if (facturas.length > 0) {
+        invoicesCard.style.display = '';
+
+        // Resumen de facturas
+        const totalFacturas = facturas.reduce((s, f) => s + (f.total || 0), 0);
+        const pagadas = facturas.filter(isInvoicePaid).length;
+        const pendientes = facturas.filter(isInvoicePending).length;
+
+        const summaryEl = $('invoice-summary');
+        summaryEl.innerHTML = `
+          <div class="summary-box">
+            <div class="summary-box__label">Pendientes de Pago</div>
+            <div class="summary-box__value">${pendientes}</div>
+          </div>
+          <div class="summary-box">
+            <div class="summary-box__label">Pagadas</div>
+            <div class="summary-box__value">${pagadas}</div>
+          </div>
+          <div class="summary-box">
+            <div class="summary-box__label">Total</div>
+            <div class="summary-box__value" style="font-size:0.9rem;">${fmtNum(totalFacturas)}</div>
+          </div>
+        `;
+
+        invoicesEl.innerHTML = facturas.map(f => {
+          const statusMeta = portalFinanceStatusMeta(f.estado);
+          const statoBadge = `<span class="item__status item__status--${statusMeta.className}">${statusMeta.label}</span>`;
+          const tipoDTE = f.tipo_dte || 'Documento';
+
+          return `
+            <div class="item">
+              <div class="item__content">
+                <div class="item__title">${tipoDTE} #${escHtml(String(f.folio || '').padStart(6,'0'))}</div>
+                <div class="item__subtitle">
+                  ${f.fecha || '—'} · ${f.periodo || ''} ${f.periodo ? '·' : ''}
+                  ${f.razon_social ? escHtml(f.razon_social) : '—'}
+                  ${f.source_label ? ` · ${escHtml(f.source_label)}` : ''}
+                </div>
+                <div>${statoBadge}</div>
+                ${f.source === 'maintenance' && f.payable ? `<div class="item__payment"><button type="button" class="item__pay-btn" data-maintenance-pay="${escHtml(f.id)}">Continuar a pago seguro <img src="/assets/mercado-pago.svg" alt="Mercado Pago" class="payment-brand-logo"></button></div>` : ''}
+              </div>
+              <div class="item__value">${fmtNum(f.total || 0)}</div>
+            </div>
+          `;
+        }).join('');
+      } else {
+        invoicesCard.style.display = 'none';
+      }
+
+      // Documentos Entregables
+      const documentos = p.documentos || [];
+      const deliverablesCard = $('proj-deliverables-card');
+      const deliverablesEl = $('proj-deliverables');
+      if (documentos.length > 0) {
+        deliverablesCard.style.display = '';
+        const folderIcons = {
+          'contratos': 'file-signature',
+          'propuestas': 'file-plus-2',
+          'diseños': 'palette',
+          'entregables': 'package',
+          'facturas': 'file-text',
+          'legal': 'shield-check',
+          'otros': 'file'
+        };
+        deliverablesEl.innerHTML = documentos.map(d => {
+          const icon = folderIcons[d.folder] || 'file';
+          const sizeKB = Math.round((d.file_size || 0) / 1024);
+          return `
+            <div class="item">
+              <div class="item__content">
+                <div class="item__title"><i data-lucide="${icon}" style="width:14px;height:14px;display:inline;margin-right:6px;vertical-align:text-bottom;"></i>${escHtml(d.file_name)}</div>
+                <div class="item__subtitle">${d.folder ? d.folder.charAt(0).toUpperCase() + d.folder.slice(1) : 'Otros'} · ${sizeKB} KB</div>
+              </div>
+              <div class="item__value">${fmtDate(d.created_at)}</div>
+            </div>
+          `;
+        }).join('');
+      } else {
+        deliverablesCard.style.display = 'none';
+      }
+
+      lucide.createIcons();
+    }
+
+    /* ── fetch ── */
+    async function loadByToken(token) {
+      const searchButton = $('search-btn');
+      if (searchButton) {
+        searchButton.disabled = true;
+        searchButton.setAttribute('aria-busy', 'true');
+      }
+      setView('loading');
+      try {
+        currentProjectToken = token.trim().toLowerCase();
+        const { data, error } = await supabase
+          .from('projects')
+          .select(`
+            id, name, description, status, progress, technologies, updated_at,
+            start_date, estimated_end_date, client_notes, client_visible, client_token,
+            clients ( name, company, rut ),
+            project_members ( team_member_id, team_members ( full_name, avatar_url ) ),
+              project_updates ( id, title, description, type, visible_to_client, created_at ),
+              orders ( id, title, description, status, priority, due_date, created_at, updated_at )
+          `)
+          .eq('client_token', token.trim().toLowerCase())
+          .eq('client_visible', true)
+          .single();
+
+        if (error || !data) {
+          setView('error');
+          return;
+        }
+
+        /* Normalise nested relations */
+        data.client_company = data.clients?.company || null;
+        data.client_name    = data.clients?.name    || null;
+        data.teamMembers = (data.project_members || [])
+          .map(pm => pm.team_members ? {
+            name: pm.team_members.full_name || 'Miembro',
+            avatar_url: pm.team_members.avatar_url || null
+          } : null)
+          .filter(Boolean);
+
+        /* Sort updates newest first, only client-visible ones */
+        data.updates = (data.project_updates || [])
+          .filter(u => u.visible_to_client !== false)
+          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        data.tickets = (data.orders || [])
+          .sort((a, b) => new Date(b.created_at || b.updated_at || 0) - new Date(a.created_at || a.updated_at || 0));
+
+        const clientName = (data.client_name || '').trim();
+        const clientCompany = (data.client_company || '').trim();
+        const clientRut = (data.clients?.rut || '').trim();
+        const quoteFilters = [];
+        const invoiceFilters = [];
+
+        if (clientName) {
+          const safeClientName = clientName.replace(/,/g, ' ');
+          quoteFilters.push(`cliente.ilike.%${safeClientName}%`);
+        }
+        if (clientCompany) {
+          const safeClientCompany = clientCompany.replace(/,/g, ' ');
+          quoteFilters.push(`razon_social.ilike.%${safeClientCompany}%`);
+        }
+        if (clientRut) {
+          quoteFilters.push(`rut_receptor.eq.${clientRut}`);
+          invoiceFilters.push(`rut_receptor.eq.${clientRut}`);
+        }
+        if (clientCompany) {
+          const safeClientCompany = clientCompany.replace(/,/g, ' ');
+          invoiceFilters.push(`razon_social.ilike.%${safeClientCompany}%`);
+        }
+
+        /* Fetch cotizaciones */
+        let cotizacionesQuery = supabase
+          .from('cotizaciones')
+          .select('id, folio, fecha, fecha_vencimiento, estado, neto, iva, total, cliente, vigencia, exento, razon_social, observaciones')
+          .order('fecha', { ascending: false })
+          .limit(20);
+        if (quoteFilters.length) {
+          cotizacionesQuery = cotizacionesQuery.or(quoteFilters.join(','));
+        }
+        const { data: cotizaciones } = await cotizacionesQuery;
+        data.cotizaciones = (cotizaciones || []).map(c => ({
+          folio: c.folio || '—',
+          fecha: c.fecha || '—',
+          fecha_vencimiento: c.fecha_vencimiento || '—',
+          estado: c.estado || 'vigente',
+          neto: Number(c.neto || 0),
+          iva: Number(c.iva || 0),
+          total: Number(c.total || 0),
+          cliente: c.cliente || '—',
+          vigencia: c.vigencia || 30,
+          exento: c.exento || false,
+          razon_social: c.razon_social || '—',
+          observaciones: c.observaciones || ''
+        }));
+        data.cotizacionesVigentes = (data.cotizaciones || []).filter(c => c.estado === 'vigente').length;
+
+        /* Fetch facturas/recibos from the same finance sources used by dashboard Finanzas */
+        const invoiceSelect = 'id, folio, tipo_dte, fecha, fecha_vencimiento, periodo, estado, neto, iva, total, razon_social, rut_receptor, exento, observaciones, sii_pdf_url, project_id, operacion, emi_name, emi_rut, created_at';
+        const invoiceSelectLegacy = 'id, folio, tipo_dte, fecha, fecha_vencimiento, periodo, estado, neto, iva, total, razon_social, rut_receptor, exento, observaciones, sii_pdf_url, operacion, emi_name, emi_rut, created_at';
+        const financeRows = [];
+        let usedProjectScopedInvoices = false;
+
+        const matchesPortalClient = (record, names = [], rut = '') => {
+          const normalizedRut = normalizePortalRut(rut);
+          if (normalizedRut && [record.rut_receptor, record.rut, record.counterpartyRut].some(value => normalizePortalRut(value) === normalizedRut)) return true;
+          const searchable = normalizePortalSearch([
+            record.razon_social,
+            record.cliente,
+            record.nombre,
+            record.origen,
+            record.counterparty
+          ].filter(Boolean).join(' '));
+          return names.some(name => {
+            const normalizedName = normalizePortalSearch(name);
+            return normalizedName && searchable.includes(normalizedName);
+          });
+        };
+
+        const clientNames = [clientName, clientCompany].filter(Boolean);
+        const clientRutNormalized = normalizePortalRut(clientRut);
+
+        const projectInvoicesRes = await supabase
+          .from('facturas_presii')
+          .select(invoiceSelect)
+          .eq('project_id', data.id)
+          .order('fecha', { ascending: false })
+          .limit(20);
+
+        let presiiRows = [];
+        if (!projectInvoicesRes.error && Array.isArray(projectInvoicesRes.data) && projectInvoicesRes.data.length) {
+          presiiRows = projectInvoicesRes.data;
+          usedProjectScopedInvoices = true;
+        } else {
+          let facturasQuery = supabase
+            .from('facturas_presii')
+            .select(projectInvoicesRes.error ? invoiceSelectLegacy : invoiceSelect)
+            .order('fecha', { ascending: false })
+            .limit(20);
+          if (invoiceFilters.length) {
+            facturasQuery = facturasQuery.or(invoiceFilters.join(','));
+          }
+          const { data: fallbackFacturas, error: fallbackError } = await facturasQuery;
+          if (!fallbackError) presiiRows = fallbackFacturas || [];
+        }
+
+        (presiiRows || []).forEach(doc => {
+          const operacion = String(doc.operacion || (String(doc.tipo_dte || '') === '110' ? 'compra' : 'venta')).toLowerCase();
+          if (operacion !== 'venta') return;
+          financeRows.push({
+            id: doc.id || '',
+            folio: doc.folio || '—',
+            tipo_dte: portalDteName(doc.tipo_dte),
+            fecha: portalRowDate(doc.fecha || doc.created_at) || '—',
+            fecha_vencimiento: doc.fecha_vencimiento || '',
+            periodo: doc.periodo || '',
+            estado: normalizePortalFinanceStatus(doc.estado || 'borrador'),
+            total: Number(doc.total || 0),
+            razon_social: doc.razon_social || doc.emi_name || '—',
+            rut_receptor: doc.rut_receptor || '',
+            source: 'presii',
+            source_label: 'SII Facturas',
+            project_id: doc.project_id || null,
+            sii_pdf_url: doc.sii_pdf_url || null
+          });
+        });
+
+        const [pagosRes, incomesRes] = await Promise.all([
+          supabase.from('pagos').select('id,fecha,tipo,operacion,nombre,rut,cargo,descripcion,status,neto,bruto,amount,skip_analytics').order('fecha', { ascending: false }).limit(100),
+          supabase.from('fin_ingresos').select('id,fecha,concepto,cliente,origen,categoria,metodo_pago,referencia,observaciones,estado,monto').order('fecha', { ascending: false }).limit(100)
+        ]);
+
+        (pagosRes.data || []).forEach(payment => {
+          if (String(payment.tipo || '').toLowerCase() !== 'honorarios') return;
+          if (String(payment.operacion || 'compra').toLowerCase() !== 'venta') return;
+          if (payment.skip_analytics) return;
+          if (!matchesPortalClient(payment, clientNames, clientRutNormalized)) return;
+          financeRows.push({
+            id: payment.id || '',
+            folio: payment.id ? String(payment.id).slice(0, 8) : '—',
+            tipo_dte: 'Boleta',
+            fecha: portalRowDate(payment.fecha) || '—',
+            fecha_vencimiento: '',
+            periodo: '',
+            estado: normalizePortalFinanceStatus(payment.status || 'registrado'),
+            total: Number(payment.neto || payment.bruto || payment.amount || 0),
+            razon_social: payment.nombre || '—',
+            rut_receptor: payment.rut || '',
+            source: 'honorarios',
+            source_label: 'Honorarios'
+          });
+        });
+
+        (incomesRes.data || []).forEach(income => {
+          if (!matchesPortalClient(income, clientNames, clientRutNormalized)) return;
+          financeRows.push({
+            id: income.id || '',
+            folio: income.referencia || income.id?.slice(0, 8) || '—',
+            tipo_dte: 'Ingreso',
+            fecha: portalRowDate(income.fecha) || '—',
+            fecha_vencimiento: '',
+            periodo: income.categoria || '',
+            estado: normalizePortalFinanceStatus(income.estado || 'registrado'),
+            total: Number(income.monto || 0),
+            razon_social: income.cliente || income.origen || '—',
+            rut_receptor: '',
+            source: 'income',
+            source_label: 'Ingresos externos'
+          });
+        });
+
+        const { data: maintenanceBilling, error: maintenanceBillingError } = await supabase.functions.invoke('project-maintenance-billing', {
+          body: { action: 'list', project_token: currentProjectToken }
+        });
+        const returnedMaintenanceBill = (maintenanceBilling?.bills || []).find(bill => bill.id === maintenanceReturnBillId) || null;
+        data.maintenanceReturnStatus = returnedMaintenanceBill?.status || '';
+        if (!maintenanceBillingError) {
+          (maintenanceBilling?.bills || []).forEach(bill => {
+            const planName = bill.maintenance_billing_plans?.plan_name || 'Mantención mensual';
+            financeRows.push({
+              id: bill.id,
+              folio: `MANT-${String(bill.id).slice(0, 8).toUpperCase()}`,
+              tipo_dte: 'Mantención',
+              fecha: bill.issued_at,
+              fecha_vencimiento: bill.due_at,
+              periodo: bill.period_start ? new Date(`${bill.period_start}T00:00:00`).toLocaleDateString('es-CL', { month: 'long', year: 'numeric' }) : '',
+              estado: normalizePortalFinanceStatus(bill.status),
+              total: Number(bill.amount || 0),
+              razon_social: planName,
+              rut_receptor: clientRut,
+              source: 'maintenance',
+              source_label: 'Pago de servicios Solven Labs',
+              payable: ['pending', 'overdue'].includes(String(bill.status || '').toLowerCase())
+            });
+          });
+        }
+
+        const normalizedFacturas = financeRows
+          .filter(row => Number(row.total || 0) > 0)
+          .sort((a, b) => new Date(b.fecha || 0) - new Date(a.fecha || 0));
+        const seenFacturas = new Set();
+        data.facturas = normalizedFacturas.filter(f => {
+          const key = `${f.source || 'finance'}:${f.id || [f.tipo_dte, f.folio, f.fecha, f.periodo, f.total].join('|')}`;
+          if (seenFacturas.has(key)) return false;
+          seenFacturas.add(key);
+          return true;
+        });
+        data.facturasPendientes = (data.facturas || []).filter(f => f.estado === 'pendiente').length;
+
+        /* Fetch document deliverables */
+        const { data: documentos } = await supabase
+          .from('documents')
+          .select('id, file_name, folder, file_size, created_at, download_url')
+          .eq('project_id', data.id)
+          .order('created_at', { ascending: false })
+          .limit(40);
+        data.documentos = (documentos || []).map(d => ({
+          file_name: d.file_name || 'Documento',
+          folder: d.folder || 'otros',
+          file_size: Number(d.file_size || 0),
+          created_at: d.created_at || null,
+          download_url: d.download_url || null
+        }));
+        data.documentosCount = data.documentos.length;
+
+        renderProject(data);
+        setView('project');
+        if (maintenanceReturnState) {
+          const billStatus = String(data.maintenanceReturnStatus || '').toLowerCase();
+          const isPaid = billStatus === 'paid';
+          const isRejected = maintenanceReturnState === 'failure' || ['cancelled', 'payment_mismatch'].includes(billStatus);
+          if (isPaid) {
+            showPaymentResult('success');
+            maintenanceReturnState = '';
+          } else if (isRejected) {
+            showPaymentResult('error', billStatus === 'payment_mismatch'
+              ? 'Recibimos una respuesta de pago, pero el monto o la moneda no coincide. Solven Labs revisará el caso antes de aplicar el cobro.'
+              : 'El medio de pago no aprobó la operación. La factura sigue pendiente y puedes volver a intentarlo.');
+            maintenanceReturnState = '';
+          } else {
+            if (maintenanceReturnPolls < 8) {
+              showPaymentResult('pending');
+              maintenanceReturnPolls += 1;
+              window.setTimeout(() => loadByToken(currentProjectToken), 2500);
+            } else {
+              showPaymentResult('pending', 'La confirmación está tardando más de lo habitual. Puedes cerrar este mensaje; el portal se actualizará cuando se confirme el pago.');
+            }
+          }
+          const cleanUrl = new URL(window.location.href);
+          cleanUrl.searchParams.delete('maintenance_payment');
+          cleanUrl.searchParams.delete('maintenance_bill');
+          history.replaceState({}, '', cleanUrl);
+        }
+      } catch (e) {
+        console.error(e);
+        setView('error');
+      } finally {
+        if (searchButton) {
+          searchButton.disabled = false;
+          searchButton.removeAttribute('aria-busy');
+        }
+      }
+    }
+
+    /* ── URL routing ── */
+    function getTokenFromUrl() {
+      // First check sessionStorage (set by redirect from /project/{token})
+      const sessionToken = sessionStorage.getItem('_ntek_project_token');
+      if (sessionToken) {
+        sessionStorage.removeItem('_ntek_project_token');
+        return sessionToken;
+      }
+
+      // query param fallback: ?token=xxx
+      return new URLSearchParams(window.location.search).get('token') || null;
+    }
+
+    /* ── search ── */
+    window.searchProject = function() {
+      const token = document.getElementById('token-input').value.trim();
+      if (!token) {
+        document.getElementById('token-input').focus();
+        return;
+      }
+      projectDialogTrigger = document.activeElement;
+      currentProjectToken = token.toLowerCase();
+      // Keep the project page URL clean (no dynamic deep route in browser bar)
+      history.replaceState({}, '', '/proyecto');
+      loadByToken(token);
+    };
+
+    document.getElementById('project-search-form').addEventListener('submit', event => {
+      event.preventDefault();
+      window.searchProject();
+    });
+
+    $('maintenance-entry-button')?.addEventListener('click', openMaintenanceModal);
+    $('maintenance-modal')?.querySelectorAll('[data-maintenance-close]').forEach(button => button.addEventListener('click', closeMaintenanceModal));
+    $('maintenance-search-form')?.addEventListener('submit', event => {
+      event.preventDefault();
+      loadMaintenanceByRut($('maintenance-rut-input')?.value || '');
+    });
+    $('maintenance-rut-input')?.addEventListener('input', event => {
+      event.target.value = formatPortalRut(event.target.value);
+    });
+    $('maintenance-result')?.addEventListener('click', event => {
+      const button = event.target.closest('[data-maintenance-pay]');
+      if (button) payMaintenanceBill(button.dataset.maintenancePay, button, currentMaintenanceRut);
+    });
+    $('proj-invoices')?.addEventListener('click', event => {
+      const button = event.target.closest('[data-maintenance-pay]');
+      if (button) payMaintenanceBill(button.dataset.maintenancePay, button);
+    });
+
+    /* ── init ── */
+    function refreshPortalIcons() {
+      if (window.lucide?.createIcons) window.lucide.createIcons();
+    }
+
+    refreshPortalIcons();
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', refreshPortalIcons, { once: true });
+    }
+    window.addEventListener('load', refreshPortalIcons, { once: true });
+
+    function normalizeProjectPath() {
+      const p = window.location.pathname.replace(/\/+$/, '');
+      const match = p.match(/^\/(?:project|proyecto)\/(.+)$/);
+      if (!match) return null;
+      const token = decodeURIComponent(match[1]);
+      const normalizedUrl = new URL(window.location.href);
+      normalizedUrl.pathname = '/proyecto';
+      normalizedUrl.search = `?token=${encodeURIComponent(token)}`;
+      history.replaceState({}, '', normalizedUrl.toString());
+      return token;
+    }
+
+    const normalizedToken = normalizeProjectPath();
+    const initToken = normalizedToken || getTokenFromUrl();
+
+    if (initToken) {
+      currentProjectToken = initToken;
+      history.replaceState({}, '', '/proyecto');
+      document.getElementById('token-input').value = initToken;
+      loadByToken(initToken);
+    } else {
+      setView('intro');
+      if (currentMaintenanceRut) {
+        $('maintenance-rut-input').value = formatPortalRut(currentMaintenanceRut);
+        openMaintenanceModal();
+        loadMaintenanceByRut(currentMaintenanceRut);
+      }
+    }
+
+    bindTicketUi();
+
+    $('payment-result-modal')?.querySelectorAll('[data-payment-result-close]').forEach(button => button.addEventListener('click', closePaymentResult));
+    $('project-modal-close')?.addEventListener('click', closeProjectModal);
+    $('view-project')?.addEventListener('click', event => {
+      if (event.target === $('view-project')) closeProjectModal();
+    });
+    document.addEventListener('keydown', event => {
+      const projectDialog = $('view-project');
+      const ticketDialog = $('ticket-modal');
+      const maintenanceDialog = $('maintenance-modal');
+      const paymentDialog = $('payment-result-modal');
+      const dialog = paymentDialog && !paymentDialog.hidden
+        ? paymentDialog
+        : maintenanceDialog && !maintenanceDialog.hidden
+          ? maintenanceDialog
+          : ticketDialog && !ticketDialog.hidden
+            ? ticketDialog
+            : projectDialog;
+      if (!dialog || dialog.classList.contains('hidden')) return;
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        if (dialog === paymentDialog) closePaymentResult();
+        else if (dialog === maintenanceDialog) closeMaintenanceModal();
+        else if (dialog === ticketDialog) closeTicketModal();
+        else closeProjectModal();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const focusable = [...dialog.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])')]
+        .filter(element => !element.hidden && element.offsetParent !== null);
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    });
+  </script>
+</body>
+</html>

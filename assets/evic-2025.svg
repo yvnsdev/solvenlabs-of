@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 360" role="img" aria-labelledby="title desc">
+  <title id="title">EVIC 2025</title>
+  <desc id="desc">Escuela de Verano en Inteligencia Computacional</desc>
+  <g fill="#06365f">
+    <path d="M32 43h97v23H59v29h64v22H59v32h72v23H32z"/>
+    <path d="M241 43h27v129h-27z"/>
+    <path d="M372 84c-7-14-20-21-37-21-27 0-46 18-46 45s19 45 46 45c18 0 32-8 39-24l23 12c-12 23-33 35-63 35-44 0-74-27-74-68s31-68 75-68c29 0 50 12 61 34z"/>
+    <path d="M151 43h29l29 82 29-82h29l-49 129h-19z"/>
+  </g>
+  <g>
+    <path fill="#0870b9" d="M177 42h64l-32 104z"/>
+    <path fill="#004a86" d="M177 42l32 104V67z"/>
+    <path fill="#ed1c24" d="M209 22l32 20-32 104z"/>
+    <path fill="#b50922" d="M209 22l-32 20 32 104z"/>
+    <path fill="#ff3340" d="M209 22l-32 20h64z"/>
+  </g>
+  <text x="31" y="239" fill="#06365f" font-family="Arial, Helvetica, sans-serif" font-size="76" font-weight="800" letter-spacing="-3">2025</text>
+  <text x="34" y="284" fill="#1e2936" font-family="Arial Narrow, Arial, Helvetica, sans-serif" font-size="29" letter-spacing="-.8">Escuela de Verano en</text>
+  <text x="34" y="319" fill="#1e2936" font-family="Arial Narrow, Arial, Helvetica, sans-serif" font-size="29" letter-spacing="-.8">Inteligencia Computacional</text>
+</svg>

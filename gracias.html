@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <base href="/">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, follow">
+  <meta name="description" content="Gracias por contactar a Solven Labs. Recibimos tu solicitud correctamente.">
+  <link rel="canonical" href="https://solvenlabs.cl/gracias.html">
+  <title>Gracias por contactarnos | Solven Labs</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon%20chopped.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=solven-ebct-3">
+  <link rel="stylesheet" href="/solven-brand.css?v=solven-ebct-3">
+</head>
+<body>
+  <main class="thank-you-page">
+    <section class="section thank-you__section">
+      <div class="container thank-you__container">
+        <a href="/" class="thank-you__home-link">
+          <i data-lucide="arrow-left" class="icon icon--sm"></i>
+          Volver al inicio
+        </a>
+
+        <div class="thank-you__intro">
+          <a href="/" class="thank-you__logo" aria-label="Solven Labs - Ir al inicio">
+            <img src="assets/solvi.svg" alt="Solvi, asistente de soluciones Solven Labs">
+          </a>
+          <h1 class="section__title">Gracias por contactar a <img class="thank-you__title-logo" src="assets/logo%20extended%20chopped.png" alt="Solven Labs"></h1>
+          <p class="section__subtitle">Recibimos los antecedentes de tu proyecto. Te contactaremos para comprender el contexto y coordinar una primera conversación técnica.</p>
+        </div>
+
+        <div class="thank-you__layout">
+          <div class="ntek-agenda__panel thank-you__agenda">
+            <div>
+              <span class="section__badge">
+                <i data-lucide="badge-check" class="icon icon--sm"></i>
+                Todo listo
+              </span>
+              <h2 class="section__title">Tu solicitud quedó registrada</h2>
+              <p class="section__subtitle">No necesitas hacer nada más. Revisaremos la información y te contactaremos para conocer el proyecto con mayor profundidad.</p>
+              <div class="ntek-agenda__actions">
+                <a href="https://wa.me/56977029753?text=Hola%20Solven%20Labs%2C%20quiero%20agregar%20informaci%C3%B3n%20a%20mi%20solicitud." class="btn btn--secondary" target="_blank" rel="noopener">
+                  Agregar información por WhatsApp
+                </a>
+              </div>
+            </div>
+            <div class="ntek-agenda__checklist">
+              <div><i data-lucide="mail-check" class="icon icon--sm"></i><span>Mensaje recibido</span></div>
+              <div><i data-lucide="search" class="icon icon--sm"></i><span>Revisaremos tu solicitud</span></div>
+              <div><i data-lucide="messages-square" class="icon icon--sm"></i><span>Te contactaremos para continuar</span></div>
+            </div>
+          </div>
+
+          <div class="ntek-punctual thank-you__links">
+            <div class="ntek-punctual__header">
+              <span class="section__badge">
+                <i data-lucide="compass" class="icon icon--sm"></i>
+                Mientras tanto
+              </span>
+              <h3>Conoce mejor nuestro trabajo</h3>
+              <div class="thank-you__solvi" aria-hidden="true">
+                <img src="assets/solvi.svg" alt="">
+              </div>
+            </div>
+            <div class="ntek-punctual__grid">
+              <article>
+                <i data-lucide="layout-grid" class="icon"></i>
+                <h4>Casos de éxito</h4>
+                <p>Plataformas, prototipos y sistemas construidos para necesidades concretas.</p>
+                <a href="/#casos" class="pricing__link">Ver proyectos</a>
+              </article>
+              <article>
+                <i data-lucide="badge-percent" class="icon"></i>
+                <h4>Qué hacemos</h4>
+                <p>Desarrollo, IA y datos, prototipado e infraestructura.</p>
+                <a href="/servicios" class="pricing__link">Ver servicios</a>
+              </article>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="https://unpkg.com/lucide@1.35.0/dist/umd/lucide.min.js" integrity="sha384-eZXpDHN86IMQuxntjYbYprDla50QW8NC+8P9nUywt9PSVNqZE2Ri3YZ2WWKoliDw" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script>
+    try {
+      const events = JSON.parse(localStorage.getItem('ntek_events') || '[]');
+      events.push({ name: 'thank_you_view', path: location.pathname, createdAt: new Date().toISOString() });
+      localStorage.setItem('ntek_events', JSON.stringify(events.slice(-100)));
+    } catch (error) {}
+    if (window.lucide) window.lucide.createIcons();
+  </script>
+</body>
+</html>

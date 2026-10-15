@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-labelledby="title">
+  <title id="title">FONDEF VIU 2026, ANID</title>
+  <circle cx="120" cy="120" r="99" fill="#fff" stroke="#087dbb" stroke-width="15"/>
+  <path d="M78 30a99 99 0 0 1 84 180" fill="none" stroke="#ef2945" stroke-width="15"/>
+  <text x="120" y="77" text-anchor="middle" fill="#687486" font-family="Arial, Helvetica, sans-serif" font-size="13" letter-spacing="2">FONDEF</text>
+  <text x="120" y="123" text-anchor="middle" fill="#40536b" font-family="Arial, Helvetica, sans-serif" font-size="43">VIU</text>
+  <text x="120" y="157" text-anchor="middle" fill="#0871b5" font-family="Arial, Helvetica, sans-serif" font-size="23" letter-spacing="5">2026</text>
+  <rect x="86" y="174" width="68" height="27" rx="14" fill="#087dbb"/>
+  <text x="120" y="193" text-anchor="middle" fill="#fff" font-family="Arial, Helvetica, sans-serif" font-size="13">ANID</text>
+</svg>

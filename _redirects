@@ -1,0 +1,58 @@
+# Netlify rewrite: servir dashboard.html para rutas del dashboard
+/dashboard      /dashboard.html   200!
+/dashboard/*    /dashboard.html   200!
+/mail           /dashboard        301
+/mail/          /dashboard        301
+/login          /dashboard.html   200!
+
+# Blog estático: permite URLs limpias para cada artículo
+/blog/*        /blog/index.html   200
+
+# Netlify rewrite: portal de estado de proyecto para clientes
+/proyecto.html  /proyecto         301!
+/project        /proyecto         301!
+/project/       /proyecto         301!
+/project/*      /proyecto.html    200!
+/proyecto       /proyecto.html    200!
+/proyecto/      /proyecto         301!
+/proyecto/*     /proyecto.html    200!
+
+# Netlify redirects: servicios antiguos consolidados en la home
+/nosotros                              /servicios                         301
+/servicios-puntuales                   /servicios/soporte-infraestructura 301
+/planes                                /servicios 301
+/pricing                               /servicios 301
+/diagnostico                            /diagnostico-digital       301
+/diagnostico.html                       /diagnostico-digital       301
+/webs                                   /servicios                 301
+/webs.html                              /servicios                 301
+/automatizacion                         /servicios                 301
+/automatizacion.html                    /servicios                 301
+/soporte                                /servicios/soporte-infraestructura 301
+/soporte.html                           /servicios/soporte-infraestructura 301
+/redes                                  /servicios/soporte-infraestructura 301
+/redes.html                             /servicios/soporte-infraestructura 301
+/camaras                                /servicios/soporte-infraestructura 301
+/camaras.html                           /servicios/soporte-infraestructura 301
+/reparacion                             /servicios/soporte-infraestructura 301
+/reparacion.html                        /servicios/soporte-infraestructura 301
+/servidores                             /servicios/soporte-infraestructura 301
+/servidores.html                        /servicios/soporte-infraestructura 301
+/empresas                               /servicios                 301
+/empresas.html                          /servicios                 301
+/diagnostico-digital-pymes              /diagnostico-digital       301
+/diagnostico-digital-pymes.html         /diagnostico-digital       301
+/diagn%C3%B3stico-digital-pymes.html    /diagnostico-digital       301
+/paginas-web-presencia-digital          /servicios                 301
+/automatizacion-procesos-pymes          /servicios                 301
+/soporte-mantencion-digital             /servicios/soporte-infraestructura 301
+/camaras-seguridad                      /servicios/soporte-infraestructura 301
+
+# Netlify rewrite: servir 404.html cuando exista (permite mostrar página estática de error)
+/404.html       /404.html        200
+
+# Netlify rewrite: servir SPA para la ruta amigable 404-not-found
+/404-not-found  /index.html      200
+
+# Netlify rewrite: servir index.html para todas las rutas (SPA) - debe estar al final
+/*              /index.html       200

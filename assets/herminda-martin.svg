@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 250" role="img" aria-labelledby="title desc">
+  <title id="title">Hospital Clínico Herminda Martín</title>
+  <desc id="desc">Hospital Clínico Herminda Martín, 100 años de salud y servicio</desc>
+  <g transform="translate(18 15)">
+    <circle cx="108" cy="108" r="98" fill="#fff" stroke="#057cbc" stroke-width="14"/>
+    <path d="M72 17a98 98 0 0 1 72 0" fill="none" stroke="#ef2345" stroke-width="14"/>
+    <path d="M51 192a98 98 0 0 0 114 0" fill="none" stroke="#ef2345" stroke-width="14"/>
+    <circle cx="108" cy="108" r="73" fill="#fff" stroke="#d9dde1" stroke-width="2"/>
+    <text x="108" y="69" text-anchor="middle" fill="#777" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700">Hospital</text>
+    <text x="108" y="94" text-anchor="middle" fill="#777" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700">Clínico</text>
+    <text x="108" y="119" text-anchor="middle" fill="#777" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700">Herminda</text>
+    <text x="108" y="144" text-anchor="middle" fill="#777" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700">Martín</text>
+    <text x="108" y="166" text-anchor="middle" fill="#777" font-family="Arial, Helvetica, sans-serif" font-size="6.5">Gobierno de Chile · Ministerio de Salud</text>
+  </g>
+  <g fill="#0078bd" font-family="Arial, Helvetica, sans-serif">
+    <text x="235" y="113" font-size="116" font-weight="700" letter-spacing="-9">100</text>
+    <text x="424" y="85" font-size="29" font-weight="700">AÑOS</text>
+    <text x="235" y="151" font-size="27" font-weight="700" letter-spacing="5">SALUD Y</text>
+    <text x="235" y="184" font-size="27" font-weight="700" letter-spacing="4">SERVICIO</text>
+    <text x="235" y="218" font-size="27" font-weight="700" letter-spacing="4">1945–2025</text>
+  </g>
+</svg>

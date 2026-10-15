@@ -1,0 +1,21 @@
+{
+  "id": "/dashboard/",
+  "name": "Solven Labs · Panel de gestión",
+  "short_name": "Solven Labs",
+  "description": "Gestión operativa de Solven Labs",
+  "lang": "es-CL",
+  "categories": ["business", "productivity"],
+  "start_url": "/dashboard/",
+  "scope": "/dashboard/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#141e28",
+  "icons": [
+    {
+      "src": "/assets/favicon%20chopped.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

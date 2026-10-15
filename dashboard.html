@@ -1,0 +1,1835 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <base href="/">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <meta name="googlebot" content="noindex, nofollow, noarchive">
+  <meta name="bingbot" content="noindex, nofollow, noarchive">
+  <meta name="theme-color" content="#141e28">
+  <meta name="ntek-mail-worker-url" content="https://ntek-mail-ingest.ntek.workers.dev">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Solven Labs">
+  <title>Acceso Privado | Solven Labs</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon%20chopped.png">
+  <link rel="apple-touch-icon" href="/assets/favicon%20chopped.png">
+  <link rel="manifest" href="/dashboard-manifest.json?v=3">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="/dashboard.css?v=solven-ebct-3">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@1.35.0/dist/umd/lucide.min.js" integrity="sha384-eZXpDHN86IMQuxntjYbYprDla50QW8NC+8P9nUywt9PSVNqZE2Ri3YZ2WWKoliDw" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <link rel="stylesheet" href="/solven-brand.css?v=solven-ebct-3">
+</head>
+<body>
+  <!-- ========== LOGIN PAGE (shown when not authenticated) ========== -->
+  <div class="login-page" id="login-page" style="display:none;">
+    <!-- Background -->
+    <div class="login-bg">
+      <div class="login-bg__orb login-bg__orb--1"></div>
+      <div class="login-bg__orb login-bg__orb--2"></div>
+      <div class="login-bg__orb login-bg__orb--3"></div>
+    </div>
+
+    <!-- Login -->
+    <div class="login">
+      <div class="login__card">
+        <div class="login__logo">
+          <img src="/assets/logo%20extended%20chopped.png" alt="Solven Labs">
+        </div>
+        <h1 class="login__title">Acceso Privado</h1>
+        <p class="login__subtitle">Acceso exclusivo para usuarios autorizados</p>
+
+        <!-- Alert -->
+        <div class="login__alert" id="login-alert" role="status" aria-live="polite">
+          <i data-lucide="alert-circle" style="width:16px;height:16px;flex-shrink:0;"></i>
+          <span id="login-alert-text"></span>
+        </div>
+
+        <!-- Login Form -->
+        <form class="login__form active" id="form-login" data-tab-content="login">
+          <div class="form-field">
+            <label class="form-field__label" for="login-email">Correo electrónico</label>
+            <div class="form-field__input-wrap">
+              <i data-lucide="mail" class="form-field__icon"></i>
+              <input type="email" id="login-email" class="form-field__input" placeholder="tu@empresa.com" required autocomplete="email">
+            </div>
+            <span class="form-field__error">Ingresa un email válido</span>
+          </div>
+
+          <div class="form-field">
+            <label class="form-field__label" for="login-password">Contraseña</label>
+            <div class="form-field__input-wrap">
+              <i data-lucide="lock" class="form-field__icon"></i>
+              <input type="password" id="login-password" name="password" class="form-field__input" placeholder="••••••••" required autocomplete="current-password">
+              <button type="button" class="form-field__toggle-pass" aria-label="Mostrar contraseña">
+                <i data-lucide="eye" style="width:18px;height:18px;"></i>
+              </button>
+            </div>
+            <span class="form-field__error">La contraseña es requerida</span>
+          </div>
+
+          <div class="login__extras">
+            <label class="login__remember">
+              <input type="checkbox" checked> Recordarme
+            </label>
+            <button type="button" class="login__forgot" id="forgot-password-btn">¿Olvidaste tu clave?</button>
+          </div>
+
+          <button type="submit" class="login__submit">
+            <span class="btn-text">Ingresar</span>
+            <div class="spinner"></div>
+          </button>
+        </form>
+
+        <form class="login__form" id="form-forgot-password" hidden>
+          <div class="auth-step__icon" aria-hidden="true"><i data-lucide="key-round"></i></div>
+          <div class="form-field">
+            <label class="form-field__label" for="forgot-email">Correo de tu cuenta</label>
+            <div class="form-field__input-wrap">
+              <i data-lucide="mail" class="form-field__icon"></i>
+              <input type="email" id="forgot-email" class="form-field__input" placeholder="tu@empresa.com"
+                autocomplete="email" required>
+            </div>
+            <span class="form-field__help">Te enviaremos un enlace de uso único para crear una nueva contraseña.</span>
+          </div>
+          <button type="submit" class="login__submit">
+            <span class="btn-text">Enviar enlace de recuperación</span>
+            <div class="spinner"></div>
+          </button>
+          <button type="button" class="auth-step__back" data-auth-back-login>
+            <i data-lucide="arrow-left"></i> Volver a iniciar sesión
+          </button>
+        </form>
+
+        <section class="auth-step" id="recovery-email-sent" hidden aria-live="polite">
+          <div class="auth-step__icon auth-step__icon--success" aria-hidden="true"><i data-lucide="mail-check"></i></div>
+          <h2 class="auth-step__title">Revisa tu correo</h2>
+          <p class="auth-step__copy">Si existe una cuenta asociada a <strong id="recovery-sent-email"></strong>, recibirás un enlace para cambiar la contraseña.</p>
+          <div class="auth-step__notice">
+            <i data-lucide="clock-3"></i>
+            <span>El correo puede tardar unos minutos. Revisa también spam o correo no deseado.</span>
+          </div>
+          <button type="button" class="login__submit" id="recovery-resend-btn">Reenviar correo</button>
+          <button type="button" class="auth-step__back" data-auth-back-login>
+            <i data-lucide="arrow-left"></i> Volver a iniciar sesión
+          </button>
+        </section>
+
+        <form class="login__form" id="form-password-recovery" style="display:none;">
+          <div class="auth-step__icon" aria-hidden="true"><i data-lucide="shield-check"></i></div>
+          <div class="form-field">
+            <label class="form-field__label" for="recovery-password">Nueva contraseña</label>
+            <div class="form-field__input-wrap">
+              <i data-lucide="lock-keyhole" class="form-field__icon"></i>
+              <input type="password" id="recovery-password" class="form-field__input" minlength="8"
+                autocomplete="new-password" required>
+            </div>
+            <span class="form-field__help">Mínimo 8 caracteres. Recomendamos combinar letras, números y símbolos.</span>
+          </div>
+          <div class="form-field">
+            <label class="form-field__label" for="recovery-password-confirm">Confirmar contraseña</label>
+            <div class="form-field__input-wrap">
+              <i data-lucide="shield-check" class="form-field__icon"></i>
+              <input type="password" id="recovery-password-confirm" class="form-field__input" minlength="8"
+                autocomplete="new-password" required>
+            </div>
+          </div>
+          <button type="submit" class="login__submit">
+            <span class="btn-text">Guardar nueva contraseña</span>
+            <div class="spinner"></div>
+          </button>
+        </form>
+      </div>
+
+      <div class="login__back">
+        <a href="/">
+          <i data-lucide="arrow-left" style="width:14px;height:14px;"></i>
+          Volver al sitio web
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== DASHBOARD (shown when authenticated) ========== -->
+  <div class="dashboard-container" id="dashboard-container" style="display:none;">
+  <!-- ========== SIDEBAR ========== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar__header">
+      <a href="/" class="sidebar__logo">
+        <img src="/assets/logo%20blanco.png" alt="Solven Labs" class="sidebar__logo-img">
+      </a>
+    </div>
+
+    <nav class="sidebar__nav" aria-label="Navegación del panel">
+      <div class="sidebar__section">
+        <span class="sidebar__section-label">Principal</span>
+        <a href="/dashboard" class="sidebar__link active" data-page="overview">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Inicio</span>
+        </a>
+        <a href="/dashboard/proyectos" class="sidebar__link" data-page="projects">
+          <i data-lucide="folder-kanban"></i>
+          <span>Proyectos</span>
+          <span class="sidebar__badge" id="badge-projects" style="display:none;"></span>
+        </a>
+        <a href="/dashboard/tareas" class="sidebar__link" data-page="tasks">
+          <i data-lucide="check-square"></i>
+          <span>Tareas</span>
+          <span class="sidebar__badge" id="badge-tasks" style="display:none;"></span>
+        </a>
+      </div>
+
+      <div class="sidebar__section">
+        <span class="sidebar__section-label">Gestión</span>
+        <a href="/dashboard/calendar" class="sidebar__link" data-page="calendar">
+          <i data-lucide="calendar"></i>
+          <span>Calendar</span>
+        </a>
+        <a href="/dashboard/relaciones" class="sidebar__link" data-page="relations">
+          <i data-lucide="users"></i>
+          <span>Relaciones</span>
+        </a>
+        <a href="/dashboard/requisitos" class="sidebar__link" data-page="requirements">
+          <i data-lucide="list-checks"></i>
+          <span>Levantamiento</span>
+        </a>
+        <a href="/dashboard/cotizaciones" class="sidebar__link" data-page="quotes">
+          <i data-lucide="file-plus-2"></i>
+          <span>Cotizaciones</span>
+        </a>
+      </div>
+
+      <div class="sidebar__section">
+        <span class="sidebar__section-label">Operación</span>
+        <a href="/dashboard/mensajes" class="sidebar__link" data-page="messages">
+          <i data-lucide="message-square"></i>
+          <span>Mensajes</span>
+          <span class="sidebar__badge sidebar__badge--accent" id="badge-messages" style="display:none;"></span>
+        </a>
+        <a href="/dashboard/tickets" class="sidebar__link" data-page="orders">
+          <i data-lucide="package"></i>
+          <span>Tickets</span>
+          <span class="sidebar__badge sidebar__badge--warning" id="badge-orders" style="display:none;"></span>
+        </a>
+        <a href="/dashboard/ordenes-servicio" class="sidebar__link" data-page="service-orders">
+          <i data-lucide="wrench"></i>
+          <span>Órdenes</span>
+        </a>
+        <a href="/dashboard/reservas" class="sidebar__link" data-page="bookings">
+          <i data-lucide="calendar-check"></i>
+          <span>Reservas</span>
+        </a>
+      </div>
+
+      <div class="sidebar__section">
+        <span class="sidebar__section-label">Finanzas</span>
+        <a href="/dashboard/finanzas" class="sidebar__link" data-page="sii">
+          <i data-lucide="dollar-sign"></i>
+          <span>Finanzas</span>
+        </a>
+        <a href="/dashboard/boletas" class="sidebar__link" data-page="receipts">
+          <i data-lucide="receipt-text"></i>
+          <span>Boletas</span>
+        </a>
+        <a href="/dashboard/facturacion" class="sidebar__link" data-page="maintenance">
+          <i data-lucide="shield-check"></i>
+          <span>Facturación</span>
+        </a>
+      </div>
+
+      <div class="sidebar__section">
+        <span class="sidebar__section-label">Reportes</span>
+        <a href="/dashboard/analiticas" class="sidebar__link" data-page="analytics">
+          <i data-lucide="bar-chart-3"></i>
+          <span>Analíticas</span>
+        </a>
+        <a href="/dashboard/reportes" class="sidebar__link" data-page="reports">
+          <i data-lucide="file-bar-chart"></i>
+          <span>Reportes</span>
+        </a>
+      </div>
+
+      <div class="sidebar__section">
+        <span class="sidebar__section-label">Personas</span>
+        <a href="/dashboard/bitacora" class="sidebar__link" data-page="practices">
+          <i data-lucide="notebook-pen"></i>
+          <span data-practice-nav-label="logs">Bitácora</span>
+          <span class="sidebar__badge sidebar__badge--warning" id="badge-practices" style="display:none;"></span>
+        </a>
+        <a href="/dashboard/perfil-practicante" class="sidebar__link" data-page="practitioner-profile">
+          <i data-lucide="user-round"></i>
+          <span data-practice-nav-label="profiles">Perfil practicante</span>
+        </a>
+      </div>
+
+      <div class="sidebar__section">
+        <span class="sidebar__section-label">Sistema</span>
+        <a href="/dashboard/equipo" class="sidebar__link" data-page="team">
+          <i data-lucide="user-cog"></i>
+          <span>Equipo</span>
+        </a>
+        <a href="/dashboard/configuracion" class="sidebar__link" data-page="settings">
+          <i data-lucide="settings"></i>
+          <span>Configuración</span>
+        </a>
+      </div>
+    </nav>
+
+    <div class="sidebar__footer">
+      <div class="sidebar__user" id="sidebar-user">
+        <div class="sidebar__user-avatar" id="user-avatar">
+          <i data-lucide="user"></i>
+        </div>
+        <div class="sidebar__user-info">
+          <span class="sidebar__user-name" id="user-name">Admin Solven Labs</span>
+          <span class="sidebar__user-role" id="user-role">Administrador</span>
+        </div>
+        <button type="button" class="sidebar__user-menu" aria-label="Abrir menú de usuario" aria-controls="sidebar-user-dropdown" aria-expanded="false">
+          <i data-lucide="chevron-up"></i>
+        </button>
+      </div>
+      <!-- User dropdown -->
+      <div class="sidebar__user-dropdown" id="sidebar-user-dropdown" style="display:none;">
+        <a href="/" id="profile-view">Ver perfil</a>
+        <a href="/" id="profile-settings">Ajustes</a>
+        <a href="/" id="profile-logout">Cerrar sesión</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <div class="dash-main" id="dash-main">
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar__left">
+        <button class="topbar__menu-btn" id="mobile-menu-btn" aria-label="Abrir menú">
+          <i data-lucide="menu"></i>
+        </button>
+        <div class="topbar__breadcrumb">
+          <span class="topbar__breadcrumb-item">Panel</span>
+          <i data-lucide="chevron-right" style="width:14px;height:14px;opacity:0.4;"></i>
+          <span class="topbar__breadcrumb-item" id="page-breadcrumb-group">Principal</span>
+          <i data-lucide="chevron-right" style="width:14px;height:14px;opacity:0.4;"></i>
+          <span class="topbar__breadcrumb-item active" id="page-breadcrumb">Inicio</span>
+        </div>
+      </div>
+
+      <div class="topbar__right">
+        <div class="topbar__search" id="global-search-wrap">
+          <i data-lucide="search" class="topbar__search-icon"></i>
+          <label for="global-search" class="sr-only">Buscar en el panel</label>
+          <input type="search" class="topbar__search-input" placeholder="Buscar proyectos, clientes o secciones" id="global-search" autocomplete="off" aria-autocomplete="list" aria-controls="global-search-results" aria-expanded="false">
+          <div class="global-search-results" id="global-search-results" role="listbox" aria-label="Resultados de búsqueda" hidden></div>
+        </div>
+        <a href="/" class="topbar__icon-btn" aria-label="Ver sitio web">
+          <i data-lucide="external-link"></i>
+        </a>
+        <button class="topbar__icon-btn" id="logout-btn" aria-label="Cerrar sesión">
+          <i data-lucide="log-out"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- ==================== PAGE: OVERVIEW ==================== -->
+    <div class="dash-page active" id="page-overview">
+      <div class="dash-page__header">
+        <div>
+          <span class="mail-eyebrow"><i data-lucide="layout-grid"></i> Suite Solven Labs</span>
+          <h1 class="dash-page__title">Inicio</h1>
+          <p class="dash-page__subtitle">Tu espacio para organizar la operación diaria de Solven Labs.</p>
+        </div>
+        <div class="dash-page__actions">
+          <a class="btn-dash btn-dash--secondary" href="/dashboard/calendar">
+            <i data-lucide="calendar-days"></i> Abrir Calendar
+          </a>
+        </div>
+      </div>
+
+      <section class="home-hero" aria-labelledby="home-hero-title">
+        <div class="home-hero__content">
+          <span class="home-hero__eyebrow"><i data-lucide="sparkles"></i> Panel operativo</span>
+          <h2 id="home-hero-title">Todo lo importante, a un paso.</h2>
+          <p>Coordina proyectos, tareas, clientes y compromisos desde un inicio claro y enfocado en la operación.</p>
+          <div class="home-hero__actions">
+            <a class="btn-dash btn-dash--primary" href="/dashboard/proyectos"><i data-lucide="folder-kanban"></i> Ir a proyectos</a>
+            <a class="btn-dash home-hero__link" href="/dashboard/tareas">Ver tareas <i data-lucide="arrow-right"></i></a>
+          </div>
+        </div>
+        <div class="home-hero__mark" aria-hidden="true">
+          <img src="/assets/logo%20extended%20chopped.png" alt="">
+          <span>Tecnología que impulsa tu futuro</span>
+        </div>
+      </section>
+
+      <section class="home-shortcuts" aria-label="Accesos rápidos">
+        <a class="home-shortcut" href="/dashboard/relaciones"><i data-lucide="users"></i><span><strong>Relaciones</strong><small>Gestiona clientes y proveedores</small></span><i data-lucide="arrow-up-right"></i></a>
+        <a class="home-shortcut" href="/dashboard/finanzas"><i data-lucide="wallet"></i><span><strong>Finanzas</strong><small>Revisa ingresos y gastos</small></span><i data-lucide="arrow-up-right"></i></a>
+        <a class="home-shortcut" href="/dashboard/cotizaciones"><i data-lucide="file-text"></i><span><strong>Cotizaciones</strong><small>Prepara nuevas propuestas</small></span><i data-lucide="arrow-up-right"></i></a>
+        <a class="home-shortcut" href="/dashboard/mensajes"><i data-lucide="message-square"></i><span><strong>Mensajes</strong><small>Atiende conversaciones</small></span><i data-lucide="arrow-up-right"></i></a>
+        <a class="home-shortcut" href="/dashboard/boletas"><i data-lucide="receipt-text"></i><span><strong>Boletas</strong><small>Emite y consulta boletas</small></span><i data-lucide="arrow-up-right"></i></a>
+        <a class="home-shortcut" href="/dashboard/configuracion"><i data-lucide="settings"></i><span><strong>Configuración</strong><small>Gestiona tu cuenta y accesos</small></span><i data-lucide="arrow-up-right"></i></a>
+      </section>
+
+      <section class="home-workflow" aria-labelledby="home-workflow-title">
+        <div class="home-workflow__intro">
+          <span>FLUJO DE TRABAJO</span>
+          <h3 id="home-workflow-title">Una vista creada para avanzar.</h3>
+          <p>Empieza por lo urgente, coordina lo que sigue y deja cada avance registrado.</p>
+        </div>
+        <ol class="home-workflow__steps">
+          <li><span>01</span><div><i data-lucide="list-checks"></i><strong>Prioriza</strong><small>Ordena tareas y responsables.</small></div></li>
+          <li><span>02</span><div><i data-lucide="calendar-clock"></i><strong>Coordina</strong><small>Reserva reuniones y entregas.</small></div></li>
+          <li><span>03</span><div><i data-lucide="circle-check-big"></i><strong>Entrega</strong><small>Actualiza proyectos y clientes.</small></div></li>
+        </ol>
+      </section>
+
+      <div class="dash-grid dash-grid--2 home-activity-grid">
+        <div class="dash-card">
+          <div class="dash-card__header">
+            <h3 class="dash-card__title">Últimos movimientos</h3>
+            <button type="button" id="btn-view-all-activity" class="dash-card__link">Ver todo</button>
+          </div>
+          <div class="dash-card__body dash-card__body--no-padding">
+            <div class="activity-list" id="activity-list">
+              <p style="color:var(--dash-text-secondary);padding:1rem;">Sin actividad reciente</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="dash-card">
+          <div class="dash-card__header">
+            <h3 class="dash-card__title">Próximos compromisos</h3>
+          </div>
+          <div class="dash-card__body dash-card__body--no-padding">
+            <div class="upcoming-list" id="upcoming-list">
+              <p style="color:var(--dash-text-secondary);padding:1rem;">Sin compromisos próximos</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== PAGE: SII ==================== -->
+    <div class="dash-page" id="page-sii">
+      <div class="dash-page__header">
+        <div>
+          <span class="mail-eyebrow"><i data-lucide="wallet"></i> Suite Solven Labs</span>
+          <h1 class="dash-page__title">Finanzas</h1>
+          <p class="dash-page__subtitle">Facturas, boletas, compras e ingresos en una sola vista</p>
+        </div>
+        <div class="dash-page__actions dash-page__actions--tight">
+          <button class="btn-dash btn-dash--secondary btn-dash--sm" id="btn-export-sii">
+            <i data-lucide="download"></i> Exportar CSV
+          </button>
+          <button class="btn-dash btn-dash--primary btn-dash--sm" id="btn-sii-factura-venta">
+            <i data-lucide="file-text"></i> Factura venta
+          </button>
+          <button class="btn-dash btn-dash--primary btn-dash--sm" id="btn-sii-factura-compra">
+            <i data-lucide="file-down"></i> Factura compra
+          </button>
+          <button class="btn-dash btn-dash--primary btn-dash--sm" id="btn-sii-honorarios">
+            <i data-lucide="file-spreadsheet"></i> Boleta honorarios
+          </button>
+          <button class="btn-dash btn-dash--primary btn-dash--sm" id="btn-sii-gasto">
+            <i data-lucide="shopping-cart"></i> Gasto externo
+          </button>
+          <button class="btn-dash btn-dash--primary btn-dash--sm" id="btn-sii-ingreso">
+            <i data-lucide="wallet"></i> Ingreso externo
+          </button>
+        </div>
+      </div>
+
+      <div class="kpi-grid kpi-grid--4" id="sii-kpis">
+        <div class="kpi-card kpi-card--compact"><div class="kpi-card__content"><span class="kpi-card__label">Saldo retenciones</span><span class="kpi-card__value" id="sii-kpi-retenciones">$0</span></div></div>
+        <div class="kpi-card kpi-card--compact"><div class="kpi-card__content"><span class="kpi-card__label">Ingresos</span><span class="kpi-card__value" id="sii-kpi-ingresos">$0</span></div></div>
+        <div class="kpi-card kpi-card--compact"><div class="kpi-card__content"><span class="kpi-card__label">Egresos</span><span class="kpi-card__value" id="sii-kpi-egresos">$0</span></div></div>
+        <div class="kpi-card kpi-card--compact"><div class="kpi-card__content"><span class="kpi-card__label">Saldo IVA</span><span class="kpi-card__value" id="sii-kpi-iva">$0</span></div></div>
+        <div class="kpi-card kpi-card--compact"><div class="kpi-card__content"><span class="kpi-card__label">Neto</span><span class="kpi-card__value" id="sii-kpi-neto">$0</span></div></div>
+      </div>
+
+      <div class="dash-toolbar dash-toolbar--relations">
+        <div class="dash-toolbar__search">
+          <i data-lucide="search" style="width:16px;height:16px;opacity:0.4;position:absolute;left:12px;top:50%;transform:translateY(-50%);"></i>
+          <input type="text" class="dash-toolbar__input" placeholder="Buscar por detalle, contraparte, RUT o monto" id="sii-search">
+        </div>
+        <div class="dash-toolbar__filters">
+          <select class="dash-select" id="sii-filter-source">
+            <option value="all">Todos los orígenes</option>
+            <option value="presii">SII Facturas</option>
+            <option value="honorarios">Honorarios</option>
+            <option value="expenses">Gastos compras</option>
+            <option value="income">Ingresos externos</option>
+          </select>
+          <select class="dash-select" id="sii-filter-type">
+            <option value="all">Todos los tipos</option>
+            <option value="sale">Factura venta</option>
+            <option value="purchase">Factura compra</option>
+            <option value="honorarios">Boleta honorarios</option>
+            <option value="expense">Gasto compra</option>
+            <option value="income">Ingreso externo</option>
+          </select>
+          <select class="dash-select" id="sii-filter-status">
+            <option value="all">Todos los estados</option>
+            <option value="borrador">Borrador</option>
+            <option value="emitida">Emitida</option>
+            <option value="pagado">Pagado</option>
+            <option value="registrado">Registrado</option>
+            <option value="aprobado">Aprobado</option>
+            <option value="pendiente">Pendiente</option>
+          </select>
+          <select class="dash-select" id="sii-filter-mes"></select>
+        </div>
+      </div>
+
+      <div class="dash-card">
+        <div class="dash-card__body dash-card__body--no-padding">
+          <div class="table-responsive">
+            <table class="dash-table dash-table--sii">
+              <thead>
+                <tr>
+                  <th>Tipo</th>
+                  <th>Detalle</th>
+                  <th>Contraparte</th>
+                  <th>Fecha</th>
+                  <th>Monto</th>
+                  <th>IVA / retención</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="sii-tbody">
+                    <tr><td colspan="8" style="text-align:center;color:var(--dash-text-secondary);padding:2rem;">Cargando documentos de Finanzas...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== PAGE: RELATIONS ==================== -->
+    <div class="dash-page" id="page-relations">
+      <div class="dash-page__header">
+        <div>
+          <span class="mail-eyebrow"><i data-lucide="users"></i> Suite Solven Labs</span>
+          <h1 class="dash-page__title">Relaciones</h1>
+          <p class="dash-page__subtitle">Gestiona clientes y proveedores en una sola vista</p>
+        </div>
+        <div class="dash-page__actions dash-page__actions--tight">
+          <button class="btn-dash btn-dash--secondary btn-dash--sm" id="btn-export-relations">
+            <i data-lucide="download"></i> Exportar
+          </button>
+          <button class="btn-dash btn-dash--primary btn-dash--sm" id="btn-add-client" data-relation-type="client">
+            <i data-lucide="plus"></i> Nuevo cliente
+          </button>
+          <button class="btn-dash btn-dash--primary btn-dash--sm" id="btn-add-provider" data-relation-type="provider">
+            <i data-lucide="plus"></i> Nuevo proveedor
+          </button>
+        </div>
+      </div>
+
+      <div class="dash-toolbar dash-toolbar--relations">
+        <div class="dash-toolbar__search">
+          <i data-lucide="search" style="width:16px;height:16px;opacity:0.4;position:absolute;left:12px;top:50%;transform:translateY(-50%);"></i>
+          <input type="text" class="dash-toolbar__input" placeholder="Buscar por nombre, empresa, email o RUT" id="relations-search">
+        </div>
+        <div class="dash-toolbar__filters">
+          <select class="dash-select" id="relations-type-filter">
+            <option value="all">Todos los tipos</option>
+            <option value="client">Clientes</option>
+            <option value="provider">Proveedores</option>
+          </select>
+          <select class="dash-select" id="relations-status-filter">
+            <option value="all">Todos los estados</option>
+            <option value="active">Activo</option>
+            <option value="inactive">Inactivo</option>
+            <option value="prospect">Prospecto</option>
+          </select>
+          <select class="dash-select" id="relations-sort-filter">
+            <option value="name">Ordenar por nombre</option>
+            <option value="company">Ordenar por empresa</option>
+            <option value="type">Ordenar por tipo</option>
+            <option value="amount">Ordenar por facturado</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="dash-card">
+        <div class="dash-card__body dash-card__body--no-padding">
+          <div class="table-responsive">
+            <table class="dash-table dash-table--relations">
+              <thead>
+                <tr>
+                  <th>Tipo</th>
+                  <th>Nombre</th>
+                  <th>Empresa</th>
+                  <th>Contacto</th>
+                  <th>Detalle</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="relations-tbody">
+                <tr><td colspan="7" style="text-align:center;color:var(--dash-text-secondary);padding:2rem;">Cargando relaciones...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== PAGE: PROJECTS ==================== -->
+    <div class="dash-page" id="page-projects">
+      <div class="dash-page__header">
+        <div>
+          <span class="mail-eyebrow"><i data-lucide="folder-kanban"></i> Suite Solven Labs</span>
+          <h1 class="dash-page__title">Proyectos</h1>
+          <p class="dash-page__subtitle">Gestiona y supervisa todos tus proyectos</p>
+        </div>
+        <div class="dash-page__actions">
+          <div class="view-toggle" id="proj-view-toggle" role="group" aria-label="Vista de proyectos">
+            <button class="view-toggle__btn view-toggle__btn--active" id="proj-view-cards" aria-label="Vista de tarjetas" aria-pressed="true"><i data-lucide="layout-grid"></i></button>
+            <button class="view-toggle__btn" id="proj-view-kanban" aria-label="Vista kanban" aria-pressed="false"><i data-lucide="columns-3"></i></button>
+          </div>
+          <button class="btn-dash btn-dash--primary" id="btn-add-project">
+            <i data-lucide="plus"></i> Nuevo Proyecto
+          </button>
+        </div>
+      </div>
+
+      <!-- Project cards -->
+      <div class="project-grid" id="projects-grid">
+        <p style="color:var(--dash-text-secondary);padding:2rem;text-align:center;">Cargando proyectos...</p>
+      </div>
+      <!-- Project Kanban -->
+      <div class="kanban" id="projects-kanban" style="display:none;"></div>
+    </div>
+
+    <!-- ==================== PAGE: INVOICES ==================== -->
+    <div class="dash-page" id="page-invoices">
+      <div class="dash-page__header">
+        <div>
+          <span class="mail-eyebrow"><i data-lucide="file-text"></i> Suite Solven Labs</span>
+          <h1 class="dash-page__title">Facturas</h1>
+          <p class="dash-page__subtitle">Documentos tributarios previos al envío oficial al SII</p>
+        </div>
+        <div class="dash-page__actions">
+          <button class="btn-dash btn-dash--secondary" id="btn-export-presii">
+            <i data-lucide="download"></i> Exportar CSV
+          </button>
+          <button class="btn-dash btn-dash--primary" id="btn-nueva-presii">
+            <i data-lucide="plus"></i> Nueva Factura
+          </button>
+        </div>
+      </div>
+
+      <div class="dash-toolbar" style="margin-bottom:16px;border-bottom:none;padding-bottom:0;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:0.82rem;color:var(--dash-text-secondary);white-space:nowrap;">Período:</span>
+          <select class="dash-select" id="presii-filter-mes" style="min-width:170px;"></select>
+        </div>
+      </div>
+
+      <div class="kpi-grid kpi-grid--4" id="presii-kpis">
+        <div class="kpi-card kpi-card--compact">
+          <div class="kpi-card__content">
+            <span class="kpi-card__label">Total Emitidas</span>
+            <span class="kpi-card__value" id="presii-kpi-total">0</span>
+          </div>
+        </div>
+        <div class="kpi-card kpi-card--compact">
+          <div class="kpi-card__content">
+            <span class="kpi-card__label">Por Cobrar</span>
+            <span class="kpi-card__value" id="presii-kpi-por-cobrar" style="color:#E65100;">$0</span>
+          </div>
+        </div>
+        <div class="kpi-card kpi-card--compact">
+          <div class="kpi-card__content">
+            <span class="kpi-card__label">Monto Total</span>
+            <span class="kpi-card__value" id="presii-kpi-monto">$0</span>
+          </div>
+        </div>
+        <div class="kpi-card kpi-card--compact">
+          <div class="kpi-card__content">
+            <span class="kpi-card__label">Operaciones Venta</span>
+            <span class="kpi-card__value" id="presii-kpi-venta">0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-toolbar">
+        <div class="dash-toolbar__search">
+          <i data-lucide="search" style="width:16px;height:16px;opacity:0.4;position:absolute;left:12px;top:50%;transform:translateY(-50%);"></i>
+          <input type="text" class="dash-toolbar__input" placeholder="Buscar facturas..." id="presii-search">
+        </div>
+        <div class="dash-toolbar__filters">
+          <select class="dash-select" id="presii-filter-tipo">
+            <option value="">Todos los tipos</option>
+            <option value="33">Factura Electrónica (33)</option>
+            <option value="34">Factura No Afecta (34)</option>
+            <option value="39">Boleta Electrónica (39)</option>
+            <option value="110">Factura Compra (110)</option>
+          </select>
+          <select class="dash-select" id="presii-filter-operacion">
+            <option value="">Venta y Compra</option>
+            <option value="venta">Venta</option>
+            <option value="compra">Compra</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="dash-card" style="margin-top:1rem;">
+        <div class="dash-card__body dash-card__body--no-padding">
+          <div class="table-responsive">
+            <table class="dash-table">
+              <thead>
+                <tr>
+                  <th>Folio</th>
+                  <th>Tipo DTE</th>
+                  <th>Operación</th>
+                  <th>Razón Social</th>
+                  <th>RUT Receptor</th>
+                  <th>Fecha</th>
+                  <th>Neto</th>
+                  <th>IVA</th>
+                  <th>Total</th>
+                  <th>PDF SII</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="presii-tbody">
+                <tr><td colspan="10" style="text-align:center;color:var(--dash-text-secondary);padding:2rem;">No hay facturas pre-SII aún</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== PAGE: RECEIPTS ==================== -->
+    <div class="dash-page" id="page-receipts">
+      <div class="dash-page__header">
+        <div>
+          <span class="mail-eyebrow"><i data-lucide="receipt-text"></i> Suite Solven Labs</span>
+          <h1 class="dash-page__title">Boletas</h1>
+          <p class="dash-page__subtitle">Registra servicios y entrega una boleta clara a tus clientes</p>
+        </div>
+        <div class="dash-page__actions">
+          <button class="btn-dash btn-dash--secondary" id="dashboard-receipt-reset" type="button" data-permission-action="dashboard-receipt-print">
+            <i data-lucide="file-plus-2"></i> Nueva boleta
+          </button>
+        </div>
+      </div>
+
+      <form class="dashboard-receipt-lookup" id="dashboard-receipt-search-form" role="search">
+        <label class="dashboard-receipt-search">
+          <i data-lucide="search"></i>
+          <span class="sr-only">Buscar boleta</span>
+          <input class="modal-form__input" id="dashboard-receipt-search" type="search" autocomplete="off" placeholder="Buscar por folio, cliente, RUT o detalle...">
+        </label>
+      </form>
+
+      <div class="dashboard-receipt-layout">
+        <section class="dash-card dashboard-receipt-editor" aria-labelledby="dashboard-receipt-form-title">
+          <div class="dash-card__header">
+            <div>
+              <h2 class="dash-card__title" id="dashboard-receipt-form-title">Información de la boleta</h2>
+              <p class="dashboard-receipt-card-copy">El número se asignará automáticamente al guardar.</p>
+            </div>
+            <span class="dashboard-receipt-status is-dirty" id="dashboard-receipt-status">Sin guardar</span>
+          </div>
+          <div class="dash-card__body">
+            <div class="dashboard-receipt-notice">
+              <i data-lucide="info"></i>
+              <span>La boleta se guardará al imprimir. No reemplaza un documento tributario electrónico autorizado por el SII.</span>
+            </div>
+
+            <div class="dashboard-receipt-form-grid dashboard-receipt-form-grid--3">
+              <label class="modal-form__group">
+                <span class="modal-form__label">Tipo de documento</span>
+                <select class="modal-form__select" id="dashboard-receipt-type">
+                  <option value="BOLETA AFECTA A IVA">Boleta afecta a IVA</option>
+                  <option value="BOLETA EXENTA O NO AFECTA A IVA">Boleta exenta o no afecta a IVA</option>
+                </select>
+              </label>
+              <label class="modal-form__group">
+                <span class="modal-form__label">N.º de referencia</span>
+                <input class="modal-form__input" id="dashboard-receipt-number" type="text" placeholder="Se asigna al guardar" readonly>
+              </label>
+              <label class="modal-form__group">
+                <span class="modal-form__label">Fecha y hora</span>
+                <input class="modal-form__input" id="dashboard-receipt-date" type="datetime-local">
+              </label>
+            </div>
+
+            <div class="dashboard-receipt-section">
+              <div class="dashboard-receipt-section__title">Cliente <small>opcional</small></div>
+              <div class="dashboard-receipt-form-grid dashboard-receipt-form-grid--3">
+                <label class="modal-form__group">
+                  <span class="modal-form__label">Nombre o empresa</span>
+                  <input class="modal-form__input" id="dashboard-receipt-customer-name" type="text" maxlength="80" placeholder="Cliente">
+                </label>
+                <label class="modal-form__group">
+                  <span class="modal-form__label">RUT</span>
+                  <input class="modal-form__input" id="dashboard-receipt-customer-rut" type="text" maxlength="20" placeholder="12.345.678-9">
+                </label>
+                <label class="modal-form__group">
+                  <span class="modal-form__label">Contacto</span>
+                  <input class="modal-form__input" id="dashboard-receipt-customer-contact" type="text" maxlength="60" placeholder="Correo o teléfono">
+                </label>
+              </div>
+            </div>
+
+            <div class="dashboard-receipt-section">
+              <div class="dashboard-receipt-section__heading">
+                <div class="dashboard-receipt-section__title">Servicios o productos</div>
+                <button class="btn-dash btn-dash--secondary btn-dash--sm" id="dashboard-receipt-add-item" type="button" data-permission-action="dashboard-receipt-print">
+                  <i data-lucide="plus"></i> Añadir línea
+                </button>
+              </div>
+              <div class="dashboard-receipt-items-head" aria-hidden="true">
+                <span>Detalle</span><span>Cantidad</span><span>Precio</span><span>Descuento</span><span>Total</span><span></span>
+              </div>
+              <div id="dashboard-receipt-items"></div>
+            </div>
+
+            <div class="dashboard-receipt-form-grid dashboard-receipt-form-grid--2">
+              <label class="modal-form__group">
+                <span class="modal-form__label">Medio de pago</span>
+                <select class="modal-form__select" id="dashboard-receipt-payment">
+                  <option>Efectivo</option>
+                  <option>Transferencia</option>
+                  <option>Débito</option>
+                  <option>Crédito</option>
+                  <option>Mercado Pago</option>
+                  <option>Otro</option>
+                </select>
+              </label>
+              <label class="modal-form__group" id="dashboard-receipt-received-wrap">
+                <span class="modal-form__label">Monto recibido</span>
+                <input class="modal-form__input" id="dashboard-receipt-received" type="number" min="0" step="1" inputmode="numeric" placeholder="$0">
+              </label>
+            </div>
+
+            <div class="dashboard-receipt-form-grid dashboard-receipt-form-grid--2">
+              <label class="modal-form__group">
+                <span class="modal-form__label">Nota para el cliente</span>
+                <textarea class="modal-form__textarea" id="dashboard-receipt-note" rows="3" maxlength="180" placeholder="Ej: Servicio entregado conforme."></textarea>
+              </label>
+              <label class="modal-form__group">
+                <span class="modal-form__label">Mensaje final</span>
+                <textarea class="modal-form__textarea" id="dashboard-receipt-footer" rows="3" maxlength="180">Gracias por preferir Equipo Solven Labs.</textarea>
+              </label>
+            </div>
+
+            <div class="dashboard-receipt-actions">
+              <p id="dashboard-receipt-message" role="alert" hidden></p>
+              <button class="btn-dash btn-dash--primary" id="dashboard-receipt-print" type="button">
+                <i data-lucide="printer"></i><span>Guardar e imprimir</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <aside class="dash-card dashboard-receipt-preview-card" aria-label="Vista previa de la boleta">
+          <div class="dash-card__header">
+            <h2 class="dash-card__title">Vista previa</h2>
+          </div>
+          <div class="dash-card__body dashboard-receipt-preview-wrap">
+            <article class="dashboard-thermal-receipt" id="dashboard-receipt-preview">
+              <header class="dashboard-thermal-receipt__header">
+                <img src="/assets/logo%20extended%20chopped.png" alt="Logo Solven Labs">
+                <strong>SERVICIOS INFORMÁTICOS YEVENES &amp; CIA LTDA</strong>
+                <span>RUT 78.352.809-6</span>
+                <span>Actividades de consultoría informática y de gestión de instalaciones informática</span>
+                <span>Colo-Colo 379 Of. 706, Concepción</span>
+                <span>+56 9 7702 9753 · tomas@solvenlabs.cl</span>
+              </header>
+              <div class="dashboard-thermal-receipt__rule"></div>
+              <section class="dashboard-thermal-receipt__meta">
+                <strong id="dashboard-preview-title">BOLETA AFECTA A IVA</strong>
+                <div><span>N.º / REF.</span><b id="dashboard-preview-number">SIN GUARDAR</b></div>
+                <div><span>FECHA</span><b id="dashboard-preview-date">—</b></div>
+              </section>
+              <section id="dashboard-preview-customer" hidden>
+                <div class="dashboard-thermal-receipt__rule"></div>
+                <strong>CLIENTE</strong>
+                <span id="dashboard-preview-customer-name"></span>
+                <span id="dashboard-preview-customer-rut"></span>
+                <span id="dashboard-preview-customer-contact"></span>
+              </section>
+              <div class="dashboard-thermal-receipt__rule"></div>
+              <section>
+                <div class="dashboard-thermal-receipt__items-head"><span>DETALLE</span><span>TOTAL</span></div>
+                <div id="dashboard-preview-items"></div>
+              </section>
+              <div class="dashboard-thermal-receipt__rule"></div>
+              <section class="dashboard-thermal-receipt__totals">
+                <div><span>NETO</span><b id="dashboard-preview-net">$0</b></div>
+                <div id="dashboard-preview-tax-row"><span>IVA 19% INCL.</span><b id="dashboard-preview-tax">$0</b></div>
+                <div class="dashboard-thermal-receipt__grand-total"><span>TOTAL</span><b id="dashboard-preview-total">$0</b></div>
+                <div><span>FORMA DE PAGO</span><b id="dashboard-preview-payment">Efectivo</b></div>
+                <div id="dashboard-preview-received-row"><span>RECIBIDO</span><b id="dashboard-preview-received">$0</b></div>
+                <div id="dashboard-preview-change-row"><span>VUELTO</span><b id="dashboard-preview-change">$0</b></div>
+              </section>
+              <section id="dashboard-preview-note-wrap" hidden>
+                <div class="dashboard-thermal-receipt__rule"></div>
+                <p id="dashboard-preview-note"></p>
+              </section>
+              <footer class="dashboard-thermal-receipt__footer">
+                <div class="dashboard-thermal-receipt__rule"></div>
+                <strong id="dashboard-preview-footer">Gracias por preferir Equipo Solven Labs.</strong>
+                <span>www.solvenlabs.cl</span>
+                <small>Comprobante interno no válido como documento tributario electrónico.</small>
+              </footer>
+            </article>
+          </div>
+        </aside>
+      </div>
+
+      <template id="dashboard-receipt-row-template">
+        <div class="dashboard-receipt-item-row">
+          <label><span>Detalle</span><input class="modal-form__input dashboard-receipt-item-description" type="text" maxlength="90" placeholder="Ej: Mantención web"></label>
+          <label><span>Cantidad</span><input class="modal-form__input dashboard-receipt-item-quantity" type="number" min="0.01" step="0.01" value="1" inputmode="decimal"></label>
+          <label><span>Precio</span><input class="modal-form__input dashboard-receipt-item-price" type="number" min="0" step="1" placeholder="0" inputmode="numeric"></label>
+          <label><span>Descuento</span><input class="modal-form__input dashboard-receipt-item-discount" type="number" min="0" max="100" step="1" value="0" inputmode="decimal"></label>
+          <output class="dashboard-receipt-item-total">$0</output>
+          <button class="dashboard-receipt-item-remove" type="button" aria-label="Eliminar línea"><i data-lucide="trash-2"></i></button>
+        </div>
+      </template>
+    </div>
+
+    <div class="dash-page" id="page-maintenance">
+      <div class="dash-page__header">
+        <div>
+          <span class="mail-eyebrow"><i data-lucide="receipt"></i> Suite Solven Labs</span>
+          <h1 class="dash-page__title">Facturación</h1>
+          <p class="dash-page__subtitle">Factura mantenciones por proyecto y permite que cada cliente las pague manualmente desde su portal.</p>
+        </div>
+        <div class="dash-page__actions">
+          <button class="btn-dash btn-dash--primary" id="btn-add-mp-subscription">
+            <i data-lucide="calendar-plus"></i> Activar mantención mensual
+          </button>
+        </div>
+      </div>
+
+      <div class="kpi-grid kpi-grid--4" id="maintenance-kpis">
+        <div class="kpi-card">
+          <div class="kpi-card__content">
+            <span class="kpi-card__label">Mantenciones activas</span>
+            <span class="kpi-card__value" id="maintenance-kpi-active">0</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card__content">
+            <span class="kpi-card__label">Monto mensual activo</span>
+            <span class="kpi-card__value" id="maintenance-kpi-due">$0</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card__content">
+            <span class="kpi-card__label">Facturan en 7 días</span>
+            <span class="kpi-card__value" id="maintenance-kpi-upcoming">0</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card__content">
+            <span class="kpi-card__label">Con cobro vencido</span>
+            <span class="kpi-card__value" id="maintenance-kpi-overdue">0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-card dash-card--compact" style="margin-bottom:1rem;">
+        <div class="dash-card__body" id="maintenance-upcoming-list">
+          <h3 class="dash-card__title">Próximas facturas programadas</h3>
+          <div style="color:var(--dash-text-secondary);padding:1rem;" id="maintenance-upcoming-placeholder">Cargando próximas facturas...</div>
+        </div>
+      </div>
+
+      <div class="dash-card" style="margin-bottom:1rem;">
+        <div class="dash-card__header">
+          <div>
+            <h3 class="dash-card__title">Mantenciones facturadas · Pago manual</h3>
+            <p style="margin:4px 0 0;color:var(--dash-text-secondary);font-size:.85rem;">Se mantiene un solo cobro abierto por proyecto. Si está impago o vencido, no se acumulan meses nuevos.</p>
+          </div>
+        </div>
+        <div class="dash-card__body dash-card__body--no-padding">
+          <div class="table-responsive">
+            <table class="dash-table">
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Pack</th>
+                  <th>Monto mensual</th>
+                  <th>Estado</th>
+                  <th>Próxima factura</th>
+                  <th>RUT</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="maintenance-subscriptions-tbody">
+                <tr><td colspan="7" style="text-align:center;color:var(--dash-text-secondary);padding:2rem;">Cargando mantenciones...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="dash-page" id="page-orders">
+      <div class="dash-page__header">
+        <div>
+          <span class="mail-eyebrow"><i data-lucide="ticket"></i> Suite Solven Labs</span>
+          <h1 class="dash-page__title">Tickets</h1>
+          <p class="dash-page__subtitle">Seguimiento de solicitudes y entregables</p>
+        </div>
+        <div class="dash-page__actions">
+          <button class="btn-dash btn-dash--primary" id="btn-add-order">
+            <i data-lucide="plus"></i> Nuevo Ticket
+          </button>
+        </div>
+      </div>
+
+      <!-- Kanban Board -->
+      <div class="kanban" id="kanban-board">
+        <p style="color:var(--dash-text-secondary);padding:2rem;text-align:center;">Cargando pedidos...</p>
+      </div>
+    </div>
+
+    <!-- ==================== PAGE: SERVICE ORDERS ==================== -->
+    <div class="dash-page" id="page-service-orders">
+      <div class="dash-page__header">
+        <div>
+          <span class="mail-eyebrow"><i data-lucide="wrench"></i> Suite Solven Labs</span>
+          <h1 class="dash-page__title">Órdenes</h1>
+          <p class="dash-page__subtitle">Ingreso y seguimiento de equipos, diagnósticos, trabajos y garantías</p>
+        </div>
+        <div class="dash-page__actions">
+          <button class="btn-dash btn-dash--primary" id="btn-add-service-order">
+            <i data-lucide="plus"></i> Nueva orden
+          </button>
+        </div>
+      </div>
+
+      <div class="kpi-grid kpi-grid--4">
+        <div class="kpi-card"><div class="kpi-card__content"><span class="kpi-card__label">Órdenes activas</span><span class="kpi-card__value" id="service-order-kpi-active">0</span></div></div>
+        <div class="kpi-card"><div class="kpi-card__content"><span class="kpi-card__label">En diagnóstico</span><span class="kpi-card__value" id="service-order-kpi-diagnosis">0</span></div></div>
+        <div class="kpi-card"><div class="kpi-card__content"><span class="kpi-card__label">Listas para entrega</span><span class="kpi-card__value" id="service-order-kpi-ready">0</span></div></div>
+        <div class="kpi-card"><div class="kpi-card__content"><span class="kpi-card__label">Monto registrado</span><span class="kpi-card__value" id="service-order-kpi-total">$0</span></div></div>
+      </div>
+
+      <div class="dash-toolbar">
+        <div class="dash-toolbar__search">
+          <i data-lucide="search" style="width:16px;height:16px;opacity:0.4;position:absolute;left:12px;top:50%;transform:translateY(-50%);"></i>
+          <input type="search" class="dash-toolbar__input" id="service-order-search" placeholder="Buscar por folio, cliente, equipo o serie...">
+        </div>
+        <div class="dash-toolbar__filters">
+          <select class="dash-select" id="service-order-filter-status">
+            <option value="">Todos los estados</option>
+            <option value="received">Recibida</option>
+            <option value="diagnosis">En diagnóstico</option>
+            <option value="in_progress">En reparación</option>
+            <option value="ready">Lista para entrega</option>
+            <option value="delivered">Entregada</option>
+            <option value="cancelled">Cancelada</option>
+          </select>
+          <select class="dash-select" id="service-order-filter-payment">
+            <option value="">Todos los pagos</option>
+            <option value="pending">Pendiente</option>
+            <option value="paid">Pagado</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="dash-card">
+        <div class="dash-card__body dash-card__body--no-padding">
+          <div class="table-responsive">
+            <table class="dash-table service-orders-table">
+              <thead><tr><th>Folio / fecha</th><th>Cliente</th><th>Equipo</th><th>Técnico</th><th>Estado</th><th>Pago</th><th>Total</th><th>Acciones</th></tr></thead>
+              <tbody id="service-orders-tbody"><tr><td colspan="8" class="service-orders-empty">Cargando órdenes...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== PAGE: PUBLIC BOOKINGS ==================== -->
+    <div class="dash-page" id="page-bookings">
+      <div class="dash-page__header">
+        <div>
+          <span class="mail-eyebrow"><i data-lucide="calendar-check"></i> Agenda Solven Labs</span>
+          <h1 class="dash-page__title">Reservas</h1>
+          <p class="dash-page__subtitle">Visitas técnicas y reuniones solicitadas desde solvenlabs.cl</p>
+        </div>
+        <div class="dash-page__actions">
+          <button class="btn-dash btn-dash--secondary" type="button" id="bookings-refresh"><i data-lucide="refresh-cw"></i> Actualizar</button>
+          <button class="btn-dash btn-dash--primary" type="button" id="bookings-open-calendar"><i data-lucide="calendar-days"></i> Ver Calendar</button>
+        </div>
+      </div>
+      <div class="kpi-grid kpi-grid--4">
+        <div class="kpi-card"><div class="kpi-card__content"><span class="kpi-card__label">Próximas</span><span class="kpi-card__value" id="bookings-kpi-upcoming">0</span></div></div>
+        <div class="kpi-card"><div class="kpi-card__content"><span class="kpi-card__label">Visitas pagadas</span><span class="kpi-card__value" id="bookings-kpi-approved">0</span></div></div>
+        <div class="kpi-card"><div class="kpi-card__content"><span class="kpi-card__label">Reuniones iniciales</span><span class="kpi-card__value" id="bookings-kpi-consultations">0</span></div></div>
+        <div class="kpi-card"><div class="kpi-card__content"><span class="kpi-card__label">Pagos pendientes</span><span class="kpi-card__value" id="bookings-kpi-pending">0</span></div></div>
+      </div>
+      <div class="dash-toolbar">
+        <div class="dash-toolbar__search"><i data-lucide="search" style="width:16px;height:16px;opacity:.4;position:absolute;left:12px;top:50%;transform:translateY(-50%);"></i><input type="search" class="dash-toolbar__input" id="bookings-search" placeholder="Buscar por cliente, correo, teléfono o servicio..."></div>
+        <div class="dash-toolbar__filters"><select class="dash-select" id="bookings-filter-type"><option value="">Todo tipo</option><option value="visit">Visitas técnicas</option><option value="consultation">Reuniones iniciales</option></select><select class="dash-select" id="bookings-filter-status"><option value="">Todos los estados</option><option value="confirmed">Confirmadas</option><option value="pending">Pendientes de pago</option><option value="cancelled">Canceladas</option></select></div>
+      </div>
+      <div class="dash-card"><div class="dash-card__body dash-card__body--no-padding"><div class="table-responsive"><table class="dash-table"><thead><tr><th>Fecha y hora</th><th>Tipo</th><th>Cliente</th><th>Detalle</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="bookings-tbody"><tr><td colspan="6" class="service-orders-empty">Cargando reservas...</td></tr></tbody></table></div></div></div>
+    </div>
+
+    <!-- ==================== PAGE: TASKS ==================== -->
+    <div class="dash-page" id="page-tasks">
+      <div class="dash-page__header">
+        <div>
+          <span class="mail-eyebrow"><i data-lucide="list-checks"></i> Suite Solven Labs</span>
+          <h1 class="dash-page__title">Tareas</h1>
+          <p class="dash-page__subtitle">Tu lista de tareas pendientes</p>
+        </div>
+        <div class="dash-page__actions">
+          <div class="view-toggle" role="group" aria-label="Vista de tareas">
+            <button class="view-toggle__btn view-toggle__btn--active" id="task-view-list" aria-label="Vista de lista" aria-pressed="true"><i data-lucide="list"></i></button>
+            <button class="view-toggle__btn" id="task-view-cal" aria-label="Vista de calendario" aria-pressed="false"><i data-lucide="calendar-days"></i></button>
+          </div>
+          <button class="btn-dash btn-dash--primary" id="btn-add-task">
+            <i data-lucide="plus"></i> Nueva Tarea
+          </button>
+        </div>
+      </div>
+
+      <div class="dash-card" id="task-list-card">
+        <div class="dash-card__body">
+          <div class="task-list" id="task-list">
+            <p style="color:var(--dash-text-secondary);padding:1rem;">Cargando tareas...</p>
+          </div>
+        </div>
+      </div>
+      <!-- Task Calendar View -->
+      <div id="task-calendar-view" style="display:none;">
+        <div class="task-cal-nav">
+          <button class="calendar-widget__nav" id="task-cal-prev" aria-label="Mes anterior"><i data-lucide="chevron-left"></i></button>
+          <h3 class="calendar-widget__month" id="task-cal-month">Mes 2026</h3>
+          <button class="calendar-widget__nav" id="task-cal-next" aria-label="Mes siguiente"><i data-lucide="chevron-right"></i></button>
+        </div>
+        <div class="task-cal-grid" id="task-cal-grid"></div>
+      </div>
+    </div>
+
+    <!-- ==================== PAGE: CALENDAR ==================== -->
+    <div class="dash-page" id="page-calendar">
+      <div class="dash-page__header">
+        <div>
+          <span class="mail-eyebrow"><i data-lucide="calendar-days"></i> Suite Solven Labs</span>
+          <h1 class="dash-page__title">Calendar</h1>
+          <p class="dash-page__subtitle">Reuniones, entregas y eventos</p>
+        </div>
+        <div class="dash-page__actions">
+          <button class="btn-dash btn-dash--secondary" id="btn-add-block" style="display:none;">
+            <i data-lucide="calendar-off"></i> Inhabilitar día
+          </button>
+          <button class="btn-dash btn-dash--primary" id="btn-add-event">
+            <i data-lucide="plus"></i> Nuevo Evento
+          </button>
+        </div>
+      </div>
+
+      <div class="calendar-layout">
+        <div class="calendar-widget">
+          <div class="calendar-widget__header">
+            <button class="calendar-widget__nav" id="cal-prev" aria-label="Mes anterior"><i data-lucide="chevron-left"></i></button>
+            <h3 class="calendar-widget__month" id="cal-month">Febrero 2026</h3>
+            <button class="calendar-widget__nav" id="cal-next" aria-label="Mes siguiente"><i data-lucide="chevron-right"></i></button>
+          </div>
+          <div class="calendar-widget__days">
+            <span>Lu</span><span>Ma</span><span>Mi</span><span>Ju</span><span>Vi</span><span>Sa</span><span>Do</span>
+          </div>
+          <div class="calendar-widget__grid" id="cal-grid">
+            <!-- Filled by JS -->
+          </div>
+        </div>
+
+        <div class="calendar-events">
+          <h3 class="calendar-events__title">Eventos del día</h3>
+          <div class="calendar-events__list" id="cal-events">
+            <p style="color:var(--dash-text-secondary);padding:1rem;">Sin eventos para hoy</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== PAGE: MESSAGES ==================== -->
+    <div class="dash-page" id="page-messages">
+      <div class="dash-page__header">
+        <div>
+          <span class="mail-eyebrow"><i data-lucide="message-square"></i> Suite Solven Labs</span>
+          <h1 class="dash-page__title">Mensajes</h1>
+          <p class="dash-page__subtitle">Solicitudes enviadas desde el formulario de contacto público</p>
+        </div>
+        <div class="dash-page__actions">
+          <button type="button" class="btn-dash btn-dash--secondary" id="btn-site-refresh-messages">
+            <i data-lucide="refresh-cw"></i> Actualizar
+          </button>
+        </div>
+      </div>
+
+      <div class="dash-card">
+        <div class="dash-card__body dash-card__body--no-padding">
+          <div class="table-responsive">
+            <table class="dash-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Nombre</th>
+                  <th>Email</th>
+                  <th>Teléfono</th>
+                  <th>Servicio</th>
+                  <th>Mensaje</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="site-messages-tbody">
+                <tr><td colspan="8" style="text-align:center;color:var(--dash-text-secondary);padding:2rem;">Cargando mensajes...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== PAGE: ANALYTICS ==================== -->
+    <div class="dash-page" id="page-analytics">
+      <div class="bi-dashboard bi-dashboard--monthly">
+        <header class="dash-page__header bi-page-header">
+          <div><span class="mail-eyebrow"><i data-lucide="bar-chart-3"></i> Suite Solven Labs · Inteligencia mensual</span><h1 class="dash-page__title">Analíticas</h1><p class="dash-page__subtitle">Explora el rendimiento de un mes, detecta variaciones y profundiza en cada área del negocio.</p></div>
+          <div class="bi-page-context"><i data-lucide="calendar-range"></i><div><span id="analytics-period-name">Mes actual</span><small>Vista mensual</small></div></div>
+        </header>
+        <section class="bi-filterbar" aria-label="Filtros de analíticas">
+          <label><span>Mes de análisis</span><input class="bi-control" type="month" id="analytics-month"></label>
+          <label><span>Área</span><select class="bi-control" id="analytics-area"><option value="all">Todas las áreas</option><option value="finance">Finanzas</option><option value="commercial">Comercial</option><option value="projects">Proyectos</option><option value="operations">Operaciones</option></select></label>
+          <label class="bi-switch"><input type="checkbox" id="analytics-compare" checked><span>Comparar mes anterior</span></label>
+          <div class="bi-filterbar__actions"><button class="btn-dash btn-dash--secondary" id="analytics-customize"><i data-lucide="sliders-horizontal"></i> Personalizar KPI</button><button class="btn-dash btn-dash--primary" id="analytics-refresh"><i data-lucide="refresh-cw"></i> Actualizar</button></div>
+        </section>
+        <section class="bi-kpi-grid" id="analytics-bi-kpis" aria-live="polite"></section>
+        <section class="bi-grid bi-grid--feature">
+          <article class="bi-panel bi-panel--wide" data-bi-area="finance"><header><div><span class="bi-panel__eyebrow">Flujo diario</span><h2>Ingresos y gastos del mes</h2></div><select class="bi-panel__select" id="analytics-flow-metric"><option value="both">Ingresos y gastos</option><option value="income">Solo ingresos</option><option value="expenses">Solo gastos</option></select></header><div class="bi-chart bi-chart--trend" id="analytics-cashflow-chart"></div><footer id="analytics-cashflow-legend"></footer></article>
+          <article class="bi-panel" data-bi-area="finance"><header><div><span class="bi-panel__eyebrow">Composición</span><h2>Resultado financiero</h2></div></header><div id="analytics-finance-donut"></div></article>
+          <article class="bi-panel" data-bi-area="commercial"><header><div><span class="bi-panel__eyebrow">Conversión</span><h2>Embudo comercial</h2></div></header><div class="bi-funnel" id="analytics-funnel"></div></article>
+        </section>
+        <section class="bi-grid bi-grid--equal">
+          <article class="bi-panel" data-bi-area="projects"><header><div><span class="bi-panel__eyebrow">Portafolio</span><h2>Proyectos por estado</h2></div></header><div class="bi-bars" id="analytics-project-status"></div></article>
+          <article class="bi-panel" data-bi-area="operations"><header><div><span class="bi-panel__eyebrow">Ejecución</span><h2>Productividad de tareas</h2></div></header><div id="analytics-task-performance"></div></article>
+          <article class="bi-panel" data-bi-area="commercial"><header><div><span class="bi-panel__eyebrow">Concentración</span><h2>Clientes con más proyectos</h2></div></header><div class="bi-ranking" id="analytics-client-ranking"></div></article>
+        </section>
+        <section class="bi-panel bi-panel--table" data-bi-area="finance"><header><div><span class="bi-panel__eyebrow">Detalle</span><h2>Movimientos financieros del mes</h2></div><span class="bi-result-count" id="analytics-movement-count">0 registros</span></header><div class="bi-table-wrap"><table class="bi-table"><thead><tr><th>Fecha</th><th>Tipo</th><th>Detalle</th><th>Estado</th><th>Monto</th></tr></thead><tbody id="analytics-movements"></tbody></table></div></section>
+      </div>
+    </div>
+
+    <!-- ==================== PAGE: REPORTS ==================== -->
+    <div class="dash-page" id="page-reports">
+      <div class="bi-dashboard bi-dashboard--historical">
+        <header class="dash-page__header bi-page-header"><div><span class="mail-eyebrow"><i data-lucide="file-bar-chart"></i> Suite Solven Labs · Visión histórica</span><h1 class="dash-page__title">Reportes</h1><p class="dash-page__subtitle">Todo el desempeño acumulado de Solven Labs, desde el primer registro hasta hoy.</p></div><div class="bi-page-context"><i data-lucide="database"></i><div><span>Histórico total</span><small id="reports-data-range">Todos los registros</small></div></div></header>
+        <section class="bi-filterbar" aria-label="Controles de reportes"><label><span>Agrupación del gráfico</span><select class="bi-control" id="reports-granularity"><option value="month">Mensual</option><option value="quarter">Trimestral</option><option value="year">Anual</option></select></label><label><span>Estado de proyecto</span><select class="bi-control" id="reports-project-filter"><option value="all">Todos los estados</option><option value="in_development">En desarrollo</option><option value="review">En revisión</option><option value="completed">Completados</option><option value="paused">Pausados</option></select></label><div class="bi-filterbar__actions"><button class="btn-dash btn-dash--secondary" id="reports-customize"><i data-lucide="sliders-horizontal"></i> Personalizar KPI</button><button class="btn-dash btn-dash--primary" id="reports-refresh"><i data-lucide="refresh-cw"></i> Actualizar</button></div></section>
+        <section class="bi-kpi-grid" id="reports-bi-kpis" aria-live="polite"></section>
+        <section class="bi-grid bi-grid--feature"><article class="bi-panel bi-panel--wide"><header><div><span class="bi-panel__eyebrow">Evolución histórica</span><h2>Ingresos y gastos acumulados</h2></div><span class="bi-panel__badge">Todos los períodos</span></header><div class="bi-chart bi-chart--trend" id="reports-trend-chart"></div><footer id="reports-trend-legend"></footer></article><article class="bi-panel"><header><div><span class="bi-panel__eyebrow">Rentabilidad</span><h2>Balance general</h2></div></header><div id="reports-finance-donut"></div></article><article class="bi-panel"><header><div><span class="bi-panel__eyebrow">Cumplimiento</span><h2>Salud operativa</h2></div></header><div id="reports-health"></div></article></section>
+        <section class="bi-grid bi-grid--equal"><article class="bi-panel"><header><div><span class="bi-panel__eyebrow">Portafolio histórico</span><h2>Proyectos por estado</h2></div></header><div class="bi-bars" id="reports-project-status"></div></article><article class="bi-panel"><header><div><span class="bi-panel__eyebrow">Documentación</span><h2>Documentos por estado</h2></div></header><div class="bi-bars" id="reports-document-status"></div></article><article class="bi-panel"><header><div><span class="bi-panel__eyebrow">Cartera</span><h2>Ranking histórico de clientes</h2></div></header><div class="bi-ranking" id="reports-client-ranking"></div></article></section>
+        <section class="bi-panel bi-report-library"><header><div><span class="bi-panel__eyebrow">Centro de exportación</span><h2>Informes detallados</h2></div><span class="bi-result-count">6 reportes disponibles</span></header><div class="bi-report-grid"><button data-report="financial"><i data-lucide="landmark"></i><span><strong>Financiero</strong><small>Ingresos y documentos</small></span><i data-lucide="download"></i></button><button data-report="projects"><i data-lucide="folder-kanban"></i><span><strong>Proyectos</strong><small>Estado y progreso</small></span><i data-lucide="download"></i></button><button data-report="clients"><i data-lucide="users"></i><span><strong>Clientes</strong><small>Cartera completa</small></span><i data-lucide="download"></i></button><button data-report="tasks"><i data-lucide="list-checks"></i><span><strong>Tareas</strong><small>Ejecución y plazos</small></span><i data-lucide="download"></i></button><button data-report="team"><i data-lucide="users-round"></i><span><strong>Equipo</strong><small>Carga operativa</small></span><i data-lucide="download"></i></button><button data-report="sla"><i data-lucide="shield-check"></i><span><strong>SLA</strong><small>Cumplimiento histórico</small></span><i data-lucide="download"></i></button></div></section>
+      </div>
+    </div>
+
+    <!-- ==================== PAGE: PRACTICES ==================== -->
+    <div class="dash-page" id="page-practices">
+      <div class="dash-page__header practices-header">
+        <div>
+          <span class="mail-eyebrow"><i data-lucide="notebook-pen"></i> Suite Solven Labs</span>
+          <h1 class="dash-page__title" id="practices-page-title">Bitácora</h1>
+          <p class="dash-page__subtitle" id="practices-page-subtitle">Registro y validación de las actividades de práctica</p>
+        </div>
+        <button class="btn-dash btn-dash--primary" id="btn-add-practice-log">
+          <i data-lucide="plus"></i> Nueva entrada
+        </button>
+      </div>
+
+      <section class="practices-panel is-active" id="practices-panel-log">
+        <div class="practices-stats" id="practices-stats"></div>
+        <div class="dash-card practices-admin-toolbar" id="practices-admin-toolbar" hidden>
+          <div class="practices-filters">
+            <label class="practices-search"><i data-lucide="search"></i><input type="search" id="practices-search" placeholder="Buscar actividad o practicante"></label>
+            <select class="dash-select" id="practices-user-filter"><option value="all">Todos los practicantes</option></select>
+            <select class="dash-select" id="practices-status-filter"><option value="all">Todos los estados</option><option value="ingresado">Ingresados</option><option value="autorizado">Autorizados</option><option value="validado">Validados</option><option value="rechazado">Observados</option></select>
+          </div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card__body practices-table-wrap">
+            <table class="dash-table practices-table">
+              <thead><tr><th>Fecha</th><th>Practicante</th><th>Actividad</th><th>Horario</th><th>Horas</th><th>Estado</th><th>Acciones</th></tr></thead>
+              <tbody id="practices-log-body"><tr><td colspan="7" class="practices-empty">Cargando bitácora...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ==================== PAGE: PRACTITIONER PROFILE ==================== -->
+    <div class="dash-page" id="page-practitioner-profile">
+      <div class="dash-page__header">
+        <div>
+          <span class="mail-eyebrow"><i data-lucide="user-circle"></i> Suite Solven Labs</span>
+          <h1 class="dash-page__title" id="practitioner-profile-title">Perfil del practicante</h1>
+          <p class="dash-page__subtitle" id="practitioner-profile-subtitle">Información académica y seguimiento de la práctica</p>
+        </div>
+      </div>
+      <div id="practices-profile-content"><div class="dash-card"><div class="dash-card__body practices-empty">Cargando perfil...</div></div></div>
+    </div>
+
+    <!-- ==================== PAGE: TEAM ==================== -->
+    <div class="dash-page" id="page-team">
+      <div class="dash-page__header">
+        <div>
+          <span class="mail-eyebrow"><i data-lucide="users"></i> Suite Solven Labs</span>
+          <h1 class="dash-page__title">Equipo</h1>
+          <p class="dash-page__subtitle">Gestiona tu equipo de trabajo</p>
+        </div>
+        <div class="dash-page__actions">
+          <button class="btn-dash btn-dash--primary" id="btn-add-team-member" style="display:none;">
+            <i data-lucide="plus"></i> Nuevo Miembro
+          </button>
+        </div>
+      </div>
+
+      <div class="team-grid">
+        <p style="color:var(--dash-text-secondary);padding:1rem;">Cargando equipo...</p>
+      </div>
+    </div>
+
+    <!-- ==================== PAGE: SETTINGS ==================== -->
+    <div class="dash-page" id="page-settings">
+      <div class="dash-page__header">
+        <div>
+          <span class="mail-eyebrow"><i data-lucide="settings"></i> Suite Solven Labs</span>
+          <h1 class="dash-page__title">Configuración</h1>
+          <p class="dash-page__subtitle">Ajustes de la cuenta, preferencias y accesos del dashboard</p>
+        </div>
+      </div>
+
+      <div class="dash-card settings-roles-card" id="settings-roles-card">
+        <div class="dash-card__header">
+          <div>
+            <h3 class="dash-card__title">Roles y permisos</h3>
+            <p class="dash-card__subtitle">Define qué secciones y acciones puede usar cada rol</p>
+          </div>
+          <button class="btn-dash btn-dash--primary" id="btn-add-role">
+            <i data-lucide="plus"></i> Nuevo rol
+          </button>
+        </div>
+        <div class="dash-card__body">
+          <div class="roles-table" id="roles-table">
+            <p style="color:var(--dash-text-secondary);padding:1rem;">Cargando roles...</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-grid">
+        <div class="dash-card">
+          <div class="dash-card__header">
+            <h3 class="dash-card__title">Perfil</h3>
+          </div>
+          <div class="dash-card__body">
+            <div class="settings-form">
+              <div class="settings-form__row">
+                <div class="form-field">
+                  <label class="form-field__label">Nombre</label>
+                  <input type="text" class="settings-input settings-input--readonly" value="" disabled>
+                </div>
+                <div class="form-field">
+                  <label class="form-field__label">Email</label>
+                  <input type="email" class="settings-input settings-input--readonly" value="" disabled>
+                </div>
+              </div>
+              <div class="settings-form__row">
+                <div class="form-field">
+                  <label class="form-field__label">Teléfono</label>
+                  <input type="tel" class="settings-input settings-input--readonly" value="" disabled>
+                </div>
+                <div class="form-field">
+                  <label class="form-field__label">Cargo</label>
+                  <input type="text" class="settings-input settings-input--readonly" value="" disabled>
+                </div>
+              </div>
+              <button class="btn-dash btn-dash--primary" id="btn-save-settings-profile" style="display:none;">Guardar Cambios</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ==================== PAGE: COTIZACIONES ==================== -->
+    <div class="dash-page" id="page-requirements">
+      <div class="dash-page__header">
+        <div>
+          <span class="mail-eyebrow"><i data-lucide="list-checks"></i> Suite Solven Labs</span>
+          <h1 class="dash-page__title">Levantamiento de requerimientos</h1>
+          <p class="dash-page__subtitle">Registra la necesidad del cliente y prepara su ficha con la identidad de Solven Labs.</p>
+        </div>
+      </div>
+      <div id="requirements-app"></div>
+    </div>
+    <div class="dash-page" id="page-quotes">
+      <div class="dash-page__header">
+        <div>
+          <span class="mail-eyebrow"><i data-lucide="file-text"></i> Suite Solven Labs</span>
+          <h1 class="dash-page__title">Cotizaciones</h1>
+          <p class="dash-page__subtitle">Documentos tributarios previos al envío oficial al SII</p>
+        </div>
+        <div class="dash-page__actions">
+          <button class="btn-dash btn-dash--secondary" id="btn-export-cotizaciones">
+            <i data-lucide="download"></i> Exportar CSV
+          </button>
+          <button class="btn-dash btn-dash--primary" id="btn-nueva-cotizacion">
+            <i data-lucide="plus"></i> Nueva Cotización
+          </button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="dash-toolbar" style="margin-bottom:16px;border-bottom:none;padding-bottom:0;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:0.82rem;color:var(--dash-text-secondary);white-space:nowrap;">Período:</span>
+          <select class="dash-select" id="cot-filter-mes" style="min-width:170px;"></select>
+        </div>
+      </div>
+
+      <div class="kpi-grid kpi-grid--3" id="cot-kpis">
+        <div class="kpi-card kpi-card--compact">
+          <div class="kpi-card__content">
+            <span class="kpi-card__label">Total Cotizaciones</span>
+            <span class="kpi-card__value" id="cot-kpi-total">0</span>
+          </div>
+        </div>
+        <div class="kpi-card kpi-card--compact">
+          <div class="kpi-card__content">
+            <span class="kpi-card__label">Vigentes</span>
+            <span class="kpi-card__value" id="cot-kpi-vigentes" style="color:#2e547d;">0</span>
+          </div>
+        </div>
+        <div class="kpi-card kpi-card--compact">
+          <div class="kpi-card__content">
+            <span class="kpi-card__label">Monto Total</span>
+            <span class="kpi-card__value" id="cot-kpi-monto">$0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="dash-toolbar">
+        <div class="dash-toolbar__search">
+          <i data-lucide="search" style="width:16px;height:16px;opacity:0.4;position:absolute;left:12px;top:50%;transform:translateY(-50%);"></i>
+          <input type="text" class="dash-toolbar__input" placeholder="Buscar cotizaciones..." id="cot-search">
+        </div>
+        <div class="dash-toolbar__filters">
+          <select class="dash-select" id="cot-filter-estado">
+            <option value="">Todos los estados</option>
+            <option value="vigente">Vigente</option>
+            <option value="aceptada">Aceptada</option>
+            <option value="facturada">Facturada</option>
+            <option value="rechazada">Rechazada</option>
+            <option value="vencida">Vencida</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="dash-card">
+        <div class="dash-card__body dash-card__body--no-padding">
+          <div class="table-responsive">
+            <table class="dash-table">
+              <thead>
+                <tr>
+                  <th>N° Cotización</th>
+                  <th>Cliente</th>
+                  <th>Fecha</th>
+                  <th>Vigencia</th>
+                  <th>Precio neto</th>
+                  <th>Impuestos</th>
+                  <th>Precio total</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="cot-tbody">
+                <tr><td colspan="9" style="text-align:center;color:var(--dash-text-secondary);padding:2rem;">No hay cotizaciones aún</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+    <!-- ==================== PAGE: PAGOS (Honorarios y Contratos) ==================== -->
+    <div class="dash-page" id="page-payments">
+      <div class="dash-page__header">
+        <div>
+          <span class="mail-eyebrow"><i data-lucide="receipt-text"></i> Suite Solven Labs</span>
+          <h1 class="dash-page__title">Boletas y pagos</h1>
+          <p class="dash-page__subtitle">Boletas de compra para pagos y de venta para ingresos de clientes</p>
+        </div>
+        <div class="dash-page__actions">
+          <button class="btn-dash btn-dash--secondary" id="btn-export-payments">
+            <i data-lucide="download"></i> Exportar CSV
+          </button>
+          <button class="btn-dash btn-dash--primary" id="btn-add-payment">
+            <i data-lucide="plus"></i> Nueva boleta / pago
+          </button>
+        </div>
+      </div>
+
+      <div class="kpi-grid kpi-grid--4" id="payments-kpis">
+        <div class="kpi-card kpi-card--compact">
+          <div class="kpi-card__content">
+            <span class="kpi-card__label">Ingresos pagados · Ventas</span>
+            <span class="kpi-card__value" id="payments-kpi-total">$0</span>
+          </div>
+        </div>
+        <div class="kpi-card kpi-card--compact">
+          <div class="kpi-card__content">
+            <span class="kpi-card__label">Egresos pagados · Compras</span>
+            <span class="kpi-card__value" id="payments-kpi-cantidad">0</span>
+          </div>
+        </div>
+        <div class="kpi-card kpi-card--compact">
+          <div class="kpi-card__content">
+            <span class="kpi-card__label">Saldo Neto</span>
+            <span class="kpi-card__value" id="payments-kpi-pendiente" style="color:#E65100;">$0</span>
+          </div>
+        </div>
+        <div class="kpi-card kpi-card--compact">
+          <div class="kpi-card__content">
+            <span class="kpi-card__label">Total Retenciones</span>
+            <span class="kpi-card__value" id="payments-kpi-retenciones" style="color:#C62828;">$0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-toolbar">
+        <div class="dash-toolbar__search">
+          <i data-lucide="search" style="width:16px;height:16px;opacity:0.4;position:absolute;left:12px;top:50%;transform:translateY(-50%);"></i>
+          <input type="text" class="dash-toolbar__input" placeholder="Buscar pagos..." id="payments-search">
+        </div>
+        <div class="dash-toolbar__filters">
+          <select class="dash-select" id="payments-filter-tipo">
+            <option value="">Todos los tipos</option>
+            <option value="honorarios">Boleta Honorarios</option>
+            <option value="contrato">Pago Contrato</option>
+            <option value="directo">Pago directo / efectivo</option>
+          </select>
+          <select class="dash-select" id="payments-filter-operation">
+            <option value="">Compras y ventas</option>
+            <option value="compra">Compras · Egresos</option>
+            <option value="venta">Ventas · Ingresos</option>
+          </select>
+          <select class="dash-select" id="payments-filter-year"></select>
+          <select class="dash-select" id="payments-filter-mes"></select>
+        </div>
+      </div>
+
+      <div class="dash-card">
+        <div class="dash-card__body dash-card__body--no-padding">
+          <div class="table-responsive">
+            <table class="dash-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Tipo</th>
+                  <th>Contraparte</th>
+                  <th>RUT</th>
+                  <th>Monto Bruto</th>
+                  <th>Descuentos</th>
+                  <th>Monto Neto</th>
+                  <th>No contabilizar</th>
+                  <th>Descripción</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="payments-tbody">
+                <tr><td colspan="10" style="text-align:center;color:var(--dash-text-secondary);padding:2rem;">No hay movimientos registrados</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== PAGE: TRIBUTOS (F22/F29) ==================== -->
+    <div class="dash-page" id="page-taxes">
+      <div class="dash-page__header">
+        <div>
+          <span class="mail-eyebrow"><i data-lucide="file-spreadsheet"></i> Suite Solven Labs</span>
+          <h1 class="dash-page__title">F22 - F29</h1>
+          <p class="dash-page__subtitle">F22 anual y F29 mensual - visión de impuestos</p>
+        </div>
+        <div class="dash-page__actions">
+          <button class="btn-dash btn-dash--secondary" id="btn-export-f29">
+            <i data-lucide="download"></i> Exportar F29 CSV
+          </button>
+          <button class="btn-dash btn-dash--secondary" id="btn-export-f22">
+            <i data-lucide="download"></i> Exportar F22 CSV
+          </button>
+        </div>
+      </div>
+
+      <div class="dash-toolbar" style="margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <select class="dash-select" id="taxes-filter-year"></select>
+          <select class="dash-select" id="taxes-filter-month"></select>
+        </div>
+        <p style="margin-top:0.5rem;font-size:0.83rem;color:var(--dash-text-secondary);">Los datos se actualizan automáticamente al cambiar el año/mes.</p>
+      </div>
+
+      <div class="kpi-grid kpi-grid--4" id="taxes-kpis">
+        <div class="kpi-card">
+          <div class="kpi-card__content">
+            <span class="kpi-card__label">Renta Imponible (2025)</span>
+            <span class="kpi-card__value" id="taxes-kpi-renta">$0</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card__content">
+            <span class="kpi-card__label">IVA Devengado (mes)</span>
+            <span class="kpi-card__value" id="taxes-kpi-iva">$0</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card__content">
+            <span class="kpi-card__label">Saldo a Favor</span>
+            <span class="kpi-card__value" id="taxes-kpi-favor">$0</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card__content">
+            <span class="kpi-card__label">Retenciones</span>
+            <span class="kpi-card__value" id="taxes-kpi-retenciones">$0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-card" style="margin-top:1rem;">
+        <div class="dash-card__body dash-card__body--no-padding">
+          <div class="table-responsive">
+            <table class="dash-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Ingresos Brutos</th>
+                  <th>Ventas</th>
+                  <th>Compras</th>
+                  <th>IVA Débito</th>
+                  <th>IVA Crédito</th>
+                  <th>IVA a Pagar</th>
+                </tr>
+              </thead>
+              <tbody id="taxes-tbody">
+                <tr><td colspan="7" style="text-align:center;color:var(--dash-text-secondary);padding:2rem;">Cargando datos de impuestos...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== PAGE: EXPENSES (Gastos Operacionales) ==================== -->
+    <div class="dash-page" id="page-expenses">
+      <div class="dash-page__header">
+        <div>
+          <span class="mail-eyebrow"><i data-lucide="receipt"></i> Suite Solven Labs</span>
+          <h1 class="dash-page__title">Gastos</h1>
+          <p class="dash-page__subtitle">Registro y control de gastos operacionales</p>
+        </div>
+        <div class="dash-page__actions">
+          <button class="btn-dash btn-dash--secondary" id="btn-export-expenses">
+            <i data-lucide="download"></i> Exportar CSV
+          </button>
+          <button class="btn-dash btn-dash--primary" id="btn-add-expense">
+            <i data-lucide="plus"></i> Nuevo Gasto
+          </button>
+        </div>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="kpi-grid kpi-grid--4" id="expenses-kpis">
+        <div class="kpi-card">
+          <div class="kpi-card__content">
+            <span class="kpi-card__label">Total Gastos (mes)</span>
+            <span class="kpi-card__value" id="expenses-kpi-month">$0</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card__content">
+            <span class="kpi-card__label">Total Gastos (año)</span>
+            <span class="kpi-card__value" id="expenses-kpi-year">$0</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card__content">
+            <span class="kpi-card__label">Gastos Pendientes</span>
+            <span class="kpi-card__value" id="expenses-kpi-pending">0</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card__content">
+            <span class="kpi-card__label">Gastos Reconciliados</span>
+            <span class="kpi-card__value" id="expenses-kpi-reconciled">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toolbar & Filters -->
+      <div class="dash-toolbar">
+        <div class="dash-toolbar__search">
+          <i data-lucide="search" style="width:16px;height:16px;opacity:0.4;position:absolute;left:12px;top:50%;transform:translateY(-50%);"></i>
+          <input type="text" class="dash-toolbar__input" placeholder="Buscar gastos..." id="expenses-search">
+        </div>
+        <div class="dash-toolbar__filters">
+          <select class="dash-select" id="expenses-filter-mes"></select>
+        </div>
+      </div>
+
+      <!-- Reconciliation Status -->
+      <div class="dash-toolbar" style="margin-top:12px;border-top:1px solid var(--dash-border);padding-top:12px;">
+        <label class="toggle-switch">
+          <input type="checkbox" id="expenses-filter-reconciled">
+          <span class="toggle-switch__slider"></span>
+          <span style="font-size:0.85rem;font-weight:500;white-space:nowrap;">Mostrar solo gastos no reconciliados</span>
+        </label>
+      </div>
+
+      <!-- Table -->
+      <div class="dash-card">
+        <div class="dash-card__body dash-card__body--no-padding">
+          <div class="table-responsive">
+            <table class="dash-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Descripción</th>
+                  <th>Categoría</th>
+                  <th>Monto</th>
+                  <th>Receptor</th>
+                  <th>Método Pago</th>
+                  <th>Proyecto</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="expenses-tbody">
+                <tr><td colspan="9" style="text-align:center;color:var(--dash-text-secondary);padding:2rem;">No hay gastos registrados</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart: Expenses by Category -->
+      <div class="dash-grid dash-grid--2" style="margin-top:16px;">
+        <div class="dash-card">
+          <div class="dash-card__header">
+            <h3 class="dash-card__title">Gastos por Categoría</h3>
+          </div>
+          <div class="dash-card__body">
+            <div class="horizontal-bars" id="expenses-by-category">
+              <p style="color:var(--dash-text-secondary);">Sin gastos para mostrar</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="dash-card">
+          <div class="dash-card__header">
+            <h3 class="dash-card__title">Gastos por Proyecto</h3>
+          </div>
+          <div class="dash-card__body">
+            <div class="horizontal-bars" id="expenses-by-project">
+              <p style="color:var(--dash-text-secondary);">Sin gastos para mostrar</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- END dash-main -->
+
+  <!-- ========== MODAL GENÉRICO ========== -->
+  <div class="dash-modal" id="dash-modal">
+    <div class="dash-modal__backdrop"></div>
+    <div class="dash-modal__content">
+      <div class="dash-modal__header">
+        <h3 class="dash-modal__title" id="modal-title">Modal</h3>
+        <button class="dash-modal__close" id="modal-close" aria-label="Cerrar">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="dash-modal__body" id="modal-body">
+        <!-- Dynamic content -->
+      </div>
+      <div class="dash-modal__footer" id="modal-footer">
+        <button class="btn-dash btn-dash--secondary" id="modal-cancel">Cancelar</button>
+        <button class="btn-dash btn-dash--primary" id="modal-confirm">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notifications -->
+  <div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="false"></div>
+
+  <!-- Hidden input para subir PDF de Facturas SII -->
+  <input type="file" id="presii-pdf-file" accept="application/pdf" style="display:none;">
+
+  </div> <!-- END dashboard-container -->
+
+  <!-- Dashboard infrastructure status (non-modal) -->
+  <div class="system-status-widget" id="system-status-widget" hidden>
+    <section class="system-status-panel" id="system-status-panel" aria-label="Estado de infraestructura" hidden>
+      <div class="system-status-panel__header">
+        <div>
+          <strong>Estado del sistema</strong>
+          <span id="system-status-summary">Sin comprobar</span>
+        </div>
+        <button type="button" class="system-status-panel__refresh" id="system-status-refresh" aria-label="Volver a comprobar">
+          <i data-lucide="refresh-cw"></i>
+        </button>
+      </div>
+      <div class="system-status-panel__list" id="system-status-list"></div>
+      <div class="system-status-panel__footer" id="system-status-checked">Comprobando automáticamente…</div>
+    </section>
+    <button type="button" class="system-status-trigger" id="system-status-trigger" aria-label="Estado del sistema: comprobando" aria-expanded="false">
+      <i data-lucide="activity"></i>
+      <span class="system-status-trigger__dot" aria-hidden="true"></span>
+    </button>
+  </div>
+
+  <!-- Scripts -->    
+  <script type="module" src="/dashboard.js?v=solven-ebct-3"></script>
+</body>
+</html>

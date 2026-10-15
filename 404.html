@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <base href="/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>404 · Página no encontrada</title>
+    <meta name="robots" content="noindex, nofollow">
+    <script>
+      (function() {
+        const path = (window.location.pathname || '').replace(/\/+$/g, '') || '/';
+        let requestedRoute = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+
+        function recoverSpaRoute(entryFile) {
+          try {
+            window.sessionStorage.setItem('ntek:spa-route', requestedRoute);
+          } catch (_) {
+            // El parámetro también permite recuperar la ruta si sessionStorage está bloqueado.
+          }
+          window.location.replace(`${entryFile}?spaFallback=${encodeURIComponent(requestedRoute)}`);
+        }
+
+        if (path === '/mail' || path === '/dashboard/mail') requestedRoute = `/dashboard${window.location.search}${window.location.hash}`;
+        if (path === '/mail' || path === '/login' || path === '/dashboard' || path.startsWith('/dashboard/')) {
+          recoverSpaRoute('/dashboard.html');
+          return;
+        }
+
+        const publicRoutes = new Set([
+          '/nosotros',
+          '/servicios',
+          '/servicios-puntuales',
+          '/servicios/soporte-infraestructura',
+          '/equipo',
+          '/como-trabajamos',
+          '/proyectos',
+          '/planes',
+          '/tecnologias',
+          '/diagnostico-digital',
+          '/testimonios',
+          '/garantias',
+          '/preguntas-frecuentes',
+          '/contacto',
+          '/proceso',
+          '/casos',
+          '/pricing',
+          '/simulador',
+          '/faq'
+        ]);
+
+        if (publicRoutes.has(path)) {
+          recoverSpaRoute('/index.html');
+          return;
+        }
+
+        // /project/{token} o /proyecto/{token} => llevar a proyecto.html con token.
+        const projectMatch = path.match(/^\/(?:project|proyecto)(?:\/(.+))?$/);
+        if (projectMatch) {
+          const token = projectMatch[1] || '';
+          if (token) {
+            window.location.replace(`/proyecto?token=${encodeURIComponent(token)}`);
+            return;
+          }
+        }
+
+        // Si no coincide con una ruta conocida, se mantiene el 404 real.
+      })();
+    </script>
+    <style>
+      :root {
+        --color-text: #1a1a1a;
+        --color-primary: #2e547d;
+        --font-stack: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      }
+
+      body {
+        margin: 0;
+        font-family: var(--font-stack);
+        color: var(--color-text);
+        background: #fff;
+      }
+
+      .page {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 2rem;
+        text-align: center;
+        width: 100%;
+        max-width: 44rem;
+        margin: 0 auto;
+        box-sizing: border-box;
+      }
+
+      .page__image {
+        max-width: 280px;
+        width: 100%;
+        height: auto;
+        margin: 1rem auto;
+      }
+
+      .page__title {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .page__text {
+        max-width: 38rem;
+        margin: 0 auto 1.5rem;
+        line-height: 1.6;
+      }
+
+      .page__cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        border-radius: 0.75rem;
+        background: var(--color-primary);
+        color: #fff;
+        font-weight: 600;
+        text-decoration: none;
+      }
+
+      @media (max-width: 480px) {
+        .page {
+          padding: 1.25rem;
+          width: calc(100% - 2.5rem);
+        }
+
+        .page__title {
+          font-size: 2rem;
+        }
+
+        .page__text {
+          max-width: 100%;
+        }
+
+        .page__cta {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+    </style>
+    <link rel="stylesheet" href="/solven-brand.css?v=solven-ebct-3">
+</head>
+  <body>
+    <div class="page">
+      <img src="assets/solvi.svg" alt="Solvi" class="page__image" />
+      <h1 class="page__title">404 · Página no encontrada</h1>
+      <p class="page__text">La ruta que intentas visitar no existe o está mal escrita. Usa el botón para volver al inicio.</p>
+      <a href="/" class="page__cta">Ir al inicio</a>
+    </div>
+  </body>
+</html>
