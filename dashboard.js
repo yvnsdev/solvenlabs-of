@@ -998,14 +998,9 @@ async function loadDashboardRoles() {
   try {
     const { data, error } = await db.roles.getAll();
     if (error) throw error;
-    if (!Array.isArray(data) || data.length === 0) return;
+    if (!Array.isArray(data)) throw new Error('La respuesta de roles no es válida');
 
-    const mergedRoles = [...data];
-    Object.entries(defaultRoleDefinitions).forEach(([slug, definition]) => {
-      if (!mergedRoles.some(role => role.slug === slug)) mergedRoles.push({ slug, ...definition });
-    });
-
-    dashboardRoles = mergedRoles.map(role => {
+    dashboardRoles = data.map(role => {
       const validPageIds = new Set(DASHBOARD_PAGES.map(page => page.id));
       const validActionIds = new Set(DASHBOARD_ACTIONS.map(action => action.id));
       const dbPages = Array.isArray(role.pages) ? role.pages.filter(pageId => validPageIds.has(pageId)) : [];
@@ -1938,8 +1933,13 @@ const db = {
       return { data, error };
     },
     async delete(slug) {
-      const { error } = await supabase.from('dashboard_roles').delete().eq('slug', slug);
-      return { error };
+      const { data, error } = await supabase
+        .from('dashboard_roles')
+        .delete()
+        .eq('slug', slug)
+        .select('slug')
+        .maybeSingle();
+      return { data, error };
     }
   },
 
@@ -2394,7 +2394,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Show dashboard
   loginPage.style.display = 'none';
-  dashboardContainer.style.display = 'block';
   const requestedRoutePage = dashboardPageFromLocation();
 
   // Get user profile
@@ -2405,6 +2404,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Aplicar restricciones según rol (visual y acceso)
   applyRoleRestrictions();
+  dashboardContainer.style.display = 'block';
 
   // Set user info in sidebar
   updateCurrentUserChrome();
@@ -8321,7 +8321,7 @@ function renderRolesTable() {
           <div class="roles-table__meta">${escapeHtml(actions.slice(0, 3).join(', ') || 'Sin acciones')}</div>
           <div class="table-actions">
             ${canManage ? `<button class="table-action-btn" onclick="window.openRoleModal('${escapeHtml(role.slug)}')" title="Editar rol"><i data-lucide="pencil"></i></button>
-            <button class="table-action-btn table-action-btn--danger" onclick="window.deleteRoleConfirm('${escapeHtml(role.slug)}')" title="Eliminar rol" ${role.is_system ? 'disabled' : ''}><i data-lucide="trash-2"></i></button>` : '<span class="roles-table__meta">Solo lectura</span>'}
+            <button class="table-action-btn table-action-btn--danger" onclick="window.deleteRoleConfirm('${escapeHtml(role.slug)}')" title="Eliminar rol"><i data-lucide="trash-2"></i></button>` : '<span class="roles-table__meta">Solo lectura</span>'}
           </div>
         </div>
       `;
@@ -8381,19 +8381,27 @@ window.deleteRoleConfirm = function deleteRoleConfirm(slug) {
 
   const role = dashboardRoles.find(item => item.slug === slug);
   if (!role) return;
-  if (role.is_system) {
-    showToast('Los roles de sistema no se pueden eliminar', 'warning');
-    return;
-  }
 
   openModal('Eliminar rol', `<p>¿Estás seguro de eliminar el rol <strong>${escapeHtml(role.name)}</strong>? Los usuarios con este rol pasarán a Miembro.</p>`, 'Eliminar', async () => {
-    const { data: assignedProfiles } = await supabase.from('profiles').select('id').eq('role', slug);
-    if (assignedProfiles?.length) {
-      await supabase.from('profiles').update({ role: 'team' }).eq('role', slug);
+    const { data: assignedProfiles, error: profilesError } = await supabase.from('profiles').select('id').eq('role', slug);
+    if (profilesError) {
+      showToast('Error buscando usuarios del rol: ' + profilesError.message, 'error');
+      return;
     }
-    const { error } = await db.roles.delete(slug);
+    if (assignedProfiles?.length) {
+      const { error: profilesUpdateError } = await supabase.from('profiles').update({ role: 'team' }).eq('role', slug);
+      if (profilesUpdateError) {
+        showToast('Error reasignando usuarios del rol: ' + profilesUpdateError.message, 'error');
+        return;
+      }
+    }
+    const { data: deletedRole, error } = await db.roles.delete(slug);
     if (error) {
       showToast('Error eliminando rol: ' + error.message, 'error');
+      return;
+    }
+    if (!deletedRole) {
+      showToast('El rol no fue eliminado. Verifica que tengas permisos de administración.', 'error');
       return;
     }
     closeModal();

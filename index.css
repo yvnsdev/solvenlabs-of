@@ -16266,6 +16266,7 @@ main > .section .section__header {
 
 /* SITME: funding and research recognition */
 .project-achievements { margin-top: .65rem; padding-top: 1.35rem; border-top: 1px solid #dce6f2; }
+.project-achievements--standalone { max-width: 960px; margin: 2.5rem auto 0; }
 .project-achievements__header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
 .project-achievements__heading { margin: 0; color: #294664; font-size: .73rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
 .project-achievements__count { flex-shrink: 0; padding: .25rem .6rem; border: 1px solid #d7e4ef; border-radius: 999px; color: #526c85; font-size: .68rem; }
@@ -16279,6 +16280,10 @@ main > .section .section__header {
 .project-achievements__item--featured .project-achievements__icon svg { width: 21px; height: 21px; }
 .project-achievements__item--award { border-color: #e9dfc9; background: linear-gradient(145deg, #fffdf7, #fff); }
 .project-achievements__item--award .project-achievements__icon { border-color: #eadbb8; background: #fbf1dc; color: #98691c; }
+.project-achievements__logo { position: absolute; top: 1rem; right: 1rem; display: block; width: auto; height: 42px; object-fit: contain; object-position: right center; }
+.project-achievements__logo--anid { max-width: 142px; }
+.project-achievements__logo--evic { max-width: 118px; }
+.project-achievements__logo--ubb { max-width: 150px; }
 .project-achievements__copy { display: grid; gap: .35rem; min-width: 0; overflow-wrap: anywhere; }
 .project-achievements__label { color: #47688b; font-size: .68rem; font-weight: 600; line-height: 1.5; }
 .project-achievements__copy strong { color: #142c49; font-family: var(--font-family-display); font-size: 1.12rem; letter-spacing: -.025em; line-height: 1.3; }
@@ -16286,7 +16291,8 @@ main > .section .section__header {
 .project-achievements__item--featured .project-achievements__label { color: #b9defa; font-size: .65rem; letter-spacing: .09em; text-transform: uppercase; }
 .project-achievements__detail { color: #627187; font-size: .76rem; line-height: 1.6; }
 .project-achievements__item--featured .project-achievements__detail { color: #cfdfed; }
-.project-achievements__year { align-self: flex-start; flex-shrink: 0; margin-top: auto; padding: .3rem .6rem; border: 1px solid rgb(194 229 255 / 25%); border-radius: 8px; color: #e0f1ff; font-size: .73rem; font-weight: 600; }
+.project-achievements__year { align-self: flex-start; flex-shrink: 0; margin-top: auto; padding: .3rem .6rem; border: 1px solid #d7e4ef; border-radius: 8px; background: #f4f8fc; color: #426180; font-size: .73rem; font-weight: 600; }
+.project-achievements__item--featured .project-achievements__year { border-color: rgb(194 229 255 / 25%); background: transparent; color: #e0f1ff; }
 .project-achievements__copy .project-achievements__place { font-size: 2rem; line-height: 1.1; color: #79521b; }
 .project-achievements__place sup { font-size: .85rem; }
 .project-achievements__place span { font-size: 1rem; font-weight: 600; }
@@ -16315,6 +16321,7 @@ main > .section .section__header {
 .solven-institution-carousel .logos__track { width: max-content; gap: 3rem; }
 .solven-institution-carousel .logos__item-wrapper { width: 190px; height: 135px; padding: 0; border: 0; background: transparent; box-shadow: none; }
 .solven-institution-carousel .logos__item { width: 160px; height: 80px; object-fit: contain; filter: none; opacity: 1; }
+.solven-institution-carousel .logos__item--institution { width: 180px; }
 .solven-institution-carousel .logos__item-name { font-size: .7rem; margin-top: 1rem; color: #627187; }
 @media (max-width: 760px) { .project-spotlights { grid-template-columns: minmax(0, 1fr); gap: 2.5rem; } .project-spotlight__brand { height: 320px; } }
 @media (max-width: 640px) {
