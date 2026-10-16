@@ -3281,7 +3281,7 @@ async function loadOverview() {
         </div>
       `).join('');
     } else {
-      actList.innerHTML = '<p style="color:var(--dash-text-secondary);padding:1rem;">Sin actividad reciente</p>';
+      actList.innerHTML = renderDashboardEmpty('Aún no hay actividad reciente', 'Los cambios del equipo aparecerán aquí.', 'activity');
     }
     if (typeof lucide !== "undefined") setTimeout(() => lucide.createIcons(), 50);
   }
@@ -3533,6 +3533,26 @@ function initRelationsToolbar() {
   initAddEmployeeButton();
 }
 
+function renderDashboardEmpty(title, description = '', icon = 'inbox', actionId = '', actionLabel = '', embedded = true) {
+  const action = actionId && isButtonAllowed(actionId) && document.getElementById(actionId);
+  const iconNode = typeof lucide !== 'undefined' && lucide.icons
+    ? lucide.icons[icon.replace(/(^|-)([a-z])/g, (_, dash, letter) => letter.toUpperCase())] : null;
+  const iconHtml = iconNode && lucide.createElement ? lucide.createElement(iconNode).outerHTML : `<i data-lucide="${escapeHtml(icon)}"></i>`;
+  return `<div class="dash-empty-state${embedded ? ' dash-empty-state--embedded' : ''}" role="status">
+    <div class="dash-empty-state__icon" aria-hidden="true">${iconHtml}</div>
+    <h2>${escapeHtml(title)}</h2>
+    ${description ? `<p>${escapeHtml(description)}</p>` : ''}
+    ${action ? `<button type="button" class="btn-dash btn-dash--primary" data-empty-action="${escapeHtml(actionId)}">${escapeHtml(actionLabel)}</button>` : ''}
+  </div>`;
+}
+
+document.addEventListener('click', event => {
+  const button = event.target.closest('[data-empty-action]');
+  if (!button || !isButtonAllowed(button.dataset.emptyAction)) return;
+  const target = document.getElementById(button.dataset.emptyAction);
+  if (target && !target.disabled) target.click();
+});
+
 function renderRelationsRows(items = relationRows) {
   const tbody = document.getElementById('relations-tbody');
   if (!tbody) return;
@@ -3542,7 +3562,7 @@ function renderRelationsRows(items = relationRows) {
     tbody.innerHTML = `
       <tr>
         <td colspan="7" style="text-align:center;color:var(--dash-text-secondary);padding:2rem;">
-          No hay relaciones que coincidan con los filtros.
+          ${renderDashboardEmpty(items.length ? 'Sin resultados' : 'Aún no hay relaciones', items.length ? 'Prueba con otros filtros.' : 'Agrega clientes y contactos para comenzar.', 'users', items.length ? '' : 'btn-add-client', 'Agregar cliente')}
         </td>
       </tr>`;
     return;
@@ -4070,7 +4090,7 @@ function renderSiiRows(items = siiUnifiedRows) {
     tbody.innerHTML = `
       <tr>
         <td colspan="8" style="text-align:center;color:var(--dash-text-secondary);padding:2rem;">
-          No hay documentos SII que coincidan con los filtros.
+          ${renderDashboardEmpty('No hay documentos SII para mostrar', 'Los documentos registrados aparecerán aquí. Revisa el período y los filtros.', 'file-text')}
         </td>
       </tr>`;
     return;
@@ -4589,7 +4609,7 @@ async function openActivityLogModal() {
     }
 
     if (!activities || activities.length === 0) {
-      openModal('Actividad completa', '<p style="color:var(--dash-text-secondary);padding:1rem;">No hay registros de actividad.</p>', null, null, true);
+      openModal('Actividad completa', renderDashboardEmpty('Aún no hay actividad', 'Los cambios del equipo aparecerán aquí.', 'activity'), null, null, true);
       return;
     }
 
@@ -4611,7 +4631,7 @@ async function openActivityLogModal() {
       }, {});
 
       if (!Object.keys(groupedByDay).length) {
-        return '<p style="color:var(--dash-text-secondary);padding:1rem;">No hay registros que coincidan con el filtro.</p>';
+        return renderDashboardEmpty('Sin resultados', 'Prueba con otro filtro para ver la actividad.', 'search-x');
       }
 
       return Object.keys(groupedByDay).sort((a, b) => new Date(b) - new Date(a)).map(day => {
@@ -5336,7 +5356,7 @@ async function loadProjects() {
   const sm = { proposal: ['Propuesta', 'proposal'], in_development: ['En desarrollo', 'development'], review: ['En revisión', 'review'], completed: ['Completado', 'completed'], paused: ['Pausado', 'inactive'] };
   const canManageProjects = isButtonAllowed('btn-add-project');
 
-  grid.innerHTML = (projects || []).map(p => {
+  grid.innerHTML = (projects || []).length ? (projects || []).map(p => {
     const [label, badge] = sm[p.status] || [p.status, ''];
     const techs = (p.technologies || []).map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('');
     const fillCls = p.status === 'completed' ? 'progress-bar__fill--completed' : p.status === 'review' ? 'progress-bar__fill--review' : '';
@@ -5365,7 +5385,7 @@ async function loadProjects() {
           <button class="btn-dash btn-dash--danger btn-dash--sm" onclick="deleteProject('${p.id}','${escapeHtml(p.name)}')"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button>` : ''}
         </div>
       </div>`;
-  }).join('');
+  }).join('') : renderDashboardEmpty('Aún no hay proyectos', 'Crea tu primer proyecto para organizar el trabajo, el equipo y sus avances.', 'folder-plus', 'btn-add-project', 'Crear proyecto', false);
 
   if (typeof lucide !== "undefined") setTimeout(() => lucide.createIcons(), 50);
 
@@ -5381,7 +5401,7 @@ async function loadProjects() {
   };
   allProjects.forEach(p => { if (projGroups[p.status]) projGroups[p.status].items.push(p); });
   if (kanbanEl) {
-    kanbanEl.innerHTML = `<div class="kanban">` + Object.entries(projGroups).map(([status, g]) => `
+    kanbanEl.innerHTML = allProjects.length ? `<div class="kanban">` + Object.entries(projGroups).map(([status, g]) => `
       <div class="kanban__column" data-status="${status}">
         <div class="kanban__column-header">
           <span class="kanban__column-dot" style="background:${g.color};"></span>
@@ -5407,7 +5427,7 @@ async function loadProjects() {
               </div>
             </div>`).join('')}
         </div>
-      </div>`).join('') + `</div>`;
+      </div>`).join('') + `</div>` : renderDashboardEmpty('Aún no hay proyectos', 'Crea tu primer proyecto para organizar el trabajo, el equipo y sus avances.', 'folder-plus', 'btn-add-project', 'Crear proyecto', false);
     if (typeof lucide !== "undefined") setTimeout(() => lucide.createIcons(), 100);
   }
 
@@ -5555,7 +5575,7 @@ async function loadTasks() {
   const pm = { high: 'Alta', medium: 'Media', low: 'Baja' };
   const canManageTasks = isButtonAllowed('btn-add-task');
 
-  list.innerHTML = (tasks || []).map(t => {
+  list.innerHTML = (tasks || []).length ? (tasks || []).map(t => {
     const due = t.completed
       ? `<i data-lucide="check" style="width:12px;height:12px;color:#668fbb;"></i> Completado`
       : t.due_date ? `<i data-lucide="calendar" style="width:12px;height:12px;"></i> ${formatDateShort(t.due_date)}` : '';
@@ -5579,7 +5599,7 @@ async function loadTasks() {
           </button>
         </div>` : ''}
       </div>`;
-  }).join('');
+  }).join('') : renderDashboardEmpty('Aún no hay tareas', 'Crea tu primera tarea para organizar los pendientes y sus fechas de entrega.', 'list-checks', 'btn-add-task', 'Crear tarea', true);
 
   if (typeof lucide !== "undefined") setTimeout(() => lucide.createIcons(), 50);
   initAddTaskModal();
@@ -5885,6 +5905,12 @@ async function loadOrders() {
   const pm = { high: 'Alta', medium: 'Media', low: 'Baja' };
   const board = document.getElementById('kanban-board');
   if (!board) return;
+
+  if (!orders?.length) {
+    board.innerHTML = renderDashboardEmpty('Aún no hay tickets', 'Crea un ticket para organizar las solicitudes y sus entregables.', 'ticket', 'btn-add-order', 'Nuevo ticket', false);
+    initAddOrderModal();
+    return;
+  }
 
   board.innerHTML = Object.entries(groups).map(([status, g]) => `
     <div class="kanban__column" data-status="${status}">
@@ -6395,7 +6421,7 @@ async function loadCalendar() {
   async function loadDayEvents(dateStr) {
     if (!eventsList) return;
     const { data: events } = await db.events.getByDate(dateStr);
-    if (!events || !events.length) { eventsList.innerHTML = '<p style="color:#888;padding:12px;">Sin eventos</p>'; return; }
+    if (!events || !events.length) { eventsList.innerHTML = renderDashboardEmpty('No hay eventos para este día', 'Programa un evento o selecciona otra fecha.', 'calendar-days', 'btn-add-event', 'Nuevo evento'); return; }
     const tc = { meeting: 'meeting', deadline: 'deadline', demo: 'demo', kickoff: 'kickoff', other: 'meeting' };
     eventsList.innerHTML = events.map(e => `
       <div class="cal-event cal-event--${e.blocks_bookings ? 'blocked' : (tc[e.event_type] || 'meeting')}">
@@ -7437,7 +7463,7 @@ async function loadBiDataset({ force = false } = {}) {
   return biState.loading;
 }
 
-function biEmpty(message = 'No hay datos para este período') { return `<div class="bi-empty"><i data-lucide="chart-no-axes-column"></i><span>${escapeHtml(message)}</span></div>`; }
+function biEmpty(message = 'No hay datos para este período') { return renderDashboardEmpty(message, 'Los indicadores aparecerán cuando haya registros para la selección actual.', 'chart-no-axes-column'); }
 
 function biRenderBars(container, entries, { currency = false, colors = ['#0d4581', '#2e649d', '#5787bb', '#83b6c9', '#afcdd8', '#557ca5'] } = {}) {
   if (!container) return;
@@ -7671,6 +7697,12 @@ async function loadTeam() {
 
   const grid = document.querySelector('.team-grid');
   if (!grid) return;
+
+  if (!merged.length) {
+    grid.innerHTML = renderDashboardEmpty('Aún no hay miembros', 'Agrega personas para organizar tu equipo.', 'users', canEditTeam ? 'btn-add-team-member' : '', 'Nuevo miembro', false);
+    initAddTeamMemberButton();
+    return;
+  }
 
   grid.innerHTML = merged.map(u => {
     const roleValue = u.role || u.role_title || 'team';
@@ -8295,7 +8327,7 @@ function renderRolesTable() {
   const canManage = canManageRoles();
 
   if (!dashboardRoles.length) {
-    container.innerHTML = '<p style="color:var(--dash-text-secondary);padding:1rem;">No hay roles creados.</p>';
+    container.innerHTML = renderDashboardEmpty('Aún no hay roles', 'Crea un rol para definir los permisos del equipo.', 'shield');
     return;
   }
 
@@ -8419,7 +8451,7 @@ async function loadSiteMessages() {
     if (error) throw error;
     const messages = data || [];
     if (!messages.length) {
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--dash-text-secondary);padding:2rem;">Aún no hay mensajes de contacto.</td></tr>';
+    tbody.innerHTML = `<tr><td colspan="8">${renderDashboardEmpty('Aún no hay mensajes de contacto', 'Los mensajes recibidos desde el sitio aparecerán aquí.', 'message-square', '', '')}</td></tr>`;
       return;
     }
     const canManageMessages = isButtonAllowed('btn-site-refresh-messages');
@@ -9974,7 +10006,7 @@ async function renderCotizaciones() {
   }
 
   if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--dash-text-secondary);padding:2rem;">${listMes.length ? 'Sin resultados para los filtros aplicados' : 'No hay cotizaciones aún. Haz clic en «Nueva Cotización» para comenzar.'}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9">${renderDashboardEmpty(listMes.length ? 'Sin resultados' : 'No hay cotizaciones en este período', 'Crea una cotización o revisa el período y los filtros.', 'file-text', 'btn-nueva-cotizacion', 'Nueva cotización')}</td></tr>`;
     return;
   }
 
@@ -10074,7 +10106,7 @@ async function renderTaxForms() {
     const tbody = document.getElementById('taxes-tbody');
     if (!tbody) return;
     if (!f29Docs.length) {
-      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--dash-text-secondary);padding:2rem;">Sin datos para el periodo</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7">${renderDashboardEmpty('Sin datos para el período', 'Selecciona otro período para consultar los documentos tributarios.', 'file-text', '', '')}</td></tr>`;
       return;
     }
 
@@ -10263,7 +10295,7 @@ async function renderPayments() {
   }
 
   if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:var(--dash-text-secondary);padding:2rem;">${listMes.length ? 'Sin resultados para los filtros aplicados' : 'No hay movimientos registrados. Usa "Nueva boleta / pago" para comenzar.'}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="10">${renderDashboardEmpty(listMes.length ? 'Sin resultados' : 'No hay movimientos en este período', 'Registra una boleta o un pago, o revisa los filtros.', 'wallet', 'btn-add-payment', 'Nueva boleta / pago')}</td></tr>`;
     return;
   }
 
@@ -11088,7 +11120,7 @@ async function renderPresii() {
   }
 
   if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;color:var(--dash-text-secondary);padding:2rem;">${listMes.length ? 'Sin resultados para los filtros aplicados' : 'No hay facturas pre-SII. Haz clic en «Nueva Factura» para comenzar.'}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="11">${renderDashboardEmpty(listMes.length ? 'Sin resultados' : 'No hay facturas en este período', 'Crea una factura o revisa el período y los filtros.', 'receipt', 'btn-nueva-presii', 'Nueva factura')}</td></tr>`;
     return;
   }
 
@@ -11232,19 +11264,19 @@ async function openPresiiModal(id, prefill = {}) {
       <div class="doc-modal-grid">
         <div>
           <label class="form-field__label">Razón Social</label>
-          <input type="text" class="modal-form__input" id="emi-name" value="${escapeHtml(doc?.emi_name || (defaultOperacion === 'venta' ? COMPANY.name : ''))}">
+          <input type="text" class="modal-form__input" id="emi-name" value="${escapeHtml(doc?.emi_name || (defaultOperacion === 'venta' ? company.name : ''))}">
         </div>
         <div>
           <label class="form-field__label">RUT</label>
-          <input type="text" class="modal-form__input" id="emi-rut" value="${escapeHtml(doc?.emi_rut || (defaultOperacion === 'venta' ? COMPANY.rut : ''))}">
+          <input type="text" class="modal-form__input" id="emi-rut" value="${escapeHtml(doc?.emi_rut || (defaultOperacion === 'venta' ? company.rut : ''))}">
         </div>
         <div>
           <label class="form-field__label">Giro</label>
-          <input type="text" class="modal-form__input" id="emi-giro" value="${escapeHtml(doc?.emi_giro || (defaultOperacion === 'venta' ? COMPANY.giro : ''))}">
+          <input type="text" class="modal-form__input" id="emi-giro" value="${escapeHtml(doc?.emi_giro || (defaultOperacion === 'venta' ? company.giro : ''))}">
         </div>
         <div>
           <label class="form-field__label">Dirección</label>
-          <input type="text" class="modal-form__input" id="emi-address" value="${escapeHtml(doc?.emi_address || (defaultOperacion === 'venta' ? COMPANY.address : ''))}">
+          <input type="text" class="modal-form__input" id="emi-address" value="${escapeHtml(doc?.emi_address || (defaultOperacion === 'venta' ? company.address : ''))}">
         </div>
       </div>
 
@@ -11270,27 +11302,27 @@ async function openPresiiModal(id, prefill = {}) {
       <div class="doc-modal-grid">
         <div>
           <label class="form-field__label">Razón Social</label>
-          <input type="text" class="modal-form__input" id="rec-name" value="${escapeHtml(doc?.razon_social || prefill.razon_social || (defaultOperacion === 'compra' ? COMPANY.name : ''))}" required>
+          <input type="text" class="modal-form__input" id="rec-name" value="${escapeHtml(doc?.razon_social || prefill.razon_social || (defaultOperacion === 'compra' ? company.name : ''))}" required>
         </div>
         <div>
           <label class="form-field__label">RUT Receptor</label>
-          <input type="text" class="modal-form__input" id="rec-rut" value="${escapeHtml(doc?.rut_receptor || prefill.rut_receptor || (defaultOperacion === 'compra' ? COMPANY.rut : ''))}">
+          <input type="text" class="modal-form__input" id="rec-rut" value="${escapeHtml(doc?.rut_receptor || prefill.rut_receptor || (defaultOperacion === 'compra' ? company.rut : ''))}">
         </div>
         <div>
           <label class="form-field__label">Giro</label>
-          <input type="text" class="modal-form__input" id="rec-giro" value="${escapeHtml(doc?.giro_receptor || prefill.giro_receptor || (defaultOperacion === 'compra' ? COMPANY.giro : ''))}">
+          <input type="text" class="modal-form__input" id="rec-giro" value="${escapeHtml(doc?.giro_receptor || prefill.giro_receptor || (defaultOperacion === 'compra' ? company.giro : ''))}">
         </div>
         <div>
           <label class="form-field__label">Dirección</label>
-          <input type="text" class="modal-form__input" id="rec-dir" value="${escapeHtml(doc?.direccion_receptor || prefill.direccion_receptor || (defaultOperacion === 'compra' ? COMPANY.address : ''))}">
+          <input type="text" class="modal-form__input" id="rec-dir" value="${escapeHtml(doc?.direccion_receptor || prefill.direccion_receptor || (defaultOperacion === 'compra' ? company.address : ''))}">
         </div>
         <div>
           <label class="form-field__label">Ciudad</label>
-          <input type="text" class="modal-form__input" id="rec-ciudad" value="${escapeHtml(doc?.ciudad_receptor || prefill.ciudad_receptor || (defaultOperacion === 'compra' ? COMPANY.city : ''))}">
+          <input type="text" class="modal-form__input" id="rec-ciudad" value="${escapeHtml(doc?.ciudad_receptor || prefill.ciudad_receptor || (defaultOperacion === 'compra' ? company.city : ''))}">
         </div>
         <div>
           <label class="form-field__label">Comuna</label>
-          <input type="text" class="modal-form__input" id="rec-comuna" value="${escapeHtml(doc?.comuna_receptor || (defaultOperacion === 'compra' ? COMPANY.city : ''))}">
+          <input type="text" class="modal-form__input" id="rec-comuna" value="${escapeHtml(doc?.comuna_receptor || (defaultOperacion === 'compra' ? company.city : ''))}">
         </div>
       </div>
 
@@ -12072,6 +12104,7 @@ window.toggleSidebarGroup = function (btn) {
 
 // Helper para renderizar gráfico de gastos por categoría
 function renderExpensesByCategory(expenses) {
+  if (!expenses?.length) return renderDashboardEmpty('Sin gastos para mostrar', 'Las categorías aparecerán cuando registres gastos.', 'chart-no-axes-column');
   const byCategory = {};
   expenses.forEach(e => {
     if (!byCategory[e.category]) byCategory[e.category] = 0;
@@ -12770,7 +12803,7 @@ async function loadExpenses() {
   const displayExpenses = filteredExpenses;
 
   if (displayExpenses.length === 0) {
-    tbodyEl.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--dash-text-secondary);padding:2rem;">No hay gastos para los filtros seleccionados</td></tr>';
+    tbodyEl.innerHTML = `<tr><td colspan="9">${renderDashboardEmpty('No hay gastos para mostrar', 'Registra un gasto o revisa el período y los filtros.', 'wallet', 'btn-add-expense', 'Registrar gasto')}</td></tr>`;
   } else {
     tbodyEl.innerHTML = displayExpenses.map(exp => {
       const categoryColors = {
@@ -12866,7 +12899,7 @@ function renderExpensesByProject(expenses, projectMap) {
   const chartEl = document.getElementById('expenses-by-project');
 
   if (Object.keys(byProject).length === 0) {
-    chartEl.innerHTML = '<p style="color:var(--dash-text-secondary);">Sin gastos para mostrar</p>';
+    chartEl.innerHTML = renderDashboardEmpty('Sin gastos para mostrar', 'Los gastos por proyecto aparecerán aquí.', 'chart-no-axes-column');
     return;
   }
 
@@ -12978,7 +13011,7 @@ function renderBookings() {
   set('bookings-kpi-pending', all.filter(item => item.status === 'pending').length);
   const tbody = document.getElementById('bookings-tbody');
   if (!tbody) return;
-  if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="6" class="bookings-empty">' + (all.length ? 'No hay reservas que coincidan con los filtros.' : 'Aún no hay reservas desde el sitio.') + '</td></tr>'; return; }
+  if (!filtered.length) { tbody.innerHTML = `<tr><td colspan="6">${renderDashboardEmpty(all.length ? 'Sin resultados' : 'Aún no hay reservas', all.length ? 'Prueba con otros filtros.' : 'Las visitas y reuniones solicitadas desde el sitio aparecerán aquí.', 'calendar-days')}</td></tr>`; return; }
   tbody.innerHTML = filtered.map(item => {
     const label = BOOKING_STATUS_LABELS[item.status] || item.status;
     const kind = item.type === 'visit' ? 'Visita técnica' : 'Reunión inicial';
@@ -13152,7 +13185,7 @@ function renderMailList() {
   if (!threads.length) {
     const title = mailState.query ? 'Sin resultados' : 'Aún no hay conversaciones';
     const copy = mailState.query ? 'Prueba con otra búsqueda.' : 'Los correos enviados y recibidos aparecerán aquí agrupados por conversación.';
-    list.innerHTML = `<div class="mail-state"><i data-lucide="${mailState.query ? 'search-x' : 'inbox'}"></i><strong>${title}</strong><p>${copy}</p></div>`;
+    list.innerHTML = renderDashboardEmpty(title, copy, mailState.query ? 'search-x' : 'inbox');
     if (typeof lucide !== 'undefined') lucide.createIcons();
     return;
   }
