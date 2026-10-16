@@ -221,10 +221,7 @@
           <span>Tickets</span>
           <span class="sidebar__badge sidebar__badge--warning" id="badge-orders" style="display:none;"></span>
         </a>
-        <a href="/dashboard/ordenes-servicio" class="sidebar__link" data-page="service-orders">
-          <i data-lucide="wrench"></i>
-          <span>Órdenes</span>
-        </a>
+        
         <a href="/dashboard/reservas" class="sidebar__link" data-page="bookings">
           <i data-lucide="calendar-check"></i>
           <span>Reservas</span>
@@ -237,14 +234,8 @@
           <i data-lucide="dollar-sign"></i>
           <span>Finanzas</span>
         </a>
-        <a href="/dashboard/boletas" class="sidebar__link" data-page="receipts">
-          <i data-lucide="receipt-text"></i>
-          <span>Boletas</span>
-        </a>
-        <a href="/dashboard/facturacion" class="sidebar__link" data-page="maintenance">
-          <i data-lucide="shield-check"></i>
-          <span>Facturación</span>
-        </a>
+        
+        
       </div>
 
       <div class="sidebar__section">
@@ -259,18 +250,7 @@
         </a>
       </div>
 
-      <div class="sidebar__section">
-        <span class="sidebar__section-label">Personas</span>
-        <a href="/dashboard/bitacora" class="sidebar__link" data-page="practices">
-          <i data-lucide="notebook-pen"></i>
-          <span data-practice-nav-label="logs">Bitácora</span>
-          <span class="sidebar__badge sidebar__badge--warning" id="badge-practices" style="display:none;"></span>
-        </a>
-        <a href="/dashboard/perfil-practicante" class="sidebar__link" data-page="practitioner-profile">
-          <i data-lucide="user-round"></i>
-          <span data-practice-nav-label="profiles">Perfil practicante</span>
-        </a>
-      </div>
+      
 
       <div class="sidebar__section">
         <span class="sidebar__section-label">Sistema</span>
@@ -318,7 +298,7 @@
         <div class="topbar__breadcrumb">
           <span class="topbar__breadcrumb-item">Panel</span>
           <i data-lucide="chevron-right" style="width:14px;height:14px;opacity:0.4;"></i>
-          <span class="topbar__breadcrumb-item" id="page-breadcrumb-group">Principal</span>
+          <span class="topbar__breadcrumb-item" id="page-breadcrumb-group">General</span>
           <i data-lucide="chevron-right" style="width:14px;height:14px;opacity:0.4;"></i>
           <span class="topbar__breadcrumb-item active" id="page-breadcrumb">Inicio</span>
         </div>
@@ -350,7 +330,7 @@
         </div>
         <div class="dash-page__actions">
           <a class="btn-dash btn-dash--secondary" href="/dashboard/calendar">
-            <i data-lucide="calendar-days"></i> Abrir Calendar
+            <i data-lucide="calendar-days"></i> Abrir calendario
           </a>
         </div>
       </div>
@@ -366,8 +346,8 @@
           </div>
         </div>
         <div class="home-hero__mark" aria-hidden="true">
-          <img src="/assets/logo%20extended%20chopped.png" alt="">
-          <span>Tecnología que impulsa tu futuro</span>
+          <img src="/assets/favicon%20chopped.png" alt="" width="80" height="80">
+          <span>Tecnología que se siente cercana</span>
         </div>
       </section>
 
@@ -376,7 +356,6 @@
         <a class="home-shortcut" href="/dashboard/finanzas"><i data-lucide="wallet"></i><span><strong>Finanzas</strong><small>Revisa ingresos y gastos</small></span><i data-lucide="arrow-up-right"></i></a>
         <a class="home-shortcut" href="/dashboard/cotizaciones"><i data-lucide="file-text"></i><span><strong>Cotizaciones</strong><small>Prepara nuevas propuestas</small></span><i data-lucide="arrow-up-right"></i></a>
         <a class="home-shortcut" href="/dashboard/mensajes"><i data-lucide="message-square"></i><span><strong>Mensajes</strong><small>Atiende conversaciones</small></span><i data-lucide="arrow-up-right"></i></a>
-        <a class="home-shortcut" href="/dashboard/boletas"><i data-lucide="receipt-text"></i><span><strong>Boletas</strong><small>Emite y consulta boletas</small></span><i data-lucide="arrow-up-right"></i></a>
         <a class="home-shortcut" href="/dashboard/configuracion"><i data-lucide="settings"></i><span><strong>Configuración</strong><small>Gestiona tu cuenta y accesos</small></span><i data-lucide="arrow-up-right"></i></a>
       </section>
 
@@ -521,7 +500,7 @@
       <div class="dash-page__header">
         <div>
           <span class="mail-eyebrow"><i data-lucide="users"></i> Suite Solven Labs</span>
-          <h1 class="dash-page__title">Relaciones</h1>
+          <h1 class="dash-page__title">Clientes y proveedores</h1>
           <p class="dash-page__subtitle">Gestiona clientes y proveedores en una sola vista</p>
         </div>
         <div class="dash-page__actions dash-page__actions--tight">
@@ -716,274 +695,9 @@
       </div>
     </div>
 
-    <!-- ==================== PAGE: RECEIPTS ==================== -->
-    <div class="dash-page" id="page-receipts">
-      <div class="dash-page__header">
-        <div>
-          <span class="mail-eyebrow"><i data-lucide="receipt-text"></i> Suite Solven Labs</span>
-          <h1 class="dash-page__title">Boletas</h1>
-          <p class="dash-page__subtitle">Registra servicios y entrega una boleta clara a tus clientes</p>
-        </div>
-        <div class="dash-page__actions">
-          <button class="btn-dash btn-dash--secondary" id="dashboard-receipt-reset" type="button" data-permission-action="dashboard-receipt-print">
-            <i data-lucide="file-plus-2"></i> Nueva boleta
-          </button>
-        </div>
-      </div>
+    
 
-      <form class="dashboard-receipt-lookup" id="dashboard-receipt-search-form" role="search">
-        <label class="dashboard-receipt-search">
-          <i data-lucide="search"></i>
-          <span class="sr-only">Buscar boleta</span>
-          <input class="modal-form__input" id="dashboard-receipt-search" type="search" autocomplete="off" placeholder="Buscar por folio, cliente, RUT o detalle...">
-        </label>
-      </form>
-
-      <div class="dashboard-receipt-layout">
-        <section class="dash-card dashboard-receipt-editor" aria-labelledby="dashboard-receipt-form-title">
-          <div class="dash-card__header">
-            <div>
-              <h2 class="dash-card__title" id="dashboard-receipt-form-title">Información de la boleta</h2>
-              <p class="dashboard-receipt-card-copy">El número se asignará automáticamente al guardar.</p>
-            </div>
-            <span class="dashboard-receipt-status is-dirty" id="dashboard-receipt-status">Sin guardar</span>
-          </div>
-          <div class="dash-card__body">
-            <div class="dashboard-receipt-notice">
-              <i data-lucide="info"></i>
-              <span>La boleta se guardará al imprimir. No reemplaza un documento tributario electrónico autorizado por el SII.</span>
-            </div>
-
-            <div class="dashboard-receipt-form-grid dashboard-receipt-form-grid--3">
-              <label class="modal-form__group">
-                <span class="modal-form__label">Tipo de documento</span>
-                <select class="modal-form__select" id="dashboard-receipt-type">
-                  <option value="BOLETA AFECTA A IVA">Boleta afecta a IVA</option>
-                  <option value="BOLETA EXENTA O NO AFECTA A IVA">Boleta exenta o no afecta a IVA</option>
-                </select>
-              </label>
-              <label class="modal-form__group">
-                <span class="modal-form__label">N.º de referencia</span>
-                <input class="modal-form__input" id="dashboard-receipt-number" type="text" placeholder="Se asigna al guardar" readonly>
-              </label>
-              <label class="modal-form__group">
-                <span class="modal-form__label">Fecha y hora</span>
-                <input class="modal-form__input" id="dashboard-receipt-date" type="datetime-local">
-              </label>
-            </div>
-
-            <div class="dashboard-receipt-section">
-              <div class="dashboard-receipt-section__title">Cliente <small>opcional</small></div>
-              <div class="dashboard-receipt-form-grid dashboard-receipt-form-grid--3">
-                <label class="modal-form__group">
-                  <span class="modal-form__label">Nombre o empresa</span>
-                  <input class="modal-form__input" id="dashboard-receipt-customer-name" type="text" maxlength="80" placeholder="Cliente">
-                </label>
-                <label class="modal-form__group">
-                  <span class="modal-form__label">RUT</span>
-                  <input class="modal-form__input" id="dashboard-receipt-customer-rut" type="text" maxlength="20" placeholder="12.345.678-9">
-                </label>
-                <label class="modal-form__group">
-                  <span class="modal-form__label">Contacto</span>
-                  <input class="modal-form__input" id="dashboard-receipt-customer-contact" type="text" maxlength="60" placeholder="Correo o teléfono">
-                </label>
-              </div>
-            </div>
-
-            <div class="dashboard-receipt-section">
-              <div class="dashboard-receipt-section__heading">
-                <div class="dashboard-receipt-section__title">Servicios o productos</div>
-                <button class="btn-dash btn-dash--secondary btn-dash--sm" id="dashboard-receipt-add-item" type="button" data-permission-action="dashboard-receipt-print">
-                  <i data-lucide="plus"></i> Añadir línea
-                </button>
-              </div>
-              <div class="dashboard-receipt-items-head" aria-hidden="true">
-                <span>Detalle</span><span>Cantidad</span><span>Precio</span><span>Descuento</span><span>Total</span><span></span>
-              </div>
-              <div id="dashboard-receipt-items"></div>
-            </div>
-
-            <div class="dashboard-receipt-form-grid dashboard-receipt-form-grid--2">
-              <label class="modal-form__group">
-                <span class="modal-form__label">Medio de pago</span>
-                <select class="modal-form__select" id="dashboard-receipt-payment">
-                  <option>Efectivo</option>
-                  <option>Transferencia</option>
-                  <option>Débito</option>
-                  <option>Crédito</option>
-                  <option>Mercado Pago</option>
-                  <option>Otro</option>
-                </select>
-              </label>
-              <label class="modal-form__group" id="dashboard-receipt-received-wrap">
-                <span class="modal-form__label">Monto recibido</span>
-                <input class="modal-form__input" id="dashboard-receipt-received" type="number" min="0" step="1" inputmode="numeric" placeholder="$0">
-              </label>
-            </div>
-
-            <div class="dashboard-receipt-form-grid dashboard-receipt-form-grid--2">
-              <label class="modal-form__group">
-                <span class="modal-form__label">Nota para el cliente</span>
-                <textarea class="modal-form__textarea" id="dashboard-receipt-note" rows="3" maxlength="180" placeholder="Ej: Servicio entregado conforme."></textarea>
-              </label>
-              <label class="modal-form__group">
-                <span class="modal-form__label">Mensaje final</span>
-                <textarea class="modal-form__textarea" id="dashboard-receipt-footer" rows="3" maxlength="180">Gracias por preferir Equipo Solven Labs.</textarea>
-              </label>
-            </div>
-
-            <div class="dashboard-receipt-actions">
-              <p id="dashboard-receipt-message" role="alert" hidden></p>
-              <button class="btn-dash btn-dash--primary" id="dashboard-receipt-print" type="button">
-                <i data-lucide="printer"></i><span>Guardar e imprimir</span>
-              </button>
-            </div>
-          </div>
-        </section>
-
-        <aside class="dash-card dashboard-receipt-preview-card" aria-label="Vista previa de la boleta">
-          <div class="dash-card__header">
-            <h2 class="dash-card__title">Vista previa</h2>
-          </div>
-          <div class="dash-card__body dashboard-receipt-preview-wrap">
-            <article class="dashboard-thermal-receipt" id="dashboard-receipt-preview">
-              <header class="dashboard-thermal-receipt__header">
-                <img src="/assets/logo%20extended%20chopped.png" alt="Logo Solven Labs">
-                <strong>SERVICIOS INFORMÁTICOS YEVENES &amp; CIA LTDA</strong>
-                <span>RUT 78.352.809-6</span>
-                <span>Actividades de consultoría informática y de gestión de instalaciones informática</span>
-                <span>Colo-Colo 379 Of. 706, Concepción</span>
-                <span>+56 9 7702 9753 · tomas@solvenlabs.cl</span>
-              </header>
-              <div class="dashboard-thermal-receipt__rule"></div>
-              <section class="dashboard-thermal-receipt__meta">
-                <strong id="dashboard-preview-title">BOLETA AFECTA A IVA</strong>
-                <div><span>N.º / REF.</span><b id="dashboard-preview-number">SIN GUARDAR</b></div>
-                <div><span>FECHA</span><b id="dashboard-preview-date">—</b></div>
-              </section>
-              <section id="dashboard-preview-customer" hidden>
-                <div class="dashboard-thermal-receipt__rule"></div>
-                <strong>CLIENTE</strong>
-                <span id="dashboard-preview-customer-name"></span>
-                <span id="dashboard-preview-customer-rut"></span>
-                <span id="dashboard-preview-customer-contact"></span>
-              </section>
-              <div class="dashboard-thermal-receipt__rule"></div>
-              <section>
-                <div class="dashboard-thermal-receipt__items-head"><span>DETALLE</span><span>TOTAL</span></div>
-                <div id="dashboard-preview-items"></div>
-              </section>
-              <div class="dashboard-thermal-receipt__rule"></div>
-              <section class="dashboard-thermal-receipt__totals">
-                <div><span>NETO</span><b id="dashboard-preview-net">$0</b></div>
-                <div id="dashboard-preview-tax-row"><span>IVA 19% INCL.</span><b id="dashboard-preview-tax">$0</b></div>
-                <div class="dashboard-thermal-receipt__grand-total"><span>TOTAL</span><b id="dashboard-preview-total">$0</b></div>
-                <div><span>FORMA DE PAGO</span><b id="dashboard-preview-payment">Efectivo</b></div>
-                <div id="dashboard-preview-received-row"><span>RECIBIDO</span><b id="dashboard-preview-received">$0</b></div>
-                <div id="dashboard-preview-change-row"><span>VUELTO</span><b id="dashboard-preview-change">$0</b></div>
-              </section>
-              <section id="dashboard-preview-note-wrap" hidden>
-                <div class="dashboard-thermal-receipt__rule"></div>
-                <p id="dashboard-preview-note"></p>
-              </section>
-              <footer class="dashboard-thermal-receipt__footer">
-                <div class="dashboard-thermal-receipt__rule"></div>
-                <strong id="dashboard-preview-footer">Gracias por preferir Equipo Solven Labs.</strong>
-                <span>www.solvenlabs.cl</span>
-                <small>Comprobante interno no válido como documento tributario electrónico.</small>
-              </footer>
-            </article>
-          </div>
-        </aside>
-      </div>
-
-      <template id="dashboard-receipt-row-template">
-        <div class="dashboard-receipt-item-row">
-          <label><span>Detalle</span><input class="modal-form__input dashboard-receipt-item-description" type="text" maxlength="90" placeholder="Ej: Mantención web"></label>
-          <label><span>Cantidad</span><input class="modal-form__input dashboard-receipt-item-quantity" type="number" min="0.01" step="0.01" value="1" inputmode="decimal"></label>
-          <label><span>Precio</span><input class="modal-form__input dashboard-receipt-item-price" type="number" min="0" step="1" placeholder="0" inputmode="numeric"></label>
-          <label><span>Descuento</span><input class="modal-form__input dashboard-receipt-item-discount" type="number" min="0" max="100" step="1" value="0" inputmode="decimal"></label>
-          <output class="dashboard-receipt-item-total">$0</output>
-          <button class="dashboard-receipt-item-remove" type="button" aria-label="Eliminar línea"><i data-lucide="trash-2"></i></button>
-        </div>
-      </template>
-    </div>
-
-    <div class="dash-page" id="page-maintenance">
-      <div class="dash-page__header">
-        <div>
-          <span class="mail-eyebrow"><i data-lucide="receipt"></i> Suite Solven Labs</span>
-          <h1 class="dash-page__title">Facturación</h1>
-          <p class="dash-page__subtitle">Consulta el historial de facturación de mantenciones por proyecto.</p>
-        </div>
-        <div class="dash-page__actions">
-        </div>
-      </div>
-
-      <div class="kpi-grid kpi-grid--4" id="maintenance-kpis">
-        <div class="kpi-card">
-          <div class="kpi-card__content">
-            <span class="kpi-card__label">Mantenciones activas</span>
-            <span class="kpi-card__value" id="maintenance-kpi-active">0</span>
-          </div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-card__content">
-            <span class="kpi-card__label">Monto mensual activo</span>
-            <span class="kpi-card__value" id="maintenance-kpi-due">$0</span>
-          </div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-card__content">
-            <span class="kpi-card__label">Facturan en 7 días</span>
-            <span class="kpi-card__value" id="maintenance-kpi-upcoming">0</span>
-          </div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-card__content">
-            <span class="kpi-card__label">Con cobro vencido</span>
-            <span class="kpi-card__value" id="maintenance-kpi-overdue">0</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="dash-card dash-card--compact" style="margin-bottom:1rem;">
-        <div class="dash-card__body" id="maintenance-upcoming-list">
-          <h3 class="dash-card__title">Próximas facturas programadas</h3>
-          <div style="color:var(--dash-text-secondary);padding:1rem;" id="maintenance-upcoming-placeholder">Cargando próximas facturas...</div>
-        </div>
-      </div>
-
-      <div class="dash-card" style="margin-bottom:1rem;">
-        <div class="dash-card__header">
-          <div>
-            <h3 class="dash-card__title">Historial de mantenciones facturadas</h3>
-            <p style="margin:4px 0 0;color:var(--dash-text-secondary);font-size:.85rem;">Registros disponibles para consulta. Los pagos en línea están deshabilitados.</p>
-          </div>
-        </div>
-        <div class="dash-card__body dash-card__body--no-padding">
-          <div class="table-responsive">
-            <table class="dash-table">
-              <thead>
-                <tr>
-                  <th>Cliente</th>
-                  <th>Pack</th>
-                  <th>Monto mensual</th>
-                  <th>Estado</th>
-                  <th>Próxima factura</th>
-                  <th>RUT</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody id="maintenance-subscriptions-tbody">
-                <tr><td colspan="7" style="text-align:center;color:var(--dash-text-secondary);padding:2rem;">Cargando mantenciones...</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-    </div>
+    
 
     <div class="dash-page" id="page-orders">
       <div class="dash-page__header">
@@ -1005,62 +719,7 @@
       </div>
     </div>
 
-    <!-- ==================== PAGE: SERVICE ORDERS ==================== -->
-    <div class="dash-page" id="page-service-orders">
-      <div class="dash-page__header">
-        <div>
-          <span class="mail-eyebrow"><i data-lucide="wrench"></i> Suite Solven Labs</span>
-          <h1 class="dash-page__title">Órdenes</h1>
-          <p class="dash-page__subtitle">Ingreso y seguimiento de equipos, diagnósticos, trabajos y garantías</p>
-        </div>
-        <div class="dash-page__actions">
-          <button class="btn-dash btn-dash--primary" id="btn-add-service-order">
-            <i data-lucide="plus"></i> Nueva orden
-          </button>
-        </div>
-      </div>
-
-      <div class="kpi-grid kpi-grid--4">
-        <div class="kpi-card"><div class="kpi-card__content"><span class="kpi-card__label">Órdenes activas</span><span class="kpi-card__value" id="service-order-kpi-active">0</span></div></div>
-        <div class="kpi-card"><div class="kpi-card__content"><span class="kpi-card__label">En diagnóstico</span><span class="kpi-card__value" id="service-order-kpi-diagnosis">0</span></div></div>
-        <div class="kpi-card"><div class="kpi-card__content"><span class="kpi-card__label">Listas para entrega</span><span class="kpi-card__value" id="service-order-kpi-ready">0</span></div></div>
-        <div class="kpi-card"><div class="kpi-card__content"><span class="kpi-card__label">Monto registrado</span><span class="kpi-card__value" id="service-order-kpi-total">$0</span></div></div>
-      </div>
-
-      <div class="dash-toolbar">
-        <div class="dash-toolbar__search">
-          <i data-lucide="search" style="width:16px;height:16px;opacity:0.4;position:absolute;left:12px;top:50%;transform:translateY(-50%);"></i>
-          <input type="search" class="dash-toolbar__input" id="service-order-search" placeholder="Buscar por folio, cliente, equipo o serie...">
-        </div>
-        <div class="dash-toolbar__filters">
-          <select class="dash-select" id="service-order-filter-status">
-            <option value="">Todos los estados</option>
-            <option value="received">Recibida</option>
-            <option value="diagnosis">En diagnóstico</option>
-            <option value="in_progress">En reparación</option>
-            <option value="ready">Lista para entrega</option>
-            <option value="delivered">Entregada</option>
-            <option value="cancelled">Cancelada</option>
-          </select>
-          <select class="dash-select" id="service-order-filter-payment">
-            <option value="">Todos los pagos</option>
-            <option value="pending">Pendiente</option>
-            <option value="paid">Pagado</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="dash-card">
-        <div class="dash-card__body dash-card__body--no-padding">
-          <div class="table-responsive">
-            <table class="dash-table service-orders-table">
-              <thead><tr><th>Folio / fecha</th><th>Cliente</th><th>Equipo</th><th>Técnico</th><th>Estado</th><th>Pago</th><th>Total</th><th>Acciones</th></tr></thead>
-              <tbody id="service-orders-tbody"><tr><td colspan="8" class="service-orders-empty">Cargando órdenes...</td></tr></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
+    
 
     <!-- ==================== PAGE: PUBLIC BOOKINGS ==================== -->
     <div class="dash-page" id="page-bookings">
@@ -1085,7 +744,7 @@
         <div class="dash-toolbar__search"><i data-lucide="search" style="width:16px;height:16px;opacity:.4;position:absolute;left:12px;top:50%;transform:translateY(-50%);"></i><input type="search" class="dash-toolbar__input" id="bookings-search" placeholder="Buscar por cliente, correo, teléfono o servicio..."></div>
         <div class="dash-toolbar__filters"><select class="dash-select" id="bookings-filter-type"><option value="">Todo tipo</option><option value="visit">Visitas técnicas</option><option value="consultation">Reuniones iniciales</option></select><select class="dash-select" id="bookings-filter-status"><option value="">Todos los estados</option><option value="confirmed">Confirmadas</option><option value="pending">Pendientes de pago</option><option value="cancelled">Canceladas</option></select></div>
       </div>
-      <div class="dash-card"><div class="dash-card__body dash-card__body--no-padding"><div class="table-responsive"><table class="dash-table"><thead><tr><th>Fecha y hora</th><th>Tipo</th><th>Cliente</th><th>Detalle</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="bookings-tbody"><tr><td colspan="6" class="service-orders-empty">Cargando reservas...</td></tr></tbody></table></div></div></div>
+      <div class="dash-card"><div class="dash-card__body dash-card__body--no-padding"><div class="table-responsive"><table class="dash-table"><thead><tr><th>Fecha y hora</th><th>Tipo</th><th>Cliente</th><th>Detalle</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="bookings-tbody"><tr><td colspan="6" class="bookings-empty">Cargando reservas...</td></tr></tbody></table></div></div></div>
     </div>
 
     <!-- ==================== PAGE: TASKS ==================== -->
@@ -1130,7 +789,7 @@
       <div class="dash-page__header">
         <div>
           <span class="mail-eyebrow"><i data-lucide="calendar-days"></i> Suite Solven Labs</span>
-          <h1 class="dash-page__title">Calendar</h1>
+          <h1 class="dash-page__title">Calendario</h1>
           <p class="dash-page__subtitle">Reuniones, entregas y eventos</p>
         </div>
         <div class="dash-page__actions">
@@ -1211,7 +870,7 @@
     <div class="dash-page" id="page-analytics">
       <div class="bi-dashboard bi-dashboard--monthly">
         <header class="dash-page__header bi-page-header">
-          <div><span class="mail-eyebrow"><i data-lucide="bar-chart-3"></i> Suite Solven Labs · Inteligencia mensual</span><h1 class="dash-page__title">Analíticas</h1><p class="dash-page__subtitle">Explora el rendimiento de un mes, detecta variaciones y profundiza en cada área del negocio.</p></div>
+          <div><span class="mail-eyebrow"><i data-lucide="bar-chart-3"></i> Suite Solven Labs · Inteligencia mensual</span><h1 class="dash-page__title">Resumen mensual</h1><p class="dash-page__subtitle">Explora el rendimiento de un mes, detecta variaciones y profundiza en cada área del negocio.</p></div>
           <div class="bi-page-context"><i data-lucide="calendar-range"></i><div><span id="analytics-period-name">Mes actual</span><small>Vista mensual</small></div></div>
         </header>
         <section class="bi-filterbar" aria-label="Filtros de analíticas">
@@ -1238,7 +897,7 @@
     <!-- ==================== PAGE: REPORTS ==================== -->
     <div class="dash-page" id="page-reports">
       <div class="bi-dashboard bi-dashboard--historical">
-        <header class="dash-page__header bi-page-header"><div><span class="mail-eyebrow"><i data-lucide="file-bar-chart"></i> Suite Solven Labs · Visión histórica</span><h1 class="dash-page__title">Reportes</h1><p class="dash-page__subtitle">Todo el desempeño acumulado de Solven Labs, desde el primer registro hasta hoy.</p></div><div class="bi-page-context"><i data-lucide="database"></i><div><span>Histórico total</span><small id="reports-data-range">Todos los registros</small></div></div></header>
+        <header class="dash-page__header bi-page-header"><div><span class="mail-eyebrow"><i data-lucide="file-bar-chart"></i> Suite Solven Labs · Visión histórica</span><h1 class="dash-page__title">Histórico y exportaciones</h1><p class="dash-page__subtitle">Todo el desempeño acumulado de Solven Labs, desde el primer registro hasta hoy.</p></div><div class="bi-page-context"><i data-lucide="database"></i><div><span>Histórico total</span><small id="reports-data-range">Todos los registros</small></div></div></header>
         <section class="bi-filterbar" aria-label="Controles de reportes"><label><span>Agrupación del gráfico</span><select class="bi-control" id="reports-granularity"><option value="month">Mensual</option><option value="quarter">Trimestral</option><option value="year">Anual</option></select></label><label><span>Estado de proyecto</span><select class="bi-control" id="reports-project-filter"><option value="all">Todos los estados</option><option value="in_development">En desarrollo</option><option value="review">En revisión</option><option value="completed">Completados</option><option value="paused">Pausados</option></select></label><div class="bi-filterbar__actions"><button class="btn-dash btn-dash--secondary" id="reports-customize"><i data-lucide="sliders-horizontal"></i> Personalizar KPI</button><button class="btn-dash btn-dash--primary" id="reports-refresh"><i data-lucide="refresh-cw"></i> Actualizar</button></div></section>
         <section class="bi-kpi-grid" id="reports-bi-kpis" aria-live="polite"></section>
         <section class="bi-grid bi-grid--feature"><article class="bi-panel bi-panel--wide"><header><div><span class="bi-panel__eyebrow">Evolución histórica</span><h2>Ingresos y gastos acumulados</h2></div><span class="bi-panel__badge">Todos los períodos</span></header><div class="bi-chart bi-chart--trend" id="reports-trend-chart"></div><footer id="reports-trend-legend"></footer></article><article class="bi-panel"><header><div><span class="bi-panel__eyebrow">Rentabilidad</span><h2>Balance general</h2></div></header><div id="reports-finance-donut"></div></article><article class="bi-panel"><header><div><span class="bi-panel__eyebrow">Cumplimiento</span><h2>Salud operativa</h2></div></header><div id="reports-health"></div></article></section>
@@ -1247,51 +906,9 @@
       </div>
     </div>
 
-    <!-- ==================== PAGE: PRACTICES ==================== -->
-    <div class="dash-page" id="page-practices">
-      <div class="dash-page__header practices-header">
-        <div>
-          <span class="mail-eyebrow"><i data-lucide="notebook-pen"></i> Suite Solven Labs</span>
-          <h1 class="dash-page__title" id="practices-page-title">Bitácora</h1>
-          <p class="dash-page__subtitle" id="practices-page-subtitle">Registro y validación de las actividades de práctica</p>
-        </div>
-        <button class="btn-dash btn-dash--primary" id="btn-add-practice-log">
-          <i data-lucide="plus"></i> Nueva entrada
-        </button>
-      </div>
+    
 
-      <section class="practices-panel is-active" id="practices-panel-log">
-        <div class="practices-stats" id="practices-stats"></div>
-        <div class="dash-card practices-admin-toolbar" id="practices-admin-toolbar" hidden>
-          <div class="practices-filters">
-            <label class="practices-search"><i data-lucide="search"></i><input type="search" id="practices-search" placeholder="Buscar actividad o practicante"></label>
-            <select class="dash-select" id="practices-user-filter"><option value="all">Todos los practicantes</option></select>
-            <select class="dash-select" id="practices-status-filter"><option value="all">Todos los estados</option><option value="ingresado">Ingresados</option><option value="autorizado">Autorizados</option><option value="validado">Validados</option><option value="rechazado">Observados</option></select>
-          </div>
-        </div>
-        <div class="dash-card">
-          <div class="dash-card__body practices-table-wrap">
-            <table class="dash-table practices-table">
-              <thead><tr><th>Fecha</th><th>Practicante</th><th>Actividad</th><th>Horario</th><th>Horas</th><th>Estado</th><th>Acciones</th></tr></thead>
-              <tbody id="practices-log-body"><tr><td colspan="7" class="practices-empty">Cargando bitácora...</td></tr></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-    </div>
-
-    <!-- ==================== PAGE: PRACTITIONER PROFILE ==================== -->
-    <div class="dash-page" id="page-practitioner-profile">
-      <div class="dash-page__header">
-        <div>
-          <span class="mail-eyebrow"><i data-lucide="user-circle"></i> Suite Solven Labs</span>
-          <h1 class="dash-page__title" id="practitioner-profile-title">Perfil del practicante</h1>
-          <p class="dash-page__subtitle" id="practitioner-profile-subtitle">Información académica y seguimiento de la práctica</p>
-        </div>
-      </div>
-      <div id="practices-profile-content"><div class="dash-card"><div class="dash-card__body practices-empty">Cargando perfil...</div></div></div>
-    </div>
+    
 
     <!-- ==================== PAGE: TEAM ==================== -->
     <div class="dash-page" id="page-team">
@@ -1318,7 +935,7 @@
       <div class="dash-page__header">
         <div>
           <span class="mail-eyebrow"><i data-lucide="settings"></i> Suite Solven Labs</span>
-          <h1 class="dash-page__title">Configuración</h1>
+          <h1 class="dash-page__title">Ajustes</h1>
           <p class="dash-page__subtitle">Ajustes de la cuenta, preferencias y accesos del dashboard</p>
         </div>
       </div>
@@ -1380,7 +997,7 @@
       <div class="dash-page__header">
         <div>
           <span class="mail-eyebrow"><i data-lucide="list-checks"></i> Suite Solven Labs</span>
-          <h1 class="dash-page__title">Levantamiento de requerimientos</h1>
+          <h1 class="dash-page__title">Levantamiento</h1>
           <p class="dash-page__subtitle">Registra la necesidad del cliente y prepara su ficha con la identidad de Solven Labs.</p>
         </div>
       </div>

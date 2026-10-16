@@ -504,6 +504,25 @@ try {
 // script running on the origin and remain after the browser is closed.
 let toastSequence = 0;
 
+function databaseErrorMessage(error) {
+  const code = error?.code;
+  if (['42P01', '42703', '42883', 'PGRST200', 'PGRST202', 'PGRST204', 'PGRST205'].includes(code)) {
+    return 'La base de datos está desactualizada: falta una tabla, columna, relación o función. Ejecuta supabase-dashboard-audit.sql y aplica supabase-schema.sql.';
+  }
+  if (code === 'PGRST116') return 'No se encontró un registro único accesible. Puede haber sido eliminado o tu cuenta no tiene acceso. Actualiza la lista antes de reintentar.';
+  if (code === '23503') return 'El registro tiene relaciones pendientes o hace referencia a un registro que ya no existe. Revisa sus datos asociados.';
+  if (code === '42501') return 'Tu cuenta no tiene permiso para realizar esta operación.';
+  return String(error?.message || error?.error_description || error?.error || 'No se pudo consultar la base de datos.');
+}
+
+function requireDatabaseResult(result) {
+  if (result.error) {
+    showToast(databaseErrorMessage(result.error), 'error');
+    throw result.error;
+  }
+  return result.data || [];
+}
+
 function restMutationFeedback(method, status, detail = '') {
   if (status >= 200 && status < 300) {
     if (status === 202) {
@@ -542,6 +561,11 @@ async function dashboardApiFetch(input, init = {}) {
 
   try {
     const response = await window.fetch(input, init);
+    if (!response.ok && requestUrl.startsWith(`${supabaseUrl}/rest/v1/`)) {
+      const payload = await response.clone().json().catch(() => null);
+      console.error('Database request failed', { method, resource: requestUrl.split('?')[0], status: response.status, code: payload?.code, message: payload?.message });
+      showToast(databaseErrorMessage(payload), 'error', 7000, { source: 'rest' });
+    }
     if (isRestMutation) {
       const responseCopy = response.clone();
       window.setTimeout(async () => {
@@ -549,7 +573,7 @@ async function dashboardApiFetch(input, init = {}) {
         let detail = '';
         if (!response.ok) {
           const payload = await responseCopy.json().catch(() => null);
-          detail = String(payload?.message || payload?.error_description || payload?.error || '').slice(0, 180);
+          detail = databaseErrorMessage(payload);
         }
         restMutationFeedback(method, response.status, detail);
       }, 900);
@@ -659,27 +683,88 @@ window.addEventListener('resize', updateAppViewportHeight, { passive: true });
 window.addEventListener('orientationchange', updateAppViewportHeight);
 
 const DASHBOARD_PAGES = [
-  { id: 'overview', label: 'Inicio', group: 'Principal' },
-  { id: 'projects', label: 'Proyectos', group: 'Principal' },
-  { id: 'tasks', label: 'Tareas', group: 'Principal' },
+  { id: 'overview', label: 'Inicio', group: 'General' },
+  { id: 'projects', label: 'Proyectos', group: 'Gestión' },
+  { id: 'tasks', label: 'Tareas', group: 'Gestión' },
   { id: 'messages', label: 'Mensajes', group: 'Operación' },
-  { id: 'calendar', label: 'Calendar', group: 'Gestión' },
-  { id: 'relations', label: 'Relaciones', group: 'Gestión' },
+  { id: 'calendar', label: 'Calendario', group: 'Operación' },
+  { id: 'relations', label: 'Clientes y proveedores', group: 'Gestión' },
   { id: 'quotes', label: 'Cotizaciones', group: 'Gestión' },
   { id: 'requirements', label: 'Levantamiento', group: 'Gestión' },
   { id: 'orders', label: 'Tickets', group: 'Operación' },
-  { id: 'service-orders', label: 'Órdenes', group: 'Operación' },
   { id: 'bookings', label: 'Reservas', group: 'Operación' },
-  { id: 'sii', label: 'Finanzas', group: 'Finanzas' },
-  { id: 'receipts', label: 'Boletas', group: 'Finanzas' },
-  { id: 'maintenance', label: 'Facturación', group: 'Finanzas' },
-  { id: 'analytics', label: 'Analíticas', group: 'Reportes' },
-  { id: 'reports', label: 'Reportes', group: 'Reportes' },
+  { id: 'sii', label: 'Finanzas', group: 'Control' },
+  { id: 'analytics', label: 'Resumen mensual', group: 'Control' },
+  { id: 'reports', label: 'Histórico y exportaciones', group: 'Control' },
   { id: 'team', label: 'Equipo', group: 'Sistema' },
-  { id: 'practices', label: 'Bitácora', group: 'Personas' },
-  { id: 'practitioner-profile', label: 'Perfil practicante', group: 'Personas' },
-  { id: 'settings', label: 'Configuración', group: 'Sistema' }
+  { id: 'settings', label: 'Ajustes', group: 'Sistema' }
 ];
+
+const DASHBOARD_WORKSPACES = [
+  { label: 'Inicio', category: 'General', pages: ['overview'] },
+  { label: 'Proyectos', category: 'Gestión', pages: ['projects', 'tasks', 'requirements'] },
+  { label: 'Comercial', category: 'Gestión', pages: ['relations', 'quotes'] },
+  { label: 'Atención', category: 'Operación', pages: ['messages', 'orders'] },
+  { label: 'Agenda', category: 'Operación', pages: ['calendar', 'bookings'] },
+  { label: 'Finanzas', category: 'Control', pages: ['sii'] },
+  { label: 'Reportes', category: 'Control', pages: ['reports', 'analytics'] },
+  { label: 'Configuración', category: 'Sistema', pages: ['settings', 'team'] }
+];
+
+function workspaceForPage(pageId) {
+  return DASHBOARD_WORKSPACES.find(workspace => workspace.pages.includes(pageId));
+}
+
+function refreshWorkspaceNavigation(pageId = getActivePageId()) {
+  const links = Array.from(document.querySelectorAll('.sidebar__link[data-page]'));
+  const parent = links[0]?.closest('.sidebar__section')?.parentElement;
+  if (!parent) return;
+  links.forEach(link => { link.style.display = 'none'; link.classList.remove('active'); });
+  DASHBOARD_WORKSPACES.forEach(workspace => {
+    const visiblePages = workspace.pages.filter(isPageAllowed);
+    const representative = links.find(link => link.dataset.page === visiblePages[0]);
+    if (!representative) return;
+    let section = Array.from(parent.children).find(item => item.dataset.workspaceCategory === workspace.category);
+    if (!section) {
+      section = document.createElement('div');
+      section.className = 'sidebar__section';
+      section.dataset.workspaceCategory = workspace.category;
+      const label = document.createElement('span');
+      label.className = 'sidebar__section-label';
+      label.textContent = workspace.category;
+      section.appendChild(label);
+      parent.appendChild(section);
+    }
+    section.appendChild(representative);
+    representative.style.display = '';
+    representative.querySelector('span:not(.sidebar__badge)').textContent = workspace.label;
+    representative.classList.toggle('active', workspace.pages.includes(pageId));
+  });
+  document.querySelectorAll('.sidebar__section').forEach(container => {
+    container.style.display = Array.from(container.querySelectorAll('.sidebar__link')).some(link => link.style.display !== 'none') ? '' : 'none';
+  });
+  document.querySelectorAll('.workspace-navigation').forEach(nav => nav.remove());
+  const workspace = workspaceForPage(pageId);
+  const visiblePages = workspace?.pages.filter(isPageAllowed) || [];
+  const page = document.getElementById(`page-${pageId}`);
+  if (!page || visiblePages.length < 2) return;
+  const nav = document.createElement('nav');
+  nav.className = 'workspace-navigation';
+  nav.setAttribute('aria-label', workspace.label);
+  visiblePages.forEach(id => {
+    const link = document.createElement('a');
+    link.href = dashboardPagePath(id);
+    link.textContent = DASHBOARD_PAGES.find(item => item.id === id)?.label || id;
+    if (id === pageId) link.setAttribute('aria-current', 'page');
+    link.addEventListener('click', event => {
+      if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+      event.preventDefault();
+      navigateTo(id);
+    });
+    nav.appendChild(link);
+  });
+  page.prepend(nav);
+}
 
 const DASHBOARD_PAGE_SLUGS = {
   overview: '',
@@ -691,15 +776,10 @@ const DASHBOARD_PAGE_SLUGS = {
   requirements: 'requisitos',
   calendar: 'calendar',
   orders: 'tickets',
-  'service-orders': 'ordenes-servicio',
   bookings: 'reservas',
   sii: 'finanzas',
-  receipts: 'boletas',
-  maintenance: 'facturacion',
   analytics: 'analiticas',
   reports: 'reportes',
-  practices: 'bitacora',
-  'practitioner-profile': 'perfil-practicante',
   team: 'equipo',
   settings: 'configuracion'
 };
@@ -734,7 +814,7 @@ function syncPageHeaderEyebrows(pageId) {
 
   pageElement?.querySelectorAll(eyebrowSelectors).forEach((eyebrow) => {
     const ownerPageId = eyebrow.closest('.dash-page')?.id.replace(/^page-/, '') || pageId;
-    const groupName = DASHBOARD_PAGES.find(item => item.id === ownerPageId)?.group || legacyPageGroups[ownerPageId] || 'Panel';
+    const groupName = workspaceForPage(ownerPageId)?.category || DASHBOARD_PAGES.find(item => item.id === ownerPageId)?.group || legacyPageGroups[ownerPageId] || 'Panel';
     const iconMarkup = eyebrow.querySelector('svg, i')?.outerHTML || '';
     eyebrow.innerHTML = `${iconMarkup} ${groupName}`;
   });
@@ -748,11 +828,8 @@ const DASHBOARD_ACTIONS = [
   { id: 'btn-add-project', label: 'Gestionar proyectos', group: 'Proyectos' },
   { id: 'btn-add-task', label: 'Gestionar tareas', group: 'Tareas' },
   { id: 'btn-add-order', label: 'Gestionar tickets', group: 'Tickets' },
-  { id: 'btn-add-service-order', label: 'Gestionar órdenes de servicio', group: 'Órdenes' },
   { id: 'btn-add-event', label: 'Gestionar eventos', group: 'Calendar' },
   { id: 'btn-site-refresh-messages', label: 'Gestionar mensajes', group: 'Mensajes' },
-  { id: 'btn-add-mp-subscription', label: 'Activar mantención facturada', group: 'Facturación' },
-  { id: 'dashboard-receipt-print', label: 'Emitir e imprimir boletas', group: 'Boletas' },
   { id: 'btn-export-cotizaciones', label: 'Exportar cotizaciones', group: 'Finanzas' },
   { id: 'btn-nueva-cotizacion', label: 'Gestionar cotizaciones', group: 'Finanzas' },
   { id: 'btn-export-payments', label: 'Exportar pagos', group: 'Finanzas' },
@@ -768,9 +845,7 @@ const DASHBOARD_ACTIONS = [
   { id: 'btn-sii-gasto', label: 'Gasto SII', group: 'SII' },
   { id: 'btn-sii-ingreso', label: 'Ingreso SII', group: 'SII' },
   { id: 'btn-export-f29', label: 'Exportar F29', group: 'Impuestos' },
-  { id: 'btn-export-f22', label: 'Exportar F22', group: 'Impuestos' },
-  { id: 'btn-add-practice-log', label: 'Crear entradas de bitácora', group: 'Prácticas' },
-];
+  { id: 'btn-export-f22', label: 'Exportar F22', group: 'Impuestos' }];
 
 function cloneRoleDefinitions(source) {
   return JSON.parse(JSON.stringify(source));
@@ -788,22 +863,22 @@ const defaultRoleDefinitions = {
     name: 'Contabilidad',
     description: 'Acceso centrado en finanzas, impuestos, reportes y analíticas.',
     is_system: true,
-    pages: ['sii', 'receipts', 'quotes', 'maintenance', 'analytics', 'reports', 'settings'],
-    buttons: ['btn-export-presii', 'btn-add-mp-subscription']
+    pages: ['sii', 'quotes', 'analytics', 'reports', 'settings'],
+    buttons: ['btn-export-presii']
   },
   team: {
     name: 'Miembro',
     description: 'Acceso operativo a proyectos, tareas, relaciones, tickets y calendario.',
     is_system: true,
-    pages: ['overview', 'projects', 'tasks', 'messages', 'sii', 'receipts', 'relations', 'calendar', 'orders', 'service-orders', 'settings'],
-    buttons: ['btn-add-project', 'btn-add-service-order']
+    pages: ['overview', 'projects', 'tasks', 'messages', 'sii', 'relations', 'calendar', 'orders', 'settings'],
+    buttons: ['btn-add-project']
   },
   practicante: {
     name: 'Practicante',
-    description: 'Acceso exclusivo a su bitácora y a su perfil de práctica.',
+    description: 'Acceso al calendario del equipo.',
     is_system: true,
-    pages: ['practices', 'practitioner-profile', 'calendar'],
-    buttons: ['btn-add-practice-log']
+    pages: ['calendar'],
+    buttons: []
   }
 };
 
@@ -839,7 +914,7 @@ function escapeCssIdentifier(value) {
 }
 
 function isPageAllowed(pageId) {
-  if (pageId === 'contracts') return false;
+  if (!document.getElementById(`page-${pageId}`)) return false;
   if (pageId === 'bookings' && isAdministrativeRole(getCurrentRole())) return true;
   const allowed = getRolePermissionSet();
   return allowed.pages.includes(pageId);
@@ -983,23 +1058,10 @@ function applyRoleRestrictions() {
   const allowed = getRolePermissionSet();
   const isAdmin = isAdministrativeRole(getCurrentRole());
 
-  // Para administración estas vistas representan gestión de varias personas,
-  // no la bitácora o el perfil personal de quien inició sesión.
-  const practiceLabels = isAdmin
-    ? { logs: 'Bitácoras', profiles: 'Practicantes' }
-    : { logs: 'Bitácora', profiles: 'Perfil practicante' };
-  document.querySelectorAll('[data-practice-nav-label]').forEach(label => {
-    label.textContent = practiceLabels[label.dataset.practiceNavLabel] || label.textContent;
-  });
-  const practicesTitle = document.getElementById('practices-page-title');
-  if (practicesTitle) practicesTitle.textContent = practiceLabels.logs;
-  const practitionerProfileTitle = document.getElementById('practitioner-profile-title');
-  if (practitionerProfileTitle) practitionerProfileTitle.textContent = isAdmin ? 'Practicantes' : 'Perfil del practicante';
-
   // Sidebar nav
   document.querySelectorAll('.sidebar__link[data-page]').forEach(link => {
     const pageId = link.dataset.page;
-    if (!allowed.pages.includes(pageId)) {
+    if (!isPageAllowed(pageId)) {
       link.style.display = 'none';
     } else {
       link.style.display = '';
@@ -1023,8 +1085,10 @@ function applyRoleRestrictions() {
   // Hide pages no autorizadas
   document.querySelectorAll('.dash-page').forEach(page => {
     const pageId = page.id.replace(/^page-/, '');
-    page.style.display = allowed.pages.includes(pageId) ? '' : 'none';
+    page.style.display = isPageAllowed(pageId) ? '' : 'none';
   });
+
+  refreshWorkspaceNavigation();
 
   // Button-level access
   DASHBOARD_ACTIONS.map(action => action.id).forEach(btnId => {
@@ -1384,7 +1448,7 @@ async function getUserProfile() {
     .from('profiles')
     .select('*')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error('Error fetching profile:', error);
@@ -1562,56 +1626,7 @@ const db = {
   },
 
   // ---------- Órdenes de servicio técnico ----------
-  serviceOrders: {
-    async getAll() {
-      const { data, error } = await supabase
-        .from('service_orders')
-        .select('*')
-        .order('service_date', { ascending: false })
-        .order('created_at', { ascending: false });
-      return { data, error };
-    },
-    async create(order) {
-      const { data, error } = await supabase.from('service_orders').insert(order).select().single();
-      return { data, error };
-    },
-    async update(id, updates) {
-      const { data, error } = await supabase.from('service_orders').update(updates).eq('id', id).select().single();
-      return { data, error };
-    },
-    async delete(id) {
-      const { error } = await supabase.from('service_orders').delete().eq('id', id);
-      return { error };
-    }
-  },
-
   // ---------- Facturación / Servicios ----------
-  facturacion: {
-    async getAll() {
-      const { data, error } = await supabase
-        .from('facturacion_items')
-        .select('*, projects(name)')
-        .order('due_date', { ascending: true });
-      return { data, error };
-    },
-    async getById(id) {
-      const { data, error } = await supabase.from('facturacion_items').select('*').eq('id', id).single();
-      return { data, error };
-    },
-    async create(item) {
-      const { data, error } = await supabase.from('facturacion_items').insert(item).select().single();
-      return { data, error };
-    },
-    async update(id, updates) {
-      const { data, error } = await supabase.from('facturacion_items').update(updates).eq('id', id).select().single();
-      return { data, error };
-    },
-    async delete(id) {
-      const { error } = await supabase.from('facturacion_items').delete().eq('id', id);
-      return { error };
-    }
-  },
-
   // ---------- Order Subtasks ----------
   orderSubtasks: {
     async getByOrderId(orderId) {
@@ -1650,9 +1665,12 @@ const db = {
     },
     async delete(id) {
       // Primero obtener la ruta del archivo
-      const { data: doc } = await supabase.from('documents').select('file_path').eq('id', id).single();
+      const { data: doc, error: lookupError } = await supabase.from('documents').select('file_path').eq('id', id).maybeSingle();
+      if (lookupError) return { error: lookupError };
+      if (!doc) return { error: new Error('El documento ya no existe o no tienes acceso.') };
       if (doc?.file_path) {
-        await supabase.storage.from('documents').remove([doc.file_path]);
+        const { error: storageError } = await supabase.storage.from('documents').remove([doc.file_path]);
+        if (storageError) return { error: storageError };
       }
       const { error } = await supabase.from('documents').delete().eq('id', id);
       return { error };
@@ -1884,41 +1902,6 @@ const db = {
   },
 
   // ---------- Prácticas ----------
-  practices: {
-    async getLogs({ userId = null, includeAll = false } = {}) {
-      let query = supabase
-        .from('internship_logs')
-        .select('*, practitioner:profiles!internship_logs_profile_id_fkey(id,full_name,email,avatar_url,phone,position)')
-        .is('deleted_at', null)
-        .order('log_date', { ascending: false })
-        .order('created_at', { ascending: false });
-      if (!includeAll && userId) query = query.eq('profile_id', userId);
-      const { data, error } = await query;
-      return { data, error };
-    },
-    async createLog(entry) {
-      const { data, error } = await supabase.from('internship_logs').insert(entry).select().single();
-      return { data, error };
-    },
-    async updateLog(id, updates) {
-      const { data, error } = await supabase.from('internship_logs').update(updates).eq('id', id).select().single();
-      return { data, error };
-    },
-    async getProfiles({ userId = null, includeAll = false } = {}) {
-      let query = supabase
-        .from('internship_profiles')
-        .select('*, profile:profiles!internship_profiles_profile_id_fkey(id,full_name,email,phone,position,avatar_url,created_at)')
-        .order('start_date', { ascending: false });
-      if (!includeAll && userId) query = query.eq('profile_id', userId);
-      const { data, error } = await query;
-      return { data, error };
-    },
-    async upsertProfile(profile) {
-      const { data, error } = await supabase.from('internship_profiles').upsert(profile, { onConflict: 'profile_id' }).select().single();
-      return { data, error };
-    }
-  },
-
   // ---------- Dashboard Roles ----------
   roles: {
     async getAll() {
@@ -2990,18 +2973,16 @@ async function navigateTo(pageId, skipPush = false) {
   pages.forEach(p => p.classList.remove('active'));
   const activePage = document.getElementById(`page-${pageId}`);
   if (activePage) activePage.classList.add('active');
+  refreshWorkspaceNavigation(pageId);
 
   const pageNames = {
     overview: 'Inicio', projects: 'Proyectos', tasks: 'Tareas', sii: 'Finanzas',
-    relations: 'Relaciones', clients: 'Relaciones', providers: 'Relaciones', invoices: 'Facturas', receipts: 'Boletas',
-    orders: 'Pedidos', calendar: 'Calendar',
+    relations: 'Relaciones', clients: 'Relaciones', providers: 'Relaciones', invoices: 'Facturas',
+    calendar: 'Calendario',
     analytics: 'Analíticas', reports: 'Reportes', team: 'Equipo',
-    settings: 'Configuración', practices: practiceIsAdmin() ? 'Bitácoras' : 'Bitácora',
-    'practitioner-profile': practiceIsAdmin() ? 'Practicantes' : 'Perfil del practicante',
+    settings: 'Ajustes',
     quotes: 'Cotizaciones',
-    maintenance: 'Facturación',
     orders: 'Tickets',
-    'service-orders': 'Órdenes',
     bookings: 'Reservas',
     messages: 'Mensajes',
     payments: 'Pagos',
@@ -3009,9 +2990,11 @@ async function navigateTo(pageId, skipPush = false) {
     expenses: 'Gastos'
   };
   const pageDefinition = DASHBOARD_PAGES.find(page => page.id === pageId);
-  if (breadcrumbGroup) breadcrumbGroup.textContent = pageDefinition?.group || 'Panel';
-  if (breadcrumb) breadcrumb.textContent = pageNames[pageId] || pageDefinition?.label || pageId;
+  if (breadcrumbGroup) breadcrumbGroup.textContent = workspaceForPage(pageId)?.category || pageDefinition?.group || 'Control';
+  if (breadcrumb) breadcrumb.textContent = pageDefinition?.label || pageNames[pageId] || pageId;
 
+  const sectionTitle = activePage?.querySelector('.dash-page__header .dash-page__title');
+  if (sectionTitle && pageDefinition) sectionTitle.textContent = pageDefinition.label;
   syncPageHeaderEyebrows(pageId);
   updateDashboardPageMetadata(pageId);
   const pagePath = dashboardPagePath(pageId);
@@ -3047,16 +3030,12 @@ async function loadPageData(pageId) {
       case 'providers': await loadRelations(); break;
       case 'projects': await loadProjects(); break;
       case 'invoices': await renderPresii(); break;
-      case 'receipts': initDashboardReceipts(); break;
       case 'tasks': await loadTasks(); break;
       case 'orders': await loadOrders(); break;
-      case 'service-orders': await loadServiceOrders(); break;
       case 'bookings': await loadBookings(); break;
       case 'calendar': await loadCalendar(); break;
       case 'messages': await loadSiteMessages(); initSiteMessagesPage(); break;
       case 'team': await loadTeam(); break;
-      case 'practices': await loadPractices(); break;
-      case 'practitioner-profile': await loadPractices(); break;
       case 'settings': await loadSettings(); break;
       case 'analytics': await loadAnalytics(); break;
       case 'reports': await loadReports(); break;
@@ -3065,7 +3044,6 @@ async function loadPageData(pageId) {
       case 'payments': await renderPayments(); break;
       case 'taxes': await renderTaxForms(); break;
       case 'expenses': await loadExpenses(); break;
-      case 'maintenance': await loadMaintenance(); break;
     }
   } catch (err) {
     console.error(`Error loading ${pageId}:`, err);
@@ -3074,257 +3052,7 @@ async function loadPageData(pageId) {
 }
 
 // ==========================================================================
-// PRÁCTICAS
-// ==========================================================================
-const practicesState = { logs: [], profiles: [], people: [], initialized: false };
-
-function practiceIsAdmin() {
-  return isAdministrativeRole(getCurrentRole());
-}
-
-function practiceHours(startTime, endTime) {
-  if (!startTime || !endTime) return 0;
-  const [startH, startM] = startTime.slice(0, 5).split(':').map(Number);
-  const [endH, endM] = endTime.slice(0, 5).split(':').map(Number);
-  return Math.max(0, ((endH * 60 + endM) - (startH * 60 + startM)) / 60);
-}
-
-function formatPracticeHours(value) {
-  return `${Number(value || 0).toLocaleString('es-CL', { maximumFractionDigits: 1 })} h`;
-}
-
-function formatPracticeDate(value) {
-  if (!value) return '—';
-  return new Intl.DateTimeFormat('es-CL', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${value}T12:00:00Z`));
-}
-
-function practiceStatusBadge(status) {
-  const labels = { ingresado: 'Ingresado', autorizado: 'Autorizado', validado: 'Validado', rechazado: 'Observado' };
-  return `<span class="practice-status practice-status--${escapeHtml(status || 'ingresado')}">${labels[status] || 'Ingresado'}</span>`;
-}
-
-function initPracticesUi() {
-  if (practicesState.initialized) return;
-  practicesState.initialized = true;
-  document.querySelectorAll('[data-practices-tab]').forEach(tab => {
-    tab.addEventListener('click', () => {
-      const target = tab.dataset.practicesTab;
-      document.querySelectorAll('[data-practices-tab]').forEach(item => {
-        const active = item === tab;
-        item.classList.toggle('is-active', active);
-        item.setAttribute('aria-selected', String(active));
-      });
-      document.querySelectorAll('.practices-panel').forEach(panel => {
-        const active = panel.id === `practices-panel-${target}`;
-        panel.classList.toggle('is-active', active);
-        panel.hidden = !active;
-      });
-    });
-  });
-
-  dashboardReceiptApplyAccess();
-
-  document.getElementById('btn-add-practice-log')?.addEventListener('click', () => window.openPracticeLogModal());
-  document.getElementById('practices-search')?.addEventListener('input', renderPracticeLogs);
-  document.getElementById('practices-user-filter')?.addEventListener('change', () => {
-    renderPracticeLogs();
-    renderPracticeStats();
-  });
-  document.getElementById('practices-status-filter')?.addEventListener('change', renderPracticeLogs);
-}
-
-async function loadPractices() {
-  initPracticesUi();
-  const isAdmin = practiceIsAdmin();
-  document.getElementById('practices-admin-toolbar').hidden = !isAdmin;
-  document.getElementById('practices-page-subtitle').textContent = isAdmin
-    ? 'Gestión total de bitácoras, validaciones y perfiles históricos'
-    : 'Tu bitácora y perfil de práctica';
-  const profileSubtitle = document.getElementById('practitioner-profile-subtitle');
-  if (profileSubtitle) profileSubtitle.textContent = isAdmin
-    ? 'Historial y gestión de todos los practicantes'
-    : 'Tus datos académicos, objetivos y progreso de práctica';
-
-  const [logsResult, profilesResult, peopleResult] = await Promise.all([
-    db.practices.getLogs({ userId: currentProfile?.id, includeAll: isAdmin }),
-    db.practices.getProfiles({ userId: currentProfile?.id, includeAll: isAdmin }),
-    isAdmin ? supabase.from('profiles').select('id,full_name,email,phone,position,avatar_url,role,created_at').eq('role', 'practicante').order('full_name') : Promise.resolve({ data: [currentProfile], error: null })
-  ]);
-  if (logsResult.error || profilesResult.error || peopleResult.error) {
-    console.error('Error cargando prácticas:', logsResult.error || profilesResult.error || peopleResult.error);
-    showToast('No se pudo cargar la sección de prácticas. Revisa que el esquema esté actualizado.', 'error');
-  }
-  practicesState.logs = logsResult.data || [];
-  practicesState.profiles = profilesResult.data || [];
-  const historicalPeople = practicesState.profiles.map(item => item.profile).filter(Boolean);
-  practicesState.people = [...(peopleResult.data || []), ...historicalPeople].filter((person, index, all) => person?.id && all.findIndex(item => item?.id === person.id) === index);
-  renderPracticeFilters();
-  renderPracticeStats();
-  renderPracticeLogs();
-  renderPracticeProfiles();
-  updatePracticesBadge();
-}
-
-function renderPracticeFilters() {
-  const select = document.getElementById('practices-user-filter');
-  if (!select || !practiceIsAdmin()) return;
-  const selected = select.value;
-  select.innerHTML = '<option value="all">Todos los practicantes</option>' + practicesState.people
-    .map(person => `<option value="${escapeHtml(person.id)}">${escapeHtml(person.full_name || person.email)}</option>`).join('');
-  if ([...select.options].some(option => option.value === selected)) select.value = selected;
-}
-
-function getFilteredPracticeLogs() {
-  const search = (document.getElementById('practices-search')?.value || '').trim().toLowerCase();
-  const personId = document.getElementById('practices-user-filter')?.value || 'all';
-  const status = document.getElementById('practices-status-filter')?.value || 'all';
-  return practicesState.logs.filter(log => {
-    const haystack = [log.activity, log.learning, log.practitioner?.full_name, log.practitioner?.email].filter(Boolean).join(' ').toLowerCase();
-    return (!search || haystack.includes(search)) && (personId === 'all' || log.profile_id === personId) && (status === 'all' || log.status === status);
-  });
-}
-
-function renderPracticeStats() {
-  const logs = practicesState.logs;
-  const now = new Date();
-  const timezoneOffset = now.getTimezoneOffset() * 60000;
-  const monday = new Date(now);
-  const weekday = (now.getDay() + 6) % 7;
-  monday.setDate(now.getDate() - weekday);
-  const mondayKey = new Date(monday.getTime() - timezoneOffset).toISOString().slice(0, 10);
-  const totalHours = logs.reduce((sum, log) => sum + Number(log.hours || practiceHours(log.start_time, log.end_time)), 0);
-  const weekHours = logs.filter(log => log.log_date >= mondayKey).reduce((sum, log) => sum + Number(log.hours || practiceHours(log.start_time, log.end_time)), 0);
-  const pending = logs.filter(log => log.status === 'ingresado').length;
-  const selectedPractitionerId = document.getElementById('practices-user-filter')?.value || 'all';
-  const selectedTotalHours = logs
-    .filter(log => log.profile_id === selectedPractitionerId)
-    .reduce((sum, log) => sum + Number(log.hours || practiceHours(log.start_time, log.end_time)), 0);
-  const goal = Number(practicesState.profiles.find(item => item.profile_id === currentProfile?.id)?.weekly_hours_goal || 20);
-  const items = practiceIsAdmin()
-    ? [['clock-3', 'Horas registradas', selectedPractitionerId !== 'all' ? formatPracticeHours(selectedTotalHours) : '—', selectedPractitionerId === 'all' ? 'Selecciona un practicante' : ''], ['hourglass', 'Por autorizar', pending], ['users', 'Practicantes históricos', practicesState.people.length]]
-    : [['clock-3', 'Horas totales', formatPracticeHours(totalHours)], ['target', `Meta semanal (${goal} h)`, `${Math.min(100, Math.round((weekHours / Math.max(goal, 1)) * 100))}%`], ['badge-check', 'Entradas validadas', logs.filter(log => ['autorizado', 'validado'].includes(log.status)).length]];
-  const container = document.getElementById('practices-stats');
-  if (container) container.innerHTML = items.map(item => `<div class="practice-stat"><i data-lucide="${item[0]}"></i><div><span>${item[1]}</span><strong>${item[2]}</strong>${item[3] ? `<small>${item[3]}</small>` : ''}</div></div>`).join('');
-  if (typeof lucide !== 'undefined') lucide.createIcons();
-}
-
-function renderPracticeLogs() {
-  const body = document.getElementById('practices-log-body');
-  if (!body) return;
-  const isAdmin = practiceIsAdmin();
-  const logs = getFilteredPracticeLogs();
-  if (!logs.length) {
-    body.innerHTML = '<tr><td colspan="7" class="practices-empty">No hay entradas para mostrar.</td></tr>';
-    return;
-  }
-  body.innerHTML = logs.map(log => {
-    const hours = Number(log.hours || practiceHours(log.start_time, log.end_time));
-    const safeEvidenceUrl = /^https?:\/\//i.test(log.evidence_url || '') ? log.evidence_url : '';
-    const evidence = safeEvidenceUrl ? `<a class="practice-evidence" href="${escapeHtml(safeEvidenceUrl)}" target="_blank" rel="noopener"><i data-lucide="external-link"></i> Evidencia</a>` : '';
-    const actions = isAdmin
-      ? `<div class="practice-actions"><button type="button" title="Autorizar" onclick="window.setPracticeLogStatus('${log.id}','autorizado')"><i data-lucide="check"></i></button><button type="button" title="Validar" onclick="window.setPracticeLogStatus('${log.id}','validado')"><i data-lucide="badge-check"></i></button><button type="button" title="Editar" onclick="window.openPracticeLogModal('${log.id}')"><i data-lucide="pencil"></i></button><button type="button" class="is-danger" title="Archivar" onclick="window.archivePracticeLog('${log.id}')"><i data-lucide="archive"></i></button></div>`
-      : (log.status === 'ingresado' ? `<div class="practice-actions"><button type="button" title="Editar" onclick="window.openPracticeLogModal('${log.id}')"><i data-lucide="pencil"></i></button></div>` : '<span class="practice-locked"><i data-lucide="lock"></i> Cerrada</span>');
-    return `<tr><td>${formatPracticeDate(log.log_date)}</td><td><strong>${escapeHtml(log.practitioner?.full_name || currentProfile?.full_name || '—')}</strong></td><td><div class="practice-activity"><strong>${escapeHtml(log.activity)}</strong>${log.learning ? `<small>${escapeHtml(log.learning)}</small>` : ''}${evidence}</div></td><td>${escapeHtml((log.start_time || '').slice(0, 5))} – ${escapeHtml((log.end_time || '').slice(0, 5))}</td><td><strong>${formatPracticeHours(hours)}</strong></td><td>${practiceStatusBadge(log.status)}</td><td>${actions}</td></tr>`;
-  }).join('');
-  if (typeof lucide !== 'undefined') lucide.createIcons();
-}
-
-function renderPracticeProfiles() {
-  const container = document.getElementById('practices-profile-content');
-  if (!container) return;
-  const isAdmin = practiceIsAdmin();
-  const people = isAdmin ? practicesState.people : [currentProfile].filter(Boolean);
-  if (!people.length) {
-    container.innerHTML = '<div class="dash-card"><div class="dash-card__body practices-empty">No hay perfiles de practicantes registrados.</div></div>';
-    return;
-  }
-  container.innerHTML = `<div class="practice-profile-grid">${people.map(person => {
-    const internship = practicesState.profiles.find(item => item.profile_id === person.id) || {};
-    const initials = (person.full_name || person.email || 'P').split(/\s+/).map(part => part[0]).join('').slice(0, 2).toUpperCase();
-    const logs = practicesState.logs.filter(log => log.profile_id === person.id);
-    const total = logs.reduce((sum, log) => sum + Number(log.hours || practiceHours(log.start_time, log.end_time)), 0);
-    const totalGoal = Number(internship.total_hours_goal || 0);
-    const progress = totalGoal > 0 ? Math.min(100, Math.round((total / totalGoal) * 100)) : 0;
-    const hoursBalance = totalGoal > 0 ? Math.max(0, totalGoal - total) : 0;
-    return `<article class="dash-card practice-profile-card"><div class="dash-card__body"><div class="practice-profile-card__head">${person.avatar_url ? `<img src="${escapeHtml(assetUrl(person.avatar_url))}" alt="">` : `<span>${escapeHtml(initials)}</span>`}<div><h3>${escapeHtml(person.full_name || 'Practicante')}</h3><p>${escapeHtml(person.email || '')}</p></div>${isAdmin ? `<button type="button" class="btn-dash btn-dash--secondary" onclick="window.openPracticeProfileModal('${person.id}')"><i data-lucide="settings-2"></i> Gestionar</button>` : ''}</div><div class="practice-hours-summary"><div class="practice-hours-summary__head"><div><span>Progreso de horas</span><strong>${formatPracticeHours(total).replace(' h', '')} <small>/ ${totalGoal > 0 ? formatPracticeHours(totalGoal) : 'Por configurar'}</small></strong></div>${totalGoal > 0 ? `<b>${progress}%</b>` : ''}</div><div class="practice-hours-summary__track" role="progressbar" aria-label="Progreso de horas de práctica" aria-valuemin="0" ${totalGoal > 0 ? `aria-valuenow="${progress}" aria-valuemax="100"` : ''}><span style="width:${progress}%"></span></div><p>${totalGoal > 0 ? `${formatPracticeHours(hoursBalance)} pendientes para completar la práctica` : 'Define las horas totales desde Gestionar para calcular el avance.'}</p></div><dl class="practice-profile-details"><div><dt>Institución</dt><dd>${escapeHtml(internship.institution || 'Sin informar')}</dd></div><div><dt>Carrera</dt><dd>${escapeHtml(internship.program || 'Sin informar')}</dd></div><div><dt>Supervisor</dt><dd>${escapeHtml(internship.supervisor_name || 'Sin asignar')}</dd></div><div><dt>Periodo</dt><dd>${formatPracticeDate(internship.start_date)} – ${formatPracticeDate(internship.end_date)}</dd></div><div><dt>Meta semanal</dt><dd>${formatPracticeHours(internship.weekly_hours_goal || 20)}</dd></div><div><dt>Horas exigidas</dt><dd>${totalGoal > 0 ? formatPracticeHours(totalGoal) : 'Por configurar'}</dd></div></dl>${internship.objectives ? `<div class="practice-objectives"><strong>Objetivos</strong><p>${escapeHtml(internship.objectives)}</p></div>` : ''}</div></article>`;
-  }).join('')}</div>`;
-  if (typeof lucide !== 'undefined') lucide.createIcons();
-}
-
-function updatePracticesBadge() {
-  const badge = document.getElementById('badge-practices');
-  if (!badge) return;
-  const count = practiceIsAdmin() ? practicesState.logs.filter(log => log.status === 'ingresado').length : practicesState.logs.filter(log => log.status === 'ingresado').length;
-  badge.textContent = String(count);
-  badge.style.display = count ? '' : 'none';
-}
-
-window.openPracticeLogModal = function (logId = null) {
-  const existing = practicesState.logs.find(log => log.id === logId);
-  if (existing && !practiceIsAdmin() && existing.status !== 'ingresado') return showToast('Una entrada autorizada ya no puede editarse', 'warning');
-  const isAdmin = practiceIsAdmin();
-  const today = new Date().toISOString().slice(0, 10);
-  const peopleOptions = practicesState.people.map(person => `<option value="${escapeHtml(person.id)}" ${existing?.profile_id === person.id ? 'selected' : ''}>${escapeHtml(person.full_name || person.email)}</option>`).join('');
-  openModal(existing ? 'Editar entrada de bitácora' : 'Nueva entrada de bitácora', `<form id="practice-log-form" class="practice-modal-form">${isAdmin ? `<label>Practicante<select class="modal-form__input" id="practice-log-user" required><option value="">Seleccionar</option>${peopleOptions}</select></label>` : ''}<div class="practice-form-row"><label>Fecha<input class="modal-form__input" type="date" id="practice-log-date" value="${escapeHtml(existing?.log_date || today)}" max="${today}" required></label><label>Inicio<input class="modal-form__input" type="time" id="practice-log-start" value="${escapeHtml((existing?.start_time || '09:00').slice(0, 5))}" required></label><label>Término<input class="modal-form__input" type="time" id="practice-log-end" value="${escapeHtml((existing?.end_time || '18:00').slice(0, 5))}" required></label></div><label>Actividad realizada<textarea class="modal-form__textarea" id="practice-log-activity" rows="3" maxlength="1000" required>${escapeHtml(existing?.activity || '')}</textarea></label><label>Aprendizaje o resultado <span>(opcional)</span><textarea class="modal-form__textarea" id="practice-log-learning" rows="2" maxlength="1000">${escapeHtml(existing?.learning || '')}</textarea></label><label>Enlace de evidencia <span>(opcional)</span><input class="modal-form__input" type="url" id="practice-log-evidence" placeholder="https://..." value="${escapeHtml(existing?.evidence_url || '')}"></label>${isAdmin && existing ? `<label>Observación del supervisor<textarea class="modal-form__textarea" id="practice-log-review" rows="2">${escapeHtml(existing?.review_note || '')}</textarea></label>` : ''}</form>`, existing ? 'Guardar cambios' : 'Registrar entrada', async () => {
-    const form = document.getElementById('practice-log-form');
-    if (!form?.reportValidity()) return;
-    const start = document.getElementById('practice-log-start').value;
-    const end = document.getElementById('practice-log-end').value;
-    const hours = practiceHours(start, end);
-    if (hours <= 0 || hours > 16) return showToast('Revisa el horario: debe registrar entre 0 y 16 horas', 'warning');
-    const evidenceUrl = document.getElementById('practice-log-evidence').value.trim();
-    if (evidenceUrl && !/^https?:\/\//i.test(evidenceUrl)) return showToast('El enlace de evidencia debe comenzar con http:// o https://', 'warning');
-    const payload = { profile_id: isAdmin ? document.getElementById('practice-log-user').value : currentProfile.id, log_date: document.getElementById('practice-log-date').value, start_time: start, end_time: end, hours, activity: document.getElementById('practice-log-activity').value.trim(), learning: document.getElementById('practice-log-learning').value.trim() || null, evidence_url: evidenceUrl || null };
-    if (isAdmin && existing) payload.review_note = document.getElementById('practice-log-review').value.trim() || null;
-    if (!payload.profile_id) return showToast('Selecciona un practicante', 'warning');
-    const result = existing ? await db.practices.updateLog(existing.id, payload) : await db.practices.createLog(payload);
-    if (result.error) return showToast(`No se pudo guardar: ${result.error.message}`, 'error');
-    await auditLog(`${existing ? 'Actualizó' : 'Creó'} una entrada de bitácora de práctica`, 'general', result.data?.id || existing?.id, payload.activity);
-    closeModal(); showToast('Entrada guardada correctamente', 'success'); await loadPractices();
-  });
-};
-
-window.setPracticeLogStatus = async function (id, status) {
-  if (!practiceIsAdmin() || !['autorizado', 'validado', 'rechazado'].includes(status)) return;
-  const updates = { status, reviewed_by: currentProfile.id, reviewed_at: new Date().toISOString() };
-  const noteField = document.getElementById('practice-log-review');
-  if (noteField) updates.review_note = noteField.value.trim() || null;
-  const { error } = await db.practices.updateLog(id, updates);
-  if (error) return showToast(`No se pudo actualizar: ${error.message}`, 'error');
-  await auditLog(`Marcó una bitácora de práctica como ${status}`, 'general', id, 'Bitácora de práctica');
-  showToast(`Entrada ${status === 'validado' ? 'validada' : 'autorizada'}`, 'success');
-  await loadPractices();
-};
-
-window.archivePracticeLog = async function (id) {
-  if (!practiceIsAdmin() || !window.confirm('¿Archivar esta entrada? Podrá recuperarse directamente desde la base de datos.')) return;
-  const { error } = await db.practices.updateLog(id, { deleted_at: new Date().toISOString(), deleted_by: currentProfile.id });
-  if (error) return showToast(`No se pudo archivar: ${error.message}`, 'error');
-  await auditLog('Archivó una entrada de bitácora de práctica', 'general', id, 'Bitácora de práctica');
-  showToast('Entrada archivada', 'success'); await loadPractices();
-};
-
-window.openPracticeProfileModal = function (profileId) {
-  if (!practiceIsAdmin()) {
-    showToast('Solo administración puede modificar perfiles de práctica', 'warning');
-    return;
-  }
-  const person = practicesState.people.find(item => item.id === profileId);
-  if (!person) return;
-  const existing = practicesState.profiles.find(item => item.profile_id === profileId) || {};
-  openModal('Perfil de práctica', `<form id="practice-profile-form" class="practice-modal-form"><label>Institución<input class="modal-form__input" id="practice-profile-institution" value="${escapeHtml(existing.institution || '')}" required></label><label>Carrera o programa<input class="modal-form__input" id="practice-profile-program" value="${escapeHtml(existing.program || '')}" required></label><div class="practice-form-row practice-form-row--profile"><label>Inicio<input class="modal-form__input" type="date" id="practice-profile-start" value="${escapeHtml(existing.start_date || '')}"></label><label>Término<input class="modal-form__input" type="date" id="practice-profile-end" value="${escapeHtml(existing.end_date || '')}"></label><label>Meta semanal (horas)<input class="modal-form__input" type="number" min="1" max="60" step="0.5" id="practice-profile-goal" value="${escapeHtml(existing.weekly_hours_goal || 20)}"></label><label>Horas totales a cumplir<input class="modal-form__input" type="number" min="1" max="5000" step="0.5" id="practice-profile-total-goal" value="${escapeHtml(existing.total_hours_goal || '')}" placeholder="Ej. 360"></label></div><label>Supervisor<input class="modal-form__input" id="practice-profile-supervisor" value="${escapeHtml(existing.supervisor_name || '')}" ${practiceIsAdmin() ? '' : 'readonly'}></label><label>Objetivos de la práctica<textarea class="modal-form__textarea" id="practice-profile-objectives" rows="3">${escapeHtml(existing.objectives || '')}</textarea></label></form>`, 'Guardar perfil', async () => {
-    const form = document.getElementById('practice-profile-form'); if (!form?.reportValidity()) return;
-    const totalHoursGoal = document.getElementById('practice-profile-total-goal').value;
-    const payload = { profile_id: profileId, institution: document.getElementById('practice-profile-institution').value.trim(), program: document.getElementById('practice-profile-program').value.trim(), start_date: document.getElementById('practice-profile-start').value || null, end_date: document.getElementById('practice-profile-end').value || null, weekly_hours_goal: Number(document.getElementById('practice-profile-goal').value || 20), total_hours_goal: totalHoursGoal ? Number(totalHoursGoal) : null, supervisor_name: document.getElementById('practice-profile-supervisor').value.trim() || null, objectives: document.getElementById('practice-profile-objectives').value.trim() || null, updated_by: currentProfile.id };
-    const { error } = await db.practices.upsertProfile(payload);
-    if (error) return showToast(`No se pudo guardar: ${error.message}`, 'error');
-    await auditLog('Actualizó un perfil de práctica', 'general', profileId, person.full_name || person.email);
-    closeModal(); showToast('Perfil de práctica actualizado', 'success'); await loadPractices();
-  });
-};
-
-// ==========================================================================
-// OVERVIEW
+// INICIO
 // ==========================================================================
 async function renderRevenueChart(period = 'Últimos 6 meses') {
   const container = document.getElementById('revenue-bars');
@@ -3656,7 +3384,7 @@ async function loadOverview() {
       exportBtn.textContent = 'Generando...';
       try {
         const [projectsRes, clientsRes, tasksRes] = await Promise.all([
-          supabase.from('projects').select('id,name,status,progress,client_name,estimated_end_date'),
+          supabase.from('projects_with_details').select('id,name,status,progress,client_name,estimated_end_date'),
           supabase.from('clients').select('id,name,company,status'),
           supabase.from('tasks').select('id,title,completed,due_date,priority,projects(name)')
         ]);
@@ -5260,7 +4988,6 @@ function formatRutOrNull(rut = '') {
 
 const RUT_INPUT_IDS = new Set([
   'new-client-rut', 'edit-client-rut',
-  'new-maintenance-customer-rut', 'edit-maintenance-customer-rut',
   'payment-rut', 'rec-rut', 'emi-rut',
   'ep-rut', 'ef-rut', 'ea-rut',
   'cp-rut', 'fin-rut', 'anx-rut',
@@ -5361,10 +5088,12 @@ function initAddClientModal() {
           region: document.getElementById('new-client-region').value || null,
           city: document.getElementById('new-client-city').value || null,
           status: document.getElementById('new-client-status').value,
-          payment_account: isProvider ? accountNumber : null,
-          account_type: isProvider ? accountType : null,
-          bank: isProvider ? bank : null,
-          account_number: isProvider ? accountNumber : null
+          ...(isProvider ? {
+            payment_account: accountNumber,
+            account_type: accountType,
+            bank,
+            account_number: accountNumber
+          } : {})
         };
 
         if (!isProvider) {
@@ -5817,236 +5546,6 @@ function initAddProjectModal() {
 async function viewInvoice(id) { showToast('Use la sección SII para ver facturas', 'info'); }
 async function editInvoice(id) { showToast('Use la sección SII para editar facturas', 'info'); }
 
-async function loadMaintenance() {
-  const [
-    { data: projects = [], error: projectsErr },
-    { data: subscriptions = [], error: subscriptionsErr },
-    { data: maintenanceBills = [], error: maintenanceBillsErr }
-  ] = await Promise.all([
-    db.projects.getAll(),
-    supabase.from('maintenance_billing_plans')
-      .select('id,project_id,plan_code,plan_name,amount,currency,customer_name,customer_rut,customer_email,customer_phone,status,billing_day,next_issue_date,created_at')
-      .is('deleted_at', null)
-      .order('created_at', { ascending: false }),
-    supabase.from('maintenance_bills')
-      .select('id,billing_plan_id,status,due_at,period_start,amount')
-      .order('due_at', { ascending: true })
-  ]);
-  if (projectsErr) {
-    console.error('Error cargando facturación:', projectsErr);
-    showToast('Error al cargar facturación', 'error');
-    return;
-  }
-  if (subscriptionsErr) console.warn('No se pudieron cargar las suscripciones de Mercado Pago:', subscriptionsErr);
-  if (maintenanceBillsErr) console.warn('No se pudieron cargar los cobros de mantención:', maintenanceBillsErr);
-
-  const projectMap = Object.fromEntries((projects || []).map(p => [p.id, p]));
-  const activePlans = (subscriptions || [])
-    .filter(plan => String(plan.status || '').toLowerCase() === 'active');
-  const activePlanIds = new Set(activePlans.map(plan => plan.id));
-  const relevantBillByPlan = new Map();
-  (maintenanceBills || []).forEach(bill => {
-    const status = String(bill.status || '').toLowerCase();
-    if (!activePlanIds.has(bill.billing_plan_id) || !['pending', 'overdue', 'payment_mismatch'].includes(status)) return;
-    const current = relevantBillByPlan.get(bill.billing_plan_id);
-    const billDate = String(bill.period_start || bill.due_at || '');
-    const currentDate = String(current?.period_start || current?.due_at || '');
-    if (!current || billDate > currentDate) relevantBillByPlan.set(bill.billing_plan_id, bill);
-  });
-  const activeBills = [...relevantBillByPlan.values()];
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const overdueBills = activeBills.filter(bill => String(bill.status || '').toLowerCase() === 'overdue' || (bill.due_at && parseDate(bill.due_at) < today));
-  const upcomingPlans = activePlans.filter(plan => plan.next_issue_date && isDueSoon(plan.next_issue_date, 7));
-  const monthlyActiveAmount = activePlans.reduce((sum, plan) => sum + (Number(plan.amount) || 0), 0);
-
-  window._maintenanceProjectMap = projectMap;
-  window._maintenanceProjects = projects || [];
-  window._maintenanceSubscriptions = subscriptions || [];
-  window._maintenanceBills = maintenanceBills || [];
-
-  const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
-  setText('maintenance-kpi-active', activePlans.length);
-  setText('maintenance-kpi-due', formatCurrency(monthlyActiveAmount));
-  setText('maintenance-kpi-upcoming', upcomingPlans.length);
-  setText('maintenance-kpi-overdue', overdueBills.length);
-
-  const upcomingEl = document.getElementById('maintenance-upcoming-list');
-  if (upcomingEl) {
-    upcomingEl.querySelector('#maintenance-upcoming-placeholder').innerHTML = upcomingPlans.length > 0
-      ? upcomingPlans.map(plan => {
-          const projectName = escapeHtml(projectMap[plan.project_id]?.name || plan.customer_name || 'Sin proyecto');
-          return `<div class="item" style="display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.06);"><div><strong>${escapeHtml(plan.plan_name || 'Mantención mensual')}</strong><br><small style="color:var(--dash-text-secondary);">${projectName} · Próxima factura programada</small></div><div style="text-align:right;min-width:110px;"><span style="font-weight:700;">${formatCurrency(plan.amount)}</span><br><small style="color:${isDueSoon(plan.next_issue_date, 3) ? '#d97706' : '#4b5563'};">${formatDateShort(plan.next_issue_date)}</small></div></div>`;
-        }).join('')
-      : '<p style="color:var(--dash-text-secondary);padding:1rem;">Sin facturas programadas para los próximos 7 días</p>';
-  }
-
-  renderManualMaintenancePlans(subscriptions || [], subscriptionsErr);
-}
-
-
-function getManualMaintenanceStatusMeta(plan) {
-  const planStatus = String(plan.status || 'active').toLowerCase();
-  if (planStatus === 'cancelled') return { label: 'Cancelada', badge: 'overdue' };
-  if (planStatus === 'paused') return { label: 'Pausada', badge: 'inactive' };
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const nextIssueDate = parseDate(plan.next_issue_date);
-  if (nextIssueDate && nextIssueDate < today) return { label: 'Vencida', badge: 'overdue' };
-  if (plan.next_issue_date && isDueSoon(plan.next_issue_date, 7)) return { label: 'Próxima a vencer', badge: 'upcoming' };
-  return { label: 'Activa', badge: 'active' };
-}
-
-function renderManualMaintenancePlans(plans, loadError = null) {
-  const tbody = document.getElementById('maintenance-subscriptions-tbody');
-  if (!tbody) return;
-  if (loadError) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#b45309;padding:1.5rem;">La facturación mensual aún no está instalada en Supabase.</td></tr>'; return; }
-  if (!plans.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--dash-text-secondary);padding:1.5rem;">Todavía no hay mantenciones mensuales.</td></tr>'; return; }
-  tbody.innerHTML = plans.map(plan => {
-    const status = String(plan.status || 'active').toLowerCase();
-    const state = getManualMaintenanceStatusMeta(plan);
-    const actions = 'Solo consulta';
-    return `<tr><td><strong>${escapeHtml(plan.customer_name || 'Sin nombre')}</strong><br><small>${escapeHtml(plan.customer_email || '')}</small></td><td>${escapeHtml(plan.plan_name || '-')}</td><td><strong>${formatCurrency(plan.amount || 0)}</strong></td><td><span class="status-badge status-badge--${state.badge}">${state.label}</span></td><td>${plan.next_issue_date ? formatDateShort(plan.next_issue_date) : '-'}</td><td>${escapeHtml(plan.customer_rut || '-')}</td><td><div class="table-actions">${actions}</div></td></tr>`;
-  }).join('');
-  if (typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 30);
-}
-
-function renderMaintenanceModalForm({ prefix, item = {}, projectLabel = '' }) {
-  const projectPickerId = `${prefix}-maintenance-project-picker`;
-  return `
-      <div class="modal-form__group"><label class="modal-form__label">Número de factura / referencia</label><input type="text" class="modal-form__input" id="${prefix}-maintenance-invoice-number" placeholder="INV-2026-001" value="${escapeHtml(item.invoice_number || '')}"></div>
-      <div class="modal-form__group"><label class="modal-form__label">Título</label><input type="text" class="modal-form__input" id="${prefix}-maintenance-title" value="${escapeHtml(item.title || '')}"></div>
-      <div class="modal-form__row">
-        <div class="modal-form__group"><label class="modal-form__label">Cliente</label><input type="text" class="modal-form__input" id="${prefix}-maintenance-customer-name" placeholder="Nombre del cliente" value="${escapeHtml(item.customer_name || '')}"></div>
-        <div class="modal-form__group"><label class="modal-form__label">RUT cliente</label><input type="text" class="modal-form__input" id="${prefix}-maintenance-customer-rut" placeholder="RUT" value="${escapeHtml(item.customer_rut || '')}"></div>
-      </div>
-      ${renderEntitySearchPicker({
-        rootId: projectPickerId,
-        type: 'project',
-        label: 'Proyecto asociado',
-        placeholder: 'Buscar proyecto por nombre o cliente',
-        selectedId: item.project_id || '',
-        selectedLabel: projectLabel || '',
-        helperText: 'Opcional. Puedes registrar el cobro solo con cliente libre, sin proyecto ni cliente en Relaciones.',
-        onSelect: (record) => {
-          const customerName = document.getElementById(`${prefix}-maintenance-customer-name`);
-          const customerRut = document.getElementById(`${prefix}-maintenance-customer-rut`);
-          if (customerName && !customerName.value) {
-            customerName.value = record.client_name || record.client_company || record.client || '';
-          }
-          if (customerRut && !customerRut.value) {
-            customerRut.value = record.client_rut || record.rut || '';
-          }
-        }
-      })}
-      <div class="modal-form__row">
-        <div class="modal-form__group"><label class="modal-form__label">Tipo</label><select class="modal-form__select" id="${prefix}-maintenance-type"><option value="mantenimiento" ${item.type === 'mantenimiento' ? 'selected' : ''}>Mantenimiento</option><option value="suscripcion" ${item.type === 'suscripcion' ? 'selected' : ''}>Suscripción</option><option value="facturacion" ${item.type === 'facturacion' ? 'selected' : ''}>Facturación</option></select></div>
-        <div class="modal-form__group"><label class="modal-form__label">Ciclo</label><select class="modal-form__select" id="${prefix}-maintenance-cycle"><option value="one_time" ${(!item.billing_cycle || item.billing_cycle === 'one_time') ? 'selected' : ''}>Único</option><option value="monthly" ${item.billing_cycle === 'monthly' ? 'selected' : ''}>Mensual</option><option value="quarterly" ${item.billing_cycle === 'quarterly' ? 'selected' : ''}>Trimestral</option><option value="annual" ${item.billing_cycle === 'annual' ? 'selected' : ''}>Anual</option></select></div>
-      </div>
-      <div class="modal-form__row">
-        <div class="modal-form__group"><label class="modal-form__label">Estado</label><select class="modal-form__select" id="${prefix}-maintenance-status"><option value="pending" ${item.status === 'pending' || !item.status ? 'selected' : ''}>Pendiente</option><option value="paid" ${item.status === 'paid' ? 'selected' : ''}>Pagado</option><option value="overdue" ${item.status === 'overdue' ? 'selected' : ''}>Vencido</option></select></div>
-        <div class="modal-form__group"><label class="modal-form__label">Condiciones de pago</label><input type="text" class="modal-form__input" id="${prefix}-maintenance-payment-terms" placeholder="30 días, contado, etc." value="${escapeHtml(item.payment_terms || '')}"></div>
-      </div>
-      <div class="modal-form__row"><div class="modal-form__group"><label class="modal-form__label">Monto</label><input type="number" class="modal-form__input" id="${prefix}-maintenance-amount" min="0" value="${item.amount != null ? Number(item.amount) : 0}"></div><div class="modal-form__group"><label class="modal-form__label">Fecha de vencimiento</label><input type="date" class="modal-form__input" id="${prefix}-maintenance-due" value="${item.due_date || ''}"></div></div>
-      <div class="modal-form__row"><div class="modal-form__group"><label class="modal-form__label">Fecha de renovación</label><input type="date" class="modal-form__input" id="${prefix}-maintenance-renewal" value="${item.renewal_date || ''}"></div><div class="modal-form__group"></div></div>
-      <div class="modal-form__group"><label class="modal-form__label">Notas</label><textarea class="modal-form__textarea" id="${prefix}-maintenance-notes" rows="3">${escapeHtml(item.notes || '')}</textarea></div>
-  `;
-}
-
-
-window.editMaintenanceItem = async function editMaintenanceItem(id) {
-  if (!isButtonAllowed('btn-add-mp-subscription')) return showToast('No tienes permiso para gestionar mantenimiento', 'warning');
-  const { data: item, error } = await db.facturacion.getById(id);
-  if (error || !item) {
-    showToast('No se encontró el registro', 'error');
-    return;
-  }
-
-  const projects = window._maintenanceProjects || [];
-  const projectMap = window._maintenanceProjectMap || Object.fromEntries((projects || []).map(p => [p.id, p]));
-  const projectLabel = projectMap[item.project_id]?.name || '';
-
-  openModal('Editar registro de facturación', renderMaintenanceModalForm({ prefix: 'edit', item, projectLabel }), 'Guardar cambios', async () => {
-    const invoiceNumber = document.getElementById('edit-maintenance-invoice-number')?.value.trim() || null;
-    const title = document.getElementById('edit-maintenance-title')?.value.trim();
-    const customerName = document.getElementById('edit-maintenance-customer-name')?.value.trim() || null;
-    const customerRut = formatRutOrNull(document.getElementById('edit-maintenance-customer-rut')?.value);
-    const projectId = document.getElementById('edit-maintenance-project-picker-value')?.value || null;
-    const type = document.getElementById('edit-maintenance-type')?.value || 'mantenimiento';
-    const cycle = document.getElementById('edit-maintenance-cycle')?.value || 'one_time';
-    const status = document.getElementById('edit-maintenance-status')?.value || 'pending';
-    const amount = Number(document.getElementById('edit-maintenance-amount')?.value || 0);
-    const due_date = document.getElementById('edit-maintenance-due')?.value || null;
-    const renewalDate = document.getElementById('edit-maintenance-renewal')?.value || null;
-    const paymentTerms = document.getElementById('edit-maintenance-payment-terms')?.value.trim() || null;
-    const notes = document.getElementById('edit-maintenance-notes')?.value.trim() || null;
-    if (!title || !amount) { showToast('Completa título y monto', 'error'); return; }
-
-    const { error: updateError } = await db.facturacion.update(id, {
-      invoice_number: invoiceNumber,
-      title,
-      customer_name: customerName,
-      customer_rut: customerRut,
-      project_id: projectId,
-      type,
-      billing_cycle: cycle,
-      payment_terms: paymentTerms,
-      renewal_date: renewalDate || null,
-      amount: Math.round(amount),
-      due_date: due_date || null,
-      status,
-      notes
-    });
-
-    if (updateError) {
-      showToast('Error actualizando registro: ' + updateError.message, 'error');
-      return;
-    }
-
-    closeModal();
-    await loadMaintenance();
-    showToast('Registro actualizado', 'success');
-  });
-};
-
-window.toggleMaintenancePaid = async function toggleMaintenancePaid(id) {
-  if (!isButtonAllowed('btn-add-mp-subscription')) return showToast('No tienes permiso para gestionar mantenimiento', 'warning');
-  const { data: item, error: itemErr } = await db.facturacion.getById(id);
-  if (itemErr || !item) {
-    showToast('No se encontró el registro', 'error');
-    return;
-  }
-  const newStatus = item.status === 'paid' ? 'pending' : 'paid';
-  const { error } = await db.facturacion.update(id, { status: newStatus });
-  if (error) {
-    showToast('Error actualizando estado: ' + error.message, 'error');
-    return;
-  }
-  await loadMaintenance();
-};
-
-window.deleteMaintenanceItem = async function deleteMaintenanceItem(id) {
-  if (!isButtonAllowed('btn-add-mp-subscription')) return showToast('No tienes permiso para gestionar mantenimiento', 'warning');
-  const { error } = await db.facturacion.delete(id);
-  if (error) {
-    showToast('Error eliminando registro: ' + error.message, 'error');
-    return;
-  }
-  await loadMaintenance();
-};
-
-window.deleteMaintenanceConfirm = function deleteMaintenanceConfirm(id) {
-  if (!isButtonAllowed('btn-add-mp-subscription')) return showToast('No tienes permiso para gestionar mantenimiento', 'warning');
-  openModal('Eliminar registro de facturación', '<p>¿Estás seguro de eliminar este registro? Esta acción no se puede deshacer.</p>', 'Eliminar', async () => {
-    closeModal();
-    await deleteMaintenanceItem(id);
-  });
-};
-
-// ==========================================================================
-// TASKS
-// ==========================================================================
 async function loadTasks() {
   const { data: tasks, error } = await db.tasks.getAll();
   if (error) { showToast('Error al cargar tareas', 'error'); return; }
@@ -7838,23 +7337,19 @@ function confirmEventDeletion(event, title, scope, invitationRequestId, invitati
 // ==========================================================================
 async function updateSidebarBadges() {
   try {
-    const [projectsRes, tasksRes, invoicesRes, messagesRes, ordersRes, practicesRes] = await Promise.all([
+    const [projectsRes, tasksRes, invoicesRes, messagesRes, ordersRes] = await Promise.all([
       supabase.from('projects').select('id', { count: 'exact', head: true }).eq('status', 'in_development'),
       supabase.from('tasks').select('id', { count: 'exact', head: true }).eq('completed', false),
       supabase.from('facturas_presii').select('id', { count: 'exact', head: true }).not('estado', 'in', '("Aceptada","Anulada")'),
       supabase.from('site_messages').select('id', { count: 'exact', head: true }).eq('status', 'new'),
-      supabase.from('orders').select('id', { count: 'exact', head: true }).neq('status', 'done'),
-      supabase.from('internship_logs').select('id', { count: 'exact', head: true }).eq('status', 'ingresado').is('deleted_at', null)
-    ]);
+      supabase.from('orders').select('id', { count: 'exact', head: true }).neq('status', 'done')]);
 
     const badges = [
       { id: 'badge-projects', count: projectsRes.count || 0 },
       { id: 'badge-tasks', count: tasksRes.count || 0 },
       { id: 'badge-invoices', count: invoicesRes.count || 0 },
       { id: 'badge-messages', count: messagesRes.count || 0 },
-      { id: 'badge-orders', count: ordersRes.count || 0 },
-      { id: 'badge-practices', count: practicesRes.count || 0 }
-    ];
+      { id: 'badge-orders', count: ordersRes.count || 0 }];
 
     badges.forEach(({ id, count }) => {
       const el = document.getElementById(id);
@@ -8399,11 +7894,15 @@ async function openNewTeamMemberModal(modalTitle = 'Nuevo Miembro del Equipo') {
         }
       }
 
-      const { data: existingTeamMember } = await supabase
+      const { data: existingTeamMember, error: teamLookupError } = await supabase
         .from('team_members')
         .select('id')
         .eq('profile_id', profileId)
         .maybeSingle();
+      if (teamLookupError) {
+        showToast(databaseErrorMessage(teamLookupError), 'error');
+        return;
+      }
 
       const payload = {
         profile_id: profileId,
@@ -9101,7 +8600,6 @@ function initSearch() {
     relations: 'cliente clientes proveedor proveedores relacion relaciones', sii: 'sii finanzas factura facturas',
     quotes: 'cotizacion cotizaciones presupuesto', payments: 'pago pagos', taxes: 'impuesto impuestos f22 f29',
     expenses: 'gasto gastos', calendar: 'calendario agenda evento', orders: 'ticket tickets soporte',
-    'service-orders': 'orden ordenes servicio', maintenance: 'facturacion mantenimiento mensualidad',
     requirements: 'requisitos requerimientos ficha levantamiento', analytics: 'analitica analiticas', reports: 'reporte reportes informe informes',
     team: 'equipo persona personas', settings: 'configuracion ajustes',
     messages: 'mensaje mensajes contacto'
@@ -9374,7 +8872,7 @@ function closeModal() {
   if (!modal) return;
   modal.classList.remove('show');
   const modalContentEl = modal.querySelector('.dash-modal__content');
-  if (modalContentEl) modalContentEl.classList.remove('dash-modal__content--fullscreen', 'service-order-modal');
+  if (modalContentEl) modalContentEl.classList.remove('dash-modal__content--fullscreen');
 }
 
 const modalEntitySearchConfigs = {};
@@ -10130,8 +9628,7 @@ function getActivityIcon(t) { return { project: 'folder-kanban', invoice: 'file-
 
 // ---- Storage helpers (Supabase) ----
 async function getCotizaciones() {
-  const { data } = await supabase.from('cotizaciones').select('*').order('created_at', { ascending: false });
-  return data || [];
+  return requireDatabaseResult(await supabase.from('cotizaciones').select('*').order('created_at', { ascending: false }));
 }
 async function saveCotizacion(doc) {
   const { error } = await supabase.from('cotizaciones').upsert(doc);
@@ -10144,8 +9641,7 @@ async function deleteCotizacionDB(id) {
 
 // ---- Pagos (honorarios y contrato) ----
 async function getPagos() {
-  const { data } = await supabase.from('pagos').select('*').order('fecha', { ascending: false });
-  return data || [];
+  return requireDatabaseResult(await supabase.from('pagos').select('*').order('fecha', { ascending: false }));
 }
 
 async function syncProviderBillingFromPago(paymentDoc, previousDoc = null) {
@@ -10197,7 +9693,8 @@ async function syncProviderBillingFromPago(paymentDoc, previousDoc = null) {
 async function savePago(doc) {
   let previousDoc = null;
   if (doc?.id) {
-    const { data } = await supabase.from('pagos').select('*').eq('id', doc.id).maybeSingle();
+    const { data, error } = await supabase.from('pagos').select('*').eq('id', doc.id).maybeSingle();
+    if (error) return error;
     previousDoc = data || null;
   }
 
@@ -10233,7 +9730,8 @@ async function savePago(doc) {
   return null;
 }
 async function deletePagoDB(id) {
-  const { data: previousDoc } = await supabase.from('pagos').select('*').eq('id', id).maybeSingle();
+  const { data: previousDoc, error: lookupError } = await supabase.from('pagos').select('*').eq('id', id).maybeSingle();
+  if (lookupError) return lookupError;
   const { error } = await supabase.from('pagos').delete().eq('id', id);
   if (!error && previousDoc) {
     await syncProviderBillingFromPago({ rut: '', neto: 0 }, previousDoc);
@@ -10242,15 +9740,14 @@ async function deletePagoDB(id) {
 }
 
 async function getPresiiDocs() {
-  const { data } = await supabase.from('facturas_presii').select('*').order('created_at', { ascending: false });
-  return data || [];
+  return requireDatabaseResult(await supabase.from('facturas_presii').select('*').order('created_at', { ascending: false }));
 }
 async function getFacturacionAccountingItems() {
-  const { data } = await supabase
+  const result = await supabase
     .from('facturacion_items')
     .select('amount, created_at, due_date, status')
     .order('created_at', { ascending: false });
-  return data || [];
+  return requireDatabaseResult(result);
 }
 function getAccountingEntryDate(item) {
   const raw = item?.created_at || item?.due_date || item?.fecha || '';
@@ -10280,7 +9777,7 @@ async function deletePresiiDocDB(id) {
 // ---- Folio auto ----
 async function nextFolio(type) {
   const table = type === 'cot' ? 'cotizaciones' : 'facturas_presii';
-  const { data } = await supabase.from(table).select('folio').order('folio', { ascending: false }).limit(1);
+  const data = requireDatabaseResult(await supabase.from(table).select('folio').order('folio', { ascending: false }).limit(1));
   return (parseInt(data?.[0]?.folio) || 0) + 1;
 }
 
@@ -11826,7 +11323,7 @@ async function openPresiiModal(id, prefill = {}) {
       folio: doc?.folio || await nextFolio('presii'),
       tipo_dte: document.getElementById('presii-tipo')?.value || '33',
       fecha: document.getElementById('presii-fecha')?.value || today,
-      fecha_vencimiento: document.getElementById('presii-fvenc')?.value || '',
+      fecha_vencimiento: document.getElementById('presii-fvenc')?.value || null,
       periodo: document.getElementById('presii-periodo')?.value.trim() || '',
       estado: document.getElementById('presii-estado')?.value || 'borrador',
       operacion: document.getElementById('presii-operacion')?.value || 'venta',
@@ -12126,8 +11623,7 @@ async function buildDocPDF(docType, doc) {
     { h: 'Cant.', w: 14, x: ML, align: 'center' },
     { h: 'Descripción', w: descW, x: ML + 14, align: 'left' },
     { h: 'Precio unitario', w: 30, x: ML + 14 + descW, align: 'right' },
-    { h: 'Importe', w: 28, x: ML + 14 + descW + 30, align: 'right' },
-  ];
+    { h: 'Importe', w: 28, x: ML + 14 + descW + 30, align: 'right' }];
 
   const TH = 7;
   // Branded table header
@@ -13414,132 +12910,8 @@ window.viewEvent = viewEvent;
 window.saveEventNotes = saveEventNotes;
 
 // ==========================================================================
-// ÓRDENES DE SERVICIO TÉCNICO
+// RESERVAS
 // ==========================================================================
-const SERVICE_ORDER_STATUS = {
-  received: 'Recibida',
-  diagnosis: 'En diagnóstico',
-  in_progress: 'En reparación',
-  ready: 'Lista para entrega',
-  delivered: 'Entregada',
-  cancelled: 'Cancelada'
-};
-
-const SERVICE_ORDER_PAYMENT = {
-  cash: 'Efectivo',
-  transfer: 'Transferencia',
-  card: 'Tarjeta',
-  pending: 'Pendiente'
-};
-
-const SERVICE_ORDER_WARRANTY = 'Garantía mínima de 30 días hábiles desde el término del servicio o la entrega del equipo. Cubre desperfectos o daños atribuibles al trabajo realizado. No cubre fallas ajenas al servicio, golpes, líquidos, variaciones eléctricas, software malicioso ni intervenciones posteriores de terceros, salvo que el problema sea consecuencia del trabajo realizado. Estas condiciones no limitan los derechos de la Ley N.º 19.496.';
-const SERVICE_ORDER_CONFORMITY = 'El cliente declara haber recibido información del diagnóstico, valores y condiciones; equipo probado cuando corresponda.';
-
-function serviceOrderToday() {
-  const now = new Date();
-  const offset = now.getTimezoneOffset() * 60000;
-  return new Date(now.getTime() - offset).toISOString().slice(0, 10);
-}
-
-function serviceOrderNumber(value) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
-}
-
-async function nextServiceOrderFolio() {
-  const year = new Date().getFullYear();
-  const { data } = await supabase
-    .from('service_orders')
-    .select('folio')
-    .like('folio', `OS-${year}-%`)
-    .order('folio', { ascending: false })
-    .limit(1);
-  const last = String(data?.[0]?.folio || '').split('-').pop();
-  return `OS-${year}-${String((parseInt(last, 10) || 0) + 1).padStart(4, '0')}`;
-}
-
-async function loadServiceOrders() {
-  const tbody = document.getElementById('service-orders-tbody');
-  if (!tbody) return;
-
-  const search = document.getElementById('service-order-search');
-  const status = document.getElementById('service-order-filter-status');
-  const payment = document.getElementById('service-order-filter-payment');
-  [search, status, payment].forEach(control => {
-    if (!control || control.dataset.initialized) return;
-    control.addEventListener(control.tagName === 'INPUT' ? 'input' : 'change', renderServiceOrders);
-    control.dataset.initialized = 'true';
-  });
-
-  const addButton = document.getElementById('btn-add-service-order');
-  if (addButton && !addButton.dataset.initialized) {
-    addButton.addEventListener('click', () => openServiceOrderForm());
-    addButton.dataset.initialized = 'true';
-  }
-
-  const { data, error } = await db.serviceOrders.getAll();
-  if (error) {
-    console.error('Error cargando órdenes de servicio:', error);
-    tbody.innerHTML = `<tr><td colspan="8" class="service-orders-empty">No se pudo cargar la sección. Ejecuta la migración de <strong>service_orders</strong> incluida en supabase-schema.sql.</td></tr>`;
-    return;
-  }
-
-  window._serviceOrdersCache = data || [];
-  renderServiceOrders();
-}
-
-function renderServiceOrders() {
-  const allOrders = window._serviceOrdersCache || [];
-  const query = String(document.getElementById('service-order-search')?.value || '').trim().toLowerCase();
-  const status = document.getElementById('service-order-filter-status')?.value || '';
-  const payment = document.getElementById('service-order-filter-payment')?.value || '';
-  const canManageServiceOrders = isButtonAllowed('btn-add-service-order');
-
-  const filtered = allOrders.filter(order => {
-    const haystack = [order.folio, order.client_name, order.client_rut, order.client_phone, order.equipment_type, order.brand_model, order.serial_number, order.technician_name].join(' ').toLowerCase();
-    const paymentMatches = !payment || (payment === 'pending' ? order.payment_method === 'pending' : order.payment_method !== 'pending');
-    return (!query || haystack.includes(query)) && (!status || order.status === status) && paymentMatches;
-  });
-
-  const active = allOrders.filter(order => !['delivered', 'cancelled'].includes(order.status)).length;
-  const total = allOrders.reduce((sum, order) => sum + serviceOrderNumber(order.total_amount), 0);
-  const setText = (id, value) => { const node = document.getElementById(id); if (node) node.textContent = value; };
-  setText('service-order-kpi-active', active);
-  setText('service-order-kpi-diagnosis', allOrders.filter(order => order.status === 'diagnosis').length);
-  setText('service-order-kpi-ready', allOrders.filter(order => order.status === 'ready').length);
-  setText('service-order-kpi-total', formatCurrency(total));
-
-  const tbody = document.getElementById('service-orders-tbody');
-  if (!tbody) return;
-  if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="8" class="service-orders-empty">${allOrders.length ? 'No hay órdenes que coincidan con los filtros.' : 'Aún no hay órdenes de servicio. Crea la primera con “Nueva orden”.'}</td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = filtered.map(order => {
-    const paymentPending = order.payment_method === 'pending';
-    const equipmentLabel = [order.equipment_type, order.brand_model].filter(Boolean).join(' · ');
-    return `
-      <tr>
-        <td><strong>${escapeHtml(order.folio)}</strong><br><small>${order.service_date ? formatDateShort(order.service_date) : '—'}</small></td>
-        <td><div class="service-order-client"><strong>${escapeHtml(order.client_name)}</strong><small>${escapeHtml(order.client_phone || order.client_rut || 'Sin contacto')}</small></div></td>
-        <td><div class="service-order-equipment"><strong>${escapeHtml(equipmentLabel || 'Sin equipo')}</strong><small>${order.serial_number ? `Serie: ${escapeHtml(order.serial_number)}` : 'Sin identificación'}</small></div></td>
-        <td>${escapeHtml(order.technician_name || '—')}</td>
-        <td><span class="service-order-status service-order-status--${escapeHtml(order.status)}">${SERVICE_ORDER_STATUS[order.status] || escapeHtml(order.status)}</span></td>
-        <td><span class="service-order-payment service-order-payment--${paymentPending ? 'pending' : 'paid'}">${SERVICE_ORDER_PAYMENT[order.payment_method] || '—'}</span></td>
-        <td><strong>${formatCurrency(serviceOrderNumber(order.total_amount))}</strong></td>
-        <td>
-          <div class="dashboard-row-actions">
-            <button class="btn-dash btn-dash--secondary btn-dash--sm" onclick="viewServiceOrder('${order.id}')" title="Ver detalle"><i data-lucide="eye"></i></button>
-            ${canManageServiceOrders ? `<button class="btn-dash btn-dash--secondary btn-dash--sm" onclick="editServiceOrder('${order.id}')" title="Editar"><i data-lucide="pencil"></i></button>
-            <button class="btn-dash btn-dash--secondary btn-dash--sm" onclick="deleteServiceOrder('${order.id}')" title="Eliminar"><i data-lucide="trash-2"></i></button>` : ''}
-          </div>
-        </td>
-      </tr>`;
-  }).join('');
-  if (typeof lucide !== 'undefined') lucide.createIcons();
-}
-
 const BOOKING_STATUS_LABELS = { confirmed: 'Confirmada', pending: 'Pendiente de pago', cancelled: 'Cancelada', rejected: 'Rechazada', expired: 'Expirada', needs_review: 'Revisar pago', payment_mismatch: 'Monto no coincide' };
 
 function normalizeBooking(row, type) {
@@ -13569,7 +12941,7 @@ async function loadBookings() {
   if (refresh && !refresh.dataset.initialized) { refresh.addEventListener('click', loadBookings); refresh.dataset.initialized = 'true'; }
   const calendar = document.getElementById('bookings-open-calendar');
   if (calendar && !calendar.dataset.initialized) { calendar.addEventListener('click', () => navigateTo('calendar')); calendar.dataset.initialized = 'true'; }
-  tbody.innerHTML = '<tr><td colspan="6" class="service-orders-empty">Cargando reservas...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="6" class="bookings-empty">Cargando reservas...</td></tr>';
   const results = await Promise.all([
     supabase.from('visit_reservations').select('id,service_name,customer_name,customer_email,customer_phone,visit_date,visit_time,end_time,status,event_id,created_at').order('visit_date', { ascending: false }).order('visit_time', { ascending: false }),
     supabase.from('free_consultation_bookings').select('id,customer_name,customer_email,customer_phone,company,topic,booking_date,booking_time,end_time,status,event_id,created_at').order('booking_date', { ascending: false }).order('booking_time', { ascending: false })
@@ -13577,7 +12949,7 @@ async function loadBookings() {
   const visits = results[0], consultations = results[1];
   if (visits.error || consultations.error) {
     console.error('Error cargando reservas:', visits.error || consultations.error);
-    tbody.innerHTML = '<tr><td colspan="6" class="service-orders-empty">No se pudieron cargar las reservas. Verifica la migración de reservas.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" class="bookings-empty">No se pudieron cargar las reservas. Verifica la migración de reservas.</td></tr>';
     return;
   }
   window._bookingsCache = (visits.data || []).map(row => normalizeBooking(row, 'visit')).concat((consultations.data || []).map(row => normalizeBooking(row, 'consultation'))).sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time));
@@ -13598,12 +12970,12 @@ function renderBookings() {
   set('bookings-kpi-pending', all.filter(item => item.status === 'pending').length);
   const tbody = document.getElementById('bookings-tbody');
   if (!tbody) return;
-  if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="6" class="service-orders-empty">' + (all.length ? 'No hay reservas que coincidan con los filtros.' : 'Aún no hay reservas desde el sitio.') + '</td></tr>'; return; }
+  if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="6" class="bookings-empty">' + (all.length ? 'No hay reservas que coincidan con los filtros.' : 'Aún no hay reservas desde el sitio.') + '</td></tr>'; return; }
   tbody.innerHTML = filtered.map(item => {
     const label = BOOKING_STATUS_LABELS[item.status] || item.status;
     const kind = item.type === 'visit' ? 'Visita técnica' : 'Reunión inicial';
     const canManage = isAdministrativeRole(getCurrentRole());
-    return '<tr><td><strong>' + escapeHtml(formatDateShort(item.date)) + '</strong><br><small>' + escapeHtml(String(item.time || '').slice(0, 5)) + (item.endTime ? ' – ' + escapeHtml(String(item.endTime).slice(0, 5)) : '') + '</small></td><td>' + kind + '</td><td><div class="service-order-client"><strong>' + escapeHtml(item.name) + '</strong><small>' + escapeHtml(item.email) + '</small></div></td><td>' + escapeHtml(item.detail) + '</td><td><span class="service-order-status">' + escapeHtml(label) + '</span></td><td><div class="dashboard-row-actions"><button class="btn-dash btn-dash--secondary btn-dash--sm" type="button" data-booking-detail="' + escapeHtml(item.id) + '" title="Ver detalle"><i data-lucide="eye"></i></button>' + (canManage && item.status !== 'confirmed' ? '<button class="btn-dash btn-dash--secondary btn-dash--sm" type="button" data-booking-confirm="' + escapeHtml(item.id) + '" title="Confirmar"><i data-lucide="circle-check"></i></button>' : '') + (canManage ? '<button class="btn-dash btn-dash--secondary btn-dash--sm" type="button" data-booking-reschedule="' + escapeHtml(item.id) + '" title="Reprogramar"><i data-lucide="calendar-clock"></i></button><button class="btn-dash btn-dash--secondary btn-dash--sm" type="button" data-booking-cancel="' + escapeHtml(item.id) + '" title="Cancelar"><i data-lucide="x-circle"></i></button><button class="btn-dash btn-dash--secondary btn-dash--sm" type="button" data-booking-delete="' + escapeHtml(item.id) + '" title="Eliminar"><i data-lucide="trash-2"></i></button>' : '') + '</div></td></tr>';
+    return '<tr><td><strong>' + escapeHtml(formatDateShort(item.date)) + '</strong><br><small>' + escapeHtml(String(item.time || '').slice(0, 5)) + (item.endTime ? ' – ' + escapeHtml(String(item.endTime).slice(0, 5)) : '') + '</small></td><td>' + kind + '</td><td><div class="booking-client"><strong>' + escapeHtml(item.name) + '</strong><small>' + escapeHtml(item.email) + '</small></div></td><td>' + escapeHtml(item.detail) + '</td><td><span class="booking-status">' + escapeHtml(label) + '</span></td><td><div class="dashboard-row-actions"><button class="btn-dash btn-dash--secondary btn-dash--sm" type="button" data-booking-detail="' + escapeHtml(item.id) + '" title="Ver detalle"><i data-lucide="eye"></i></button>' + (canManage && item.status !== 'confirmed' ? '<button class="btn-dash btn-dash--secondary btn-dash--sm" type="button" data-booking-confirm="' + escapeHtml(item.id) + '" title="Confirmar"><i data-lucide="circle-check"></i></button>' : '') + (canManage ? '<button class="btn-dash btn-dash--secondary btn-dash--sm" type="button" data-booking-reschedule="' + escapeHtml(item.id) + '" title="Reprogramar"><i data-lucide="calendar-clock"></i></button><button class="btn-dash btn-dash--secondary btn-dash--sm" type="button" data-booking-cancel="' + escapeHtml(item.id) + '" title="Cancelar"><i data-lucide="x-circle"></i></button><button class="btn-dash btn-dash--secondary btn-dash--sm" type="button" data-booking-delete="' + escapeHtml(item.id) + '" title="Eliminar"><i data-lucide="trash-2"></i></button>' : '') + '</div></td></tr>';
   }).join('');
   tbody.querySelectorAll('[data-booking-detail]').forEach(button => button.addEventListener('click', () => openBookingDetail(button.dataset.bookingDetail)));
   tbody.querySelectorAll('[data-booking-confirm]').forEach(button => button.addEventListener('click', () => manageBookingAction(button.dataset.bookingConfirm, 'confirm')));
@@ -13648,238 +13020,6 @@ function openBookingReschedule(id) {
   });
 }
 
-function serviceOrderInput(id, label, value = '', type = 'text', attrs = '') {
-  return `<div class="modal-form__group"><label class="modal-form__label" for="${id}">${label}</label><input class="modal-form__input" id="${id}" type="${type}" value="${escapeHtml(String(value ?? ''))}" ${attrs}></div>`;
-}
-
-function serviceOrderTextarea(id, label, value = '', placeholder = '') {
-  return `<div class="modal-form__group service-order-form__wide"><label class="modal-form__label" for="${id}">${label}</label><textarea class="modal-form__textarea" id="${id}" rows="4" placeholder="${escapeHtml(placeholder)}">${escapeHtml(String(value ?? ''))}</textarea></div>`;
-}
-
-function serviceOrderFormHtml(order = {}, folio = '') {
-  const checked = field => order[field] ? 'checked' : '';
-  const selected = (field, value, fallback = '') => (order[field] || fallback) === value ? 'selected' : '';
-  return `
-    <div class="service-order-form">
-      <section class="service-order-form__section">
-        <h4><i data-lucide="file-text"></i> Identificación de la orden</h4>
-        <div class="service-order-form__grid service-order-form__grid--3">
-          ${serviceOrderInput('so-folio', 'Folio *', order.folio || folio, 'text', 'required')}
-          ${serviceOrderInput('so-date', 'Fecha *', order.service_date || serviceOrderToday(), 'date', 'required')}
-          <div class="modal-form__group"><label class="modal-form__label" for="so-status">Estado</label><select class="modal-form__select" id="so-status">${Object.entries(SERVICE_ORDER_STATUS).map(([value, label]) => `<option value="${value}" ${selected('status', value, 'received')}>${label}</option>`).join('')}</select></div>
-        </div>
-      </section>
-
-      <section class="service-order-form__section">
-        <h4><i data-lucide="user-cog"></i> Prestador o técnico</h4>
-        <div class="service-order-form__grid service-order-form__grid--3">
-          ${serviceOrderInput('so-provider', 'RUT / razón social', order.provider_rut_name || 'Servicios Informáticos Yevenes & CIA LTDA · 78.352.809-6')}
-          ${serviceOrderInput('so-technician', 'Técnico *', order.technician_name || currentProfile?.full_name || '', 'text', 'required')}
-          ${serviceOrderInput('so-technician-contact', 'Contacto', order.technician_contact || 'tomas@solvenlabs.cl · +56 9 7702 9753')}
-        </div>
-      </section>
-
-      <section class="service-order-form__section">
-        <h4><i data-lucide="user"></i> Datos del cliente</h4>
-        <div class="service-order-form__grid">
-          ${serviceOrderInput('so-client-name', 'Nombre / empresa *', order.client_name, 'text', 'required')}
-          ${serviceOrderInput('so-client-rut', 'RUT', order.client_rut)}
-          ${serviceOrderInput('so-client-phone', 'Teléfono', order.client_phone, 'tel')}
-          ${serviceOrderInput('so-address', 'Dirección / lugar del servicio', order.service_address)}
-        </div>
-      </section>
-
-      <section class="service-order-form__section">
-        <h4><i data-lucide="monitor-cog"></i> Equipo y solicitud</h4>
-        <div class="service-order-checks">
-          <label><input type="checkbox" id="so-at-home" ${checked('service_at_home')}> Servicio a domicilio</label>
-          <label><input type="checkbox" id="so-received" ${checked('equipment_received')}> Equipo recibido</label>
-          <label><input type="checkbox" id="so-diagnosis-only" ${checked('diagnosis_only')}> Solo diagnóstico</label>
-        </div>
-        <div class="service-order-form__grid">
-          ${serviceOrderInput('so-equipment', 'Equipo *', order.equipment_type, 'text', 'list="so-equipment-types" required')}
-          <datalist id="so-equipment-types"><option value="Notebook"><option value="PC de escritorio"><option value="Impresora"><option value="Router"><option value="Consola"><option value="Cámara"><option value="Disco duro"></datalist>
-          ${serviceOrderInput('so-brand-model', 'Marca / modelo', order.brand_model)}
-          ${serviceOrderInput('so-serial', 'N.º de serie / identificación', order.serial_number)}
-          ${serviceOrderInput('so-password', 'Clave entregada', order.access_password)}
-          ${serviceOrderTextarea('so-failure', 'Falla informada por el cliente *', order.reported_failure, 'Describe los síntomas informados por el cliente.')}
-        </div>
-      </section>
-
-      <section class="service-order-form__section">
-        <h4><i data-lucide="stethoscope"></i> Diagnóstico y trabajo realizado</h4>
-        ${serviceOrderTextarea('so-diagnosis-work', 'Diagnóstico y trabajo realizado', order.diagnosis_work, 'Diagnóstico, causa, pruebas, reparación, mantenimiento, configuraciones, programas instalados y resultado final.')}
-      </section>
-
-      <section class="service-order-form__section">
-        <h4><i data-lucide="package-open"></i> Repuestos, materiales u observaciones</h4>
-        ${serviceOrderTextarea('so-parts-observations', 'Repuestos, materiales u observaciones', order.parts_observations, 'Repuestos, cantidad, daños previos, accesorios recibidos, recomendaciones, pendientes y advertencias.')}
-      </section>
-
-      <section class="service-order-form__section">
-        <h4><i data-lucide="circle-dollar-sign"></i> Valores</h4>
-        <div class="service-order-value-row">${serviceOrderInput('so-labor-detail', 'Mano de obra · detalle / cantidad', order.labor_detail)}${serviceOrderInput('so-labor-amount', 'Valor ($)', order.labor_amount || 0, 'number', 'min="0" step="1" data-service-order-amount')}</div>
-        <div class="service-order-value-row">${serviceOrderInput('so-materials-detail', 'Repuestos / materiales · detalle / cantidad', order.materials_detail)}${serviceOrderInput('so-materials-amount', 'Valor ($)', order.materials_amount || 0, 'number', 'min="0" step="1" data-service-order-amount')}</div>
-        <div class="service-order-value-row">${serviceOrderInput('so-travel-detail', 'Visita / traslado · detalle / cantidad', order.travel_detail)}${serviceOrderInput('so-travel-amount', 'Valor ($)', order.travel_amount || 0, 'number', 'min="0" step="1" data-service-order-amount')}</div>
-        <div class="service-order-total"><span>Total</span><strong id="so-total">${formatCurrency(serviceOrderNumber(order.total_amount))}</strong></div>
-      </section>
-
-      <section class="service-order-form__section">
-        <h4><i data-lucide="credit-card"></i> Pago</h4>
-        <div class="service-order-form__grid">
-          <div class="modal-form__group"><label class="modal-form__label" for="so-payment">Forma de pago</label><select class="modal-form__select" id="so-payment">${Object.entries(SERVICE_ORDER_PAYMENT).map(([value, label]) => `<option value="${value}" ${selected('payment_method', value, 'pending')}>${label}</option>`).join('')}</select></div>
-          ${serviceOrderInput('so-document-number', 'Boleta / factura N.º', order.document_number)}
-        </div>
-      </section>
-
-      <section class="service-order-form__section">
-        <h4><i data-lucide="shield-check"></i> Garantía del servicio</h4>
-        <div class="service-order-fixed">${SERVICE_ORDER_WARRANTY}</div>
-      </section>
-
-      <section class="service-order-form__section">
-        <h4><i data-lucide="signature"></i> Conformidad y recepción</h4>
-        <div class="service-order-fixed" style="margin-bottom:12px;">${SERVICE_ORDER_CONFORMITY}</div>
-        <div class="service-order-form__grid">
-          ${serviceOrderInput('so-technician-signature', 'Nombre del técnico firmante', order.technician_signature_name || order.technician_name)}
-          ${serviceOrderInput('so-client-signature', 'Nombre del cliente / recepción', order.client_signature_name)}
-          <div class="service-order-form__wide service-order-checks"><label><input type="checkbox" id="so-conformity" ${checked('client_conformity')}> Cliente confirma recepción conforme</label></div>
-        </div>
-      </section>
-    </div>`;
-}
-
-function updateServiceOrderTotal() {
-  const total = ['so-labor-amount', 'so-materials-amount', 'so-travel-amount']
-    .reduce((sum, id) => sum + serviceOrderNumber(document.getElementById(id)?.value), 0);
-  const output = document.getElementById('so-total');
-  if (output) output.textContent = formatCurrency(total);
-  return total;
-}
-
-function collectServiceOrderForm() {
-  const value = id => String(document.getElementById(id)?.value || '').trim();
-  const required = [
-    ['so-folio', 'folio'],
-    ['so-date', 'fecha'],
-    ['so-technician', 'técnico'],
-    ['so-client-name', 'cliente'],
-    ['so-equipment', 'equipo'],
-    ['so-failure', 'falla informada']
-  ];
-  const missing = required.find(([id]) => !value(id));
-  if (missing) {
-    showToast(`Completa el campo ${missing[1]}`, 'warning');
-    document.getElementById(missing[0])?.focus();
-    return null;
-  }
-  return {
-    folio: value('so-folio'),
-    service_date: value('so-date'),
-    status: value('so-status'),
-    provider_rut_name: value('so-provider') || null,
-    technician_name: value('so-technician'),
-    technician_contact: value('so-technician-contact') || null,
-    client_name: value('so-client-name'),
-    client_rut: formatRutOrNull(value('so-client-rut')),
-    client_phone: value('so-client-phone') || null,
-    service_address: value('so-address') || null,
-    service_at_home: Boolean(document.getElementById('so-at-home')?.checked),
-    equipment_received: Boolean(document.getElementById('so-received')?.checked),
-    diagnosis_only: Boolean(document.getElementById('so-diagnosis-only')?.checked),
-    equipment_type: value('so-equipment'),
-    brand_model: value('so-brand-model') || null,
-    serial_number: value('so-serial') || null,
-    access_password: value('so-password') || null,
-    reported_failure: value('so-failure'),
-    diagnosis_work: value('so-diagnosis-work') || null,
-    parts_observations: value('so-parts-observations') || null,
-    labor_detail: value('so-labor-detail') || null,
-    labor_amount: serviceOrderNumber(value('so-labor-amount')),
-    materials_detail: value('so-materials-detail') || null,
-    materials_amount: serviceOrderNumber(value('so-materials-amount')),
-    travel_detail: value('so-travel-detail') || null,
-    travel_amount: serviceOrderNumber(value('so-travel-amount')),
-    total_amount: updateServiceOrderTotal(),
-    payment_method: value('so-payment'),
-    document_number: value('so-document-number') || null,
-    technician_signature_name: value('so-technician-signature') || null,
-    client_signature_name: value('so-client-signature') || null,
-    client_conformity: Boolean(document.getElementById('so-conformity')?.checked),
-    updated_at: new Date().toISOString()
-  };
-}
-
-async function openServiceOrderForm(order = null) {
-  if (!isButtonAllowed('btn-add-service-order')) return showToast('No tienes permiso para gestionar órdenes de servicio', 'warning');
-  const folio = order?.folio || await nextServiceOrderFolio();
-  openModal(order ? `Editar orden ${order.folio}` : 'Nueva orden de servicio', serviceOrderFormHtml(order || {}, folio), order ? 'Guardar cambios' : 'Crear orden', async () => {
-    const payload = collectServiceOrderForm();
-    if (!payload) return;
-    const result = order
-      ? await db.serviceOrders.update(order.id, payload)
-      : await db.serviceOrders.create({ ...payload, created_by: currentProfile?.id || null });
-    if (result.error) {
-      showToast(`No se pudo guardar la orden: ${result.error.message}`, 'error');
-      return;
-    }
-    closeModal();
-    showToast(order ? 'Orden actualizada' : `Orden ${payload.folio} creada`, 'success');
-    await loadServiceOrders();
-  });
-  document.querySelector('#dash-modal .dash-modal__content')?.classList.add('service-order-modal');
-  document.querySelectorAll('[data-service-order-amount]').forEach(input => input.addEventListener('input', updateServiceOrderTotal));
-  updateServiceOrderTotal();
-  if (typeof lucide !== 'undefined') lucide.createIcons();
-}
-
-window.editServiceOrder = function editServiceOrder(id) {
-  if (!isButtonAllowed('btn-add-service-order')) return showToast('No tienes permiso para gestionar órdenes de servicio', 'warning');
-  const order = (window._serviceOrdersCache || []).find(item => item.id === id);
-  if (!order) return showToast('Orden no encontrada', 'error');
-  return openServiceOrderForm(order);
-};
-
-window.viewServiceOrder = function viewServiceOrder(id) {
-  const order = (window._serviceOrdersCache || []).find(item => item.id === id);
-  if (!order) return showToast('Orden no encontrada', 'error');
-  const modes = [
-    order.service_at_home && 'Servicio a domicilio',
-    order.equipment_received && 'Equipo recibido',
-    order.diagnosis_only && 'Solo diagnóstico'
-  ].filter(Boolean).join(' · ') || 'Sin modalidad marcada';
-  const payment = SERVICE_ORDER_PAYMENT[order.payment_method] || '—';
-  openModal(`Orden ${order.folio}`, `
-    <div class="service-order-detail">
-      <div class="service-order-detail__header"><div><h3>${escapeHtml(order.client_name)}</h3><p>${escapeHtml([order.equipment_type, order.brand_model, order.serial_number].filter(Boolean).join(' · '))}</p></div><span class="service-order-status service-order-status--${escapeHtml(order.status)}">${SERVICE_ORDER_STATUS[order.status] || escapeHtml(order.status)}</span></div>
-      <div class="service-order-detail__grid">
-        <section class="service-order-detail__panel"><h4>Orden y técnico</h4><p><strong>Fecha:</strong> ${order.service_date ? formatDateShort(order.service_date) : '—'}</p><p><strong>Prestador:</strong> ${escapeHtml(order.provider_rut_name || '—')}</p><p><strong>Técnico:</strong> ${escapeHtml(order.technician_name || '—')}</p><p><strong>Contacto:</strong> ${escapeHtml(order.technician_contact || '—')}</p></section>
-        <section class="service-order-detail__panel"><h4>Cliente</h4><p><strong>RUT:</strong> ${escapeHtml(order.client_rut || '—')}</p><p><strong>Teléfono:</strong> ${escapeHtml(order.client_phone || '—')}</p><p><strong>Lugar:</strong> ${escapeHtml(order.service_address || '—')}</p></section>
-        <section class="service-order-detail__panel"><h4>Equipo y solicitud</h4><p><strong>Modalidad:</strong> ${escapeHtml(modes)}</p><p><strong>Clave entregada:</strong> ${escapeHtml(order.access_password || '—')}</p><p><strong>Falla informada:</strong><br>${escapeHtml(order.reported_failure || '—')}</p></section>
-        <section class="service-order-detail__panel"><h4>Diagnóstico y trabajo realizado</h4><p>${escapeHtml(order.diagnosis_work || 'Sin registrar')}</p></section>
-        <section class="service-order-detail__panel"><h4>Repuestos, materiales u observaciones</h4><p>${escapeHtml(order.parts_observations || 'Sin registrar')}</p></section>
-        <section class="service-order-detail__panel"><h4>Valores y pago</h4><p><strong>Mano de obra:</strong> ${escapeHtml(order.labor_detail || '—')} · ${formatCurrency(serviceOrderNumber(order.labor_amount))}</p><p><strong>Repuestos:</strong> ${escapeHtml(order.materials_detail || '—')} · ${formatCurrency(serviceOrderNumber(order.materials_amount))}</p><p><strong>Visita:</strong> ${escapeHtml(order.travel_detail || '—')} · ${formatCurrency(serviceOrderNumber(order.travel_amount))}</p><p><strong>Total:</strong> ${formatCurrency(serviceOrderNumber(order.total_amount))}</p><p><strong>Pago:</strong> ${payment}${order.document_number ? ` · Doc. ${escapeHtml(order.document_number)}` : ''}</p></section>
-      </div>
-      <div class="service-order-fixed"><strong>Garantía:</strong> ${SERVICE_ORDER_WARRANTY}</div>
-      <div class="service-order-fixed"><strong>Conformidad:</strong> ${SERVICE_ORDER_CONFORMITY}<br>${order.client_conformity ? `Recepción confirmada por ${escapeHtml(order.client_signature_name || order.client_name)}.` : 'Recepción conforme aún no confirmada.'}</div>
-    </div>`, 'Cerrar', closeModal, false, true);
-  document.querySelector('#dash-modal .dash-modal__content')?.classList.add('service-order-modal');
-  if (typeof lucide !== 'undefined') lucide.createIcons();
-};
-
-window.deleteServiceOrder = function deleteServiceOrder(id) {
-  if (!isButtonAllowed('btn-add-service-order')) return showToast('No tienes permiso para gestionar órdenes de servicio', 'warning');
-  const order = (window._serviceOrdersCache || []).find(item => item.id === id);
-  if (!order) return showToast('Orden no encontrada', 'error');
-  openModal(`Eliminar orden ${order.folio}`, `<p>¿Seguro que quieres eliminar la orden de <strong>${escapeHtml(order.client_name)}</strong>? Esta acción no se puede deshacer.</p>`, 'Eliminar', async () => {
-    const { error } = await db.serviceOrders.delete(id);
-    if (error) return showToast(`No se pudo eliminar: ${error.message}`, 'error');
-    closeModal();
-    showToast('Orden eliminada', 'success');
-    await loadServiceOrders();
-  });
-};
-
 window.openWhatsAppLead = async function openWhatsAppLead(id) {
   const { data } = await db.siteMessages.getAll();
   const message = (data || []).find(item => item.id === id);
@@ -13908,692 +13048,8 @@ window.copyLeadFollowUp = async function copyLeadFollowUp(id) {
 };
 
 // ============================================================================
-// BOLETAS INTERNAS
+// CORREO
 // ============================================================================
-let dashboardReceiptInitialized = false;
-let dashboardReceiptSaved = null;
-let dashboardReceiptSaving = false;
-let dashboardReceiptHistory = [];
-let dashboardReceiptHistoryLoading = false;
-let dashboardReceiptHistoryError = '';
-
-const dashboardReceiptMoney = new Intl.NumberFormat('es-CL', {
-  style: 'currency',
-  currency: 'CLP',
-  maximumFractionDigits: 0
-});
-
-function dashboardReceiptFields() {
-  return {
-    type: document.getElementById('dashboard-receipt-type'),
-    number: document.getElementById('dashboard-receipt-number'),
-    date: document.getElementById('dashboard-receipt-date'),
-    customerName: document.getElementById('dashboard-receipt-customer-name'),
-    customerRut: document.getElementById('dashboard-receipt-customer-rut'),
-    customerContact: document.getElementById('dashboard-receipt-customer-contact'),
-    payment: document.getElementById('dashboard-receipt-payment'),
-    received: document.getElementById('dashboard-receipt-received'),
-    note: document.getElementById('dashboard-receipt-note'),
-    footer: document.getElementById('dashboard-receipt-footer')
-  };
-}
-
-function dashboardReceiptFormatMoney(value) {
-  return dashboardReceiptMoney.format(Math.round(Number(value) || 0));
-}
-
-function dashboardReceiptNumber(input) {
-  const value = Number.parseFloat(input?.value);
-  return Number.isFinite(value) ? value : 0;
-}
-
-function dashboardReceiptLocalDate(date = new Date()) {
-  const pad = value => String(value).padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
-
-function dashboardReceiptDateLabel(value) {
-  if (!value) return '—';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '—';
-  return new Intl.DateTimeFormat('es-CL', { dateStyle: 'short', timeStyle: 'short' }).format(date);
-}
-
-function dashboardReceiptReference(number) {
-  return `INT-${String(number).padStart(6, '0')}`;
-}
-
-function dashboardReceiptNormalizeSearch(value) {
-  return String(value ?? '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, ' ')
-    .trim();
-}
-
-function dashboardReceiptSearchText(receipt) {
-  const items = Array.isArray(receipt.items) ? receipt.items : [];
-  return dashboardReceiptNormalizeSearch([
-    receipt.receipt_number,
-    dashboardReceiptReference(receipt.receipt_number),
-    receipt.document_type,
-    receipt.customer_name,
-    receipt.customer_rut,
-    receipt.customer_contact,
-    receipt.payment_method,
-    receipt.total_amount,
-    receipt.net_amount,
-    receipt.tax_amount,
-    receipt.issued_at,
-    dashboardReceiptHistoryDate(receipt),
-    receipt.note,
-    receipt.footer_note,
-    ...items.flatMap(item => [item.description, item.quantity, item.price, item.total])
-  ].join(' '));
-}
-
-function dashboardReceiptHistoryDate(receipt) {
-  const value = receipt.issued_at || receipt.created_at;
-  if (!value) return '—';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '—';
-  return new Intl.DateTimeFormat('es-CL', { dateStyle: 'medium', timeStyle: 'short' }).format(date);
-}
-
-function dashboardReceiptRenderHistory() {
-  const input = document.getElementById('dashboard-receipt-search');
-  if (!input) return;
-  input.setAttribute('aria-busy', dashboardReceiptHistoryLoading ? 'true' : 'false');
-}
-
-async function dashboardReceiptLoadHistory({ notify = false } = {}) {
-  if (dashboardReceiptHistoryLoading) return;
-  dashboardReceiptHistoryLoading = true;
-  dashboardReceiptHistoryError = '';
-  dashboardReceiptRenderHistory();
-  try {
-    const rows = [];
-    const pageSize = 1000;
-    for (let from = 0; ; from += pageSize) {
-      const { data, error } = await supabase
-        .from('thermal_receipts')
-        .select('*')
-        .order('issued_at', { ascending: false })
-        .range(from, from + pageSize - 1);
-      if (error) throw error;
-      rows.push(...(data || []));
-      if (!data || data.length < pageSize) break;
-    }
-    dashboardReceiptHistory = rows;
-    if (notify) showToast('Listado de boletas actualizado', 'success');
-  } catch (error) {
-    console.error('No se pudieron consultar las boletas:', error);
-    const missingTable = error?.code === '42P01' || error?.code === 'PGRST205';
-    dashboardReceiptHistoryError = missingTable
-      ? 'Falta crear la tabla de boletas en Supabase.'
-      : `No se pudieron cargar las boletas: ${error?.message || 'error de conexión'}`;
-    if (notify) showToast('No se pudo actualizar el listado de boletas', 'error');
-  } finally {
-    dashboardReceiptHistoryLoading = false;
-    dashboardReceiptRenderHistory();
-  }
-}
-
-function dashboardReceiptFindMatches(value) {
-  const query = dashboardReceiptNormalizeSearch(value);
-  if (!query) return [];
-  const terms = query.split(' ').filter(Boolean);
-  const matches = dashboardReceiptHistory.filter(receipt => {
-    const haystack = dashboardReceiptSearchText(receipt);
-    return terms.every(term => haystack.includes(term));
-  });
-  const exact = matches.find(receipt => {
-    const reference = dashboardReceiptNormalizeSearch(dashboardReceiptReference(receipt.receipt_number));
-    const number = dashboardReceiptNormalizeSearch(receipt.receipt_number);
-    return query === reference || query === number;
-  });
-  return exact ? [exact] : matches;
-}
-
-function dashboardReceiptOpenMatchSelector(matches) {
-  const rows = matches.map(receipt => {
-    const items = dashboardReceiptRecordItems(receipt);
-    const detail = items.map(item => item.description).filter(Boolean).join(', ') || 'Sin detalle';
-    const description = [receipt.customer_name || 'Cliente no informado', dashboardReceiptHistoryDate(receipt), detail].join(' · ');
-    return `<button class="dashboard-receipt-match" type="button" data-receipt-match-id="${escapeHtml(receipt.id)}">
-      <span class="dashboard-receipt-match__main"><strong>${escapeHtml(dashboardReceiptReference(receipt.receipt_number))}</strong><span>${escapeHtml(description)}</span></span>
-      <span class="dashboard-receipt-match__amount">${escapeHtml(dashboardReceiptFormatMoney(receipt.total_amount))}</span>
-    </button>`;
-  }).join('');
-  openModal(`${matches.length} boletas encontradas`, `<div class="dashboard-receipt-match-list">${rows}</div>`, null, null, true);
-  document.querySelectorAll('[data-receipt-match-id]').forEach(button => {
-    button.addEventListener('click', () => {
-      const receipt = dashboardReceiptHistory.find(item => item.id === button.dataset.receiptMatchId);
-      if (receipt) dashboardReceiptViewRecord(receipt);
-    });
-  });
-}
-
-function dashboardReceiptSearchHistory() {
-  const input = document.getElementById('dashboard-receipt-search');
-  if (!input) return;
-  const value = input.value.trim();
-  if (!value) {
-    showToast('Escribe un folio o algún dato de la boleta', 'warning');
-    input.focus();
-    return;
-  }
-  if (dashboardReceiptHistoryLoading) {
-    showToast('Las boletas todavía se están cargando', 'info');
-    return;
-  }
-  if (dashboardReceiptHistoryError) {
-    showToast(dashboardReceiptHistoryError, 'error');
-    dashboardReceiptLoadHistory();
-    return;
-  }
-  const matches = dashboardReceiptFindMatches(value);
-  if (!matches.length) {
-    showToast('No se encontró ninguna boleta', 'warning');
-    return;
-  }
-  if (matches.length === 1) dashboardReceiptViewRecord(matches[0]);
-  else dashboardReceiptOpenMatchSelector(matches);
-}
-
-function dashboardReceiptItems() {
-  const container = document.getElementById('dashboard-receipt-items');
-  if (!container) return [];
-  return [...container.querySelectorAll('.dashboard-receipt-item-row')].map(row => {
-    const description = row.querySelector('.dashboard-receipt-item-description').value.trim();
-    const quantity = Math.max(0, dashboardReceiptNumber(row.querySelector('.dashboard-receipt-item-quantity')));
-    const price = Math.max(0, dashboardReceiptNumber(row.querySelector('.dashboard-receipt-item-price')));
-    const discount = Math.min(100, Math.max(0, dashboardReceiptNumber(row.querySelector('.dashboard-receipt-item-discount'))));
-    const total = Math.round(quantity * price * (1 - discount / 100));
-    row.querySelector('.dashboard-receipt-item-total').textContent = dashboardReceiptFormatMoney(total);
-    return { description, quantity, price, discount, total };
-  });
-}
-
-function dashboardReceiptAmounts(items = dashboardReceiptItems()) {
-  const total = items.reduce((sum, item) => sum + item.total, 0);
-  const fields = dashboardReceiptFields();
-  const taxMode = fields.type.value === 'BOLETA EXENTA O NO AFECTA A IVA' ? 'exempt' : 'included';
-  const net = taxMode === 'included' ? Math.round(total / 1.19) : total;
-  const tax = taxMode === 'included' ? total - net : 0;
-  return { taxMode, net, tax, total };
-}
-
-function dashboardReceiptSnapshot() {
-  const fields = dashboardReceiptFields();
-  const items = dashboardReceiptItems().filter(item => item.description || item.price || item.total);
-  const { taxMode, net, tax, total } = dashboardReceiptAmounts(items);
-  const cash = fields.payment.value === 'Efectivo';
-  const received = cash ? Math.round(dashboardReceiptNumber(fields.received)) : null;
-  const issuedDate = new Date(fields.date.value);
-  return {
-    document_type: fields.type.value,
-    issued_at: Number.isNaN(issuedDate.getTime()) ? new Date().toISOString() : issuedDate.toISOString(),
-    customer_name: fields.customerName.value.trim() || null,
-    customer_rut: fields.customerRut.value.trim() || null,
-    customer_contact: fields.customerContact.value.trim() || null,
-    items,
-    tax_mode: taxMode,
-    net_amount: net,
-    tax_amount: tax,
-    total_amount: total,
-    payment_method: fields.payment.value,
-    amount_received: received,
-    change_amount: cash ? Math.max(0, received - total) : null,
-    note: fields.note.value.trim() || null,
-    footer_note: fields.footer.value.trim() || null,
-    paper_width: 58
-  };
-}
-
-function dashboardReceiptFingerprint(snapshot = dashboardReceiptSnapshot()) {
-  return JSON.stringify(snapshot);
-}
-
-function dashboardReceiptSetText(id, value) {
-  const element = document.getElementById(id);
-  if (element) element.textContent = value;
-}
-
-function dashboardReceiptRenderItems(items) {
-  const container = document.getElementById('dashboard-preview-items');
-  if (!container) return;
-  container.replaceChildren();
-  const printable = items.filter(item => item.description || item.price || item.total);
-  if (!printable.length) {
-    const empty = document.createElement('div');
-    empty.className = 'dashboard-thermal-receipt__line';
-    empty.style.textAlign = 'center';
-    empty.textContent = 'Sin servicios añadidos';
-    container.append(empty);
-    return;
-  }
-  printable.forEach(item => {
-    const line = document.createElement('div');
-    line.className = 'dashboard-thermal-receipt__line';
-    const main = document.createElement('div');
-    main.className = 'dashboard-thermal-receipt__line-main';
-    const description = document.createElement('span');
-    description.textContent = item.description || 'Servicio';
-    const total = document.createElement('span');
-    total.textContent = dashboardReceiptFormatMoney(item.total);
-    main.append(description, total);
-    const detail = document.createElement('div');
-    detail.className = 'dashboard-thermal-receipt__line-detail';
-    const quantity = Number.isInteger(item.quantity)
-      ? item.quantity
-      : item.quantity.toLocaleString('es-CL', { maximumFractionDigits: 2 });
-    const unit = document.createElement('span');
-    unit.textContent = `${quantity} × ${dashboardReceiptFormatMoney(item.price)}`;
-    const discount = document.createElement('span');
-    discount.textContent = item.discount ? `Desc. ${item.discount.toLocaleString('es-CL', { maximumFractionDigits: 2 })}%` : '';
-    detail.append(unit, discount);
-    line.append(main, detail);
-    container.append(line);
-  });
-}
-
-function dashboardReceiptRender() {
-  const fields = dashboardReceiptFields();
-  if (!fields.type) return;
-  const items = dashboardReceiptItems();
-  const { taxMode, net, tax, total } = dashboardReceiptAmounts(items);
-  dashboardReceiptSetText('dashboard-preview-title', fields.type.value);
-  dashboardReceiptSetText('dashboard-preview-number', fields.number.value || 'SIN GUARDAR');
-  dashboardReceiptSetText('dashboard-preview-date', dashboardReceiptDateLabel(fields.date.value));
-
-  const customerSection = document.getElementById('dashboard-preview-customer');
-  const customerName = fields.customerName.value.trim();
-  const customerRut = fields.customerRut.value.trim();
-  const customerContact = fields.customerContact.value.trim();
-  customerSection.hidden = !(customerName || customerRut || customerContact);
-  dashboardReceiptSetText('dashboard-preview-customer-name', customerName);
-  dashboardReceiptSetText('dashboard-preview-customer-rut', customerRut ? `RUT: ${customerRut}` : '');
-  dashboardReceiptSetText('dashboard-preview-customer-contact', customerContact);
-
-  dashboardReceiptRenderItems(items);
-  dashboardReceiptSetText('dashboard-preview-net', dashboardReceiptFormatMoney(net));
-  dashboardReceiptSetText('dashboard-preview-tax', dashboardReceiptFormatMoney(tax));
-  dashboardReceiptSetText('dashboard-preview-total', dashboardReceiptFormatMoney(total));
-  dashboardReceiptSetText('dashboard-preview-payment', fields.payment.value);
-  const taxRow = document.getElementById('dashboard-preview-tax-row');
-  taxRow.hidden = taxMode === 'exempt';
-
-  const cash = fields.payment.value === 'Efectivo';
-  document.getElementById('dashboard-receipt-received-wrap').hidden = !cash;
-  document.getElementById('dashboard-preview-received-row').hidden = !cash;
-  document.getElementById('dashboard-preview-change-row').hidden = !cash;
-  const received = dashboardReceiptNumber(fields.received);
-  dashboardReceiptSetText('dashboard-preview-received', dashboardReceiptFormatMoney(received));
-  dashboardReceiptSetText('dashboard-preview-change', dashboardReceiptFormatMoney(Math.max(0, received - total)));
-
-  const note = fields.note.value.trim();
-  document.getElementById('dashboard-preview-note-wrap').hidden = !note;
-  dashboardReceiptSetText('dashboard-preview-note', note);
-  dashboardReceiptSetText('dashboard-preview-footer', fields.footer.value.trim() || 'Gracias por preferir Equipo Solven Labs.');
-}
-
-function dashboardReceiptUpdateStatus() {
-  const fields = dashboardReceiptFields();
-  const status = document.getElementById('dashboard-receipt-status');
-  const button = document.getElementById('dashboard-receipt-print');
-  if (!fields.number || !status || !button) return;
-  const canManageReceipts = isButtonAllowed('dashboard-receipt-print');
-  status.classList.toggle('is-readonly', !canManageReceipts);
-  if (!canManageReceipts) {
-    status.classList.remove('is-dirty', 'is-saved');
-    status.textContent = 'Solo lectura';
-    return;
-  }
-  const matches = dashboardReceiptSaved
-    && dashboardReceiptSaved.fingerprint === dashboardReceiptFingerprint();
-  status.classList.toggle('is-saved', Boolean(matches));
-  status.classList.toggle('is-dirty', !matches);
-  status.textContent = matches
-    ? `Guardada · ${dashboardReceiptSaved.reference}`
-    : dashboardReceiptSaved
-      ? 'Cambios sin guardar'
-      : 'Sin guardar';
-  fields.number.value = matches ? dashboardReceiptSaved.reference : '';
-  if (!dashboardReceiptSaving) {
-    button.querySelector('span').textContent = matches
-      ? 'Reimprimir boleta'
-      : dashboardReceiptSaved
-        ? 'Guardar nueva e imprimir'
-        : 'Guardar e imprimir';
-  }
-}
-
-function dashboardReceiptHandleChange() {
-  dashboardReceiptUpdateStatus();
-  dashboardReceiptRender();
-}
-
-function dashboardReceiptApplyAccess() {
-  const editor = document.querySelector('.dashboard-receipt-editor');
-  if (!editor) return;
-  const canManageReceipts = isButtonAllowed('dashboard-receipt-print');
-
-  editor.classList.toggle('dashboard-receipt-editor--readonly', !canManageReceipts);
-  editor.querySelectorAll('input, textarea').forEach(field => {
-    field.readOnly = !canManageReceipts || field.id === 'dashboard-receipt-number';
-    field.setAttribute('aria-readonly', field.readOnly ? 'true' : 'false');
-  });
-  editor.querySelectorAll('select').forEach(field => {
-    field.disabled = !canManageReceipts;
-  });
-  editor.querySelectorAll('.dashboard-receipt-item-remove').forEach(button => {
-    button.style.display = canManageReceipts ? '' : 'none';
-    button.disabled = !canManageReceipts;
-  });
-  dashboardReceiptUpdateStatus();
-}
-
-function dashboardReceiptAddItem(initial = {}) {
-  const container = document.getElementById('dashboard-receipt-items');
-  const template = document.getElementById('dashboard-receipt-row-template');
-  if (!container || !template) return null;
-  const row = template.content.firstElementChild.cloneNode(true);
-  row.querySelector('.dashboard-receipt-item-description').value = initial.description || '';
-  row.querySelector('.dashboard-receipt-item-quantity').value = initial.quantity ?? 1;
-  row.querySelector('.dashboard-receipt-item-price').value = initial.price ?? '';
-  row.querySelector('.dashboard-receipt-item-discount').value = initial.discount ?? 0;
-  row.addEventListener('input', dashboardReceiptHandleChange);
-  row.querySelector('.dashboard-receipt-item-remove').addEventListener('click', () => {
-    if (!isButtonAllowed('dashboard-receipt-print')) return showToast('No tienes permiso para modificar boletas', 'warning');
-    const rows = container.querySelectorAll('.dashboard-receipt-item-row');
-    if (rows.length === 1) {
-      row.querySelector('.dashboard-receipt-item-description').value = '';
-      row.querySelector('.dashboard-receipt-item-quantity').value = 1;
-      row.querySelector('.dashboard-receipt-item-price').value = '';
-      row.querySelector('.dashboard-receipt-item-discount').value = 0;
-    } else {
-      row.remove();
-    }
-    dashboardReceiptHandleChange();
-  });
-  container.append(row);
-  dashboardReceiptApplyAccess();
-  dashboardReceiptRender();
-  if (typeof lucide !== 'undefined') lucide.createIcons();
-  return row;
-}
-
-function dashboardReceiptReset(confirmReset = true) {
-  if (confirmReset && !isButtonAllowed('dashboard-receipt-print')) return showToast('No tienes permiso para modificar boletas', 'warning');
-  if (confirmReset && !window.confirm('Se borrarán los datos ingresados. ¿Deseas continuar?')) return;
-  const fields = dashboardReceiptFields();
-  const now = new Date();
-  dashboardReceiptSaved = null;
-  fields.type.value = 'BOLETA AFECTA A IVA';
-  fields.number.value = '';
-  fields.date.value = dashboardReceiptLocalDate(now);
-  fields.customerName.value = '';
-  fields.customerRut.value = '';
-  fields.customerContact.value = '';
-  fields.payment.value = 'Efectivo';
-  fields.received.value = '';
-  fields.note.value = '';
-  fields.footer.value = 'Gracias por preferir Equipo Solven Labs.';
-  document.getElementById('dashboard-receipt-items').replaceChildren();
-  dashboardReceiptAddItem();
-  const message = document.getElementById('dashboard-receipt-message');
-  message.hidden = true;
-  message.textContent = '';
-  dashboardReceiptHandleChange();
-  dashboardReceiptApplyAccess();
-}
-
-function dashboardReceiptValidate() {
-  const valid = dashboardReceiptItems().filter(item => item.description && item.quantity > 0);
-  const message = document.getElementById('dashboard-receipt-message');
-  if (!valid.length) {
-    message.textContent = 'Añade al menos un servicio con detalle y cantidad.';
-    message.hidden = false;
-    document.querySelector('.dashboard-receipt-item-description')?.focus();
-    return false;
-  }
-  message.hidden = true;
-  message.textContent = '';
-  return true;
-}
-
-async function dashboardReceiptSaveIfNeeded() {
-  const snapshot = dashboardReceiptSnapshot();
-  const fingerprint = dashboardReceiptFingerprint(snapshot);
-  if (dashboardReceiptSaved?.fingerprint === fingerprint) return dashboardReceiptSaved;
-  const session = await getSession();
-  if (!session?.user) throw new Error('Tu sesión expiró. Vuelve a iniciar sesión.');
-  const { data, error } = await supabase
-    .from('thermal_receipts')
-    .insert({ ...snapshot, created_by: session.user.id })
-    .select('id, receipt_number, created_at')
-    .single();
-  if (error) throw error;
-  const reference = dashboardReceiptReference(data.receipt_number);
-  dashboardReceiptSaved = { ...data, reference, fingerprint };
-  dashboardReceiptFields().number.value = reference;
-  dashboardReceiptUpdateStatus();
-  dashboardReceiptRender();
-  return dashboardReceiptSaved;
-}
-
-function dashboardReceiptRecordItems(receipt) {
-  return Array.isArray(receipt?.items) ? receipt.items : [];
-}
-
-function dashboardReceiptRecordMarkup(receipt) {
-  const items = dashboardReceiptRecordItems(receipt);
-  const customer = [
-    receipt.customer_name ? `<span>${escapeHtml(receipt.customer_name)}</span>` : '',
-    receipt.customer_rut ? `<span>RUT: ${escapeHtml(receipt.customer_rut)}</span>` : '',
-    receipt.customer_contact ? `<span>${escapeHtml(receipt.customer_contact)}</span>` : ''
-  ].filter(Boolean).join('');
-  const itemLines = items.length ? items.map(item => {
-    const quantity = Number(item.quantity) || 0;
-    const discount = Number(item.discount) || 0;
-    return `<div class="dashboard-thermal-receipt__line">
-      <div class="dashboard-thermal-receipt__line-main"><span>${escapeHtml(item.description || 'Sin detalle')}</span><span>${escapeHtml(dashboardReceiptFormatMoney(item.total))}</span></div>
-      <div class="dashboard-thermal-receipt__line-detail"><span>${escapeHtml(quantity.toLocaleString('es-CL', { maximumFractionDigits: 2 }))} × ${escapeHtml(dashboardReceiptFormatMoney(item.price))}</span><span>${discount ? `Desc. ${escapeHtml(discount.toLocaleString('es-CL', { maximumFractionDigits: 2 }))}%` : ''}</span></div>
-    </div>`;
-  }).join('') : '<div class="dashboard-thermal-receipt__line" style="text-align:center">Sin servicios añadidos</div>';
-  const cash = receipt.payment_method === 'Efectivo';
-  const exempt = receipt.tax_mode === 'exempt';
-  return `<article class="dashboard-thermal-receipt">
-    <header class="dashboard-thermal-receipt__header">
-      <img src="/assets/logo%20extended%20chopped.png" alt="Logo Solven Labs">
-      <strong>SERVICIOS INFORMÁTICOS YEVENES &amp; CIA LTDA</strong>
-      <span>RUT 78.352.809-6</span>
-      <span>Actividades de consultoría informática y de gestión de instalaciones informática</span>
-      <span>Colo-Colo 379 Of. 706, Concepción</span>
-      <span>+56 9 7702 9753 · tomas@solvenlabs.cl</span>
-    </header>
-    <div class="dashboard-thermal-receipt__rule"></div>
-    <section class="dashboard-thermal-receipt__meta">
-      <strong>${escapeHtml(receipt.document_type || 'BOLETA')}</strong>
-      <div><span>N.º / REF.</span><b>${escapeHtml(dashboardReceiptReference(receipt.receipt_number))}</b></div>
-      <div><span>FECHA</span><b>${escapeHtml(dashboardReceiptHistoryDate(receipt))}</b></div>
-    </section>
-    ${customer ? `<section class="dashboard-thermal-receipt__customer"><div class="dashboard-thermal-receipt__rule"></div><strong>CLIENTE</strong>${customer}</section>` : ''}
-    <div class="dashboard-thermal-receipt__rule"></div>
-    <section><div class="dashboard-thermal-receipt__items-head"><span>DETALLE</span><span>TOTAL</span></div>${itemLines}</section>
-    <div class="dashboard-thermal-receipt__rule"></div>
-    <section class="dashboard-thermal-receipt__totals">
-      <div><span>NETO</span><b>${escapeHtml(dashboardReceiptFormatMoney(receipt.net_amount))}</b></div>
-      ${exempt ? '' : `<div><span>IVA 19% INCL.</span><b>${escapeHtml(dashboardReceiptFormatMoney(receipt.tax_amount))}</b></div>`}
-      <div class="dashboard-thermal-receipt__grand-total"><span>TOTAL</span><b>${escapeHtml(dashboardReceiptFormatMoney(receipt.total_amount))}</b></div>
-      <div><span>FORMA DE PAGO</span><b>${escapeHtml(receipt.payment_method || '—')}</b></div>
-      ${cash ? `<div><span>RECIBIDO</span><b>${escapeHtml(dashboardReceiptFormatMoney(receipt.amount_received))}</b></div><div><span>VUELTO</span><b>${escapeHtml(dashboardReceiptFormatMoney(receipt.change_amount))}</b></div>` : ''}
-    </section>
-    ${receipt.note ? `<section><div class="dashboard-thermal-receipt__rule"></div><p>${escapeHtml(receipt.note)}</p></section>` : ''}
-    <footer class="dashboard-thermal-receipt__footer">
-      <div class="dashboard-thermal-receipt__rule"></div>
-      <strong>${escapeHtml(receipt.footer_note || 'Gracias por preferir Equipo Solven Labs.')}</strong>
-      <span>www.solvenlabs.cl</span>
-      <small>Comprobante interno no válido como documento tributario electrónico.</small>
-    </footer>
-  </article>`;
-}
-
-function dashboardReceiptPrintRecord(receipt) {
-  if (!receipt) return;
-  const printWindow = window.open('', '_blank', 'width=420,height=720');
-  if (!printWindow) {
-    showToast('El navegador bloqueó la ventana de impresión.', 'warning');
-    return;
-  }
-  const reference = dashboardReceiptReference(receipt.receipt_number);
-  printWindow.document.open();
-  printWindow.document.write(`<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Boleta ${escapeHtml(reference)}</title><style>
-    @page{size:58mm auto;margin:0}*{box-sizing:border-box}html,body{width:58mm;min-width:0;margin:0;padding:0;background:#fff}.dashboard-thermal-receipt{width:58mm;padding:3mm;color:#000;background:#fff;font-family:"Courier New",Courier,monospace;font-size:9px;line-height:1.32;overflow-wrap:anywhere}.dashboard-thermal-receipt__header,.dashboard-thermal-receipt__footer,.dashboard-thermal-receipt__customer{display:flex;align-items:center;flex-direction:column;text-align:center}.dashboard-thermal-receipt__header img{display:block;width:38mm;max-width:82%;height:auto;margin:0 auto 1.5mm;object-fit:contain;filter:grayscale(1) contrast(1.7)}.dashboard-thermal-receipt__header strong{font-size:9px}.dashboard-thermal-receipt__header span{display:block;margin-top:1px}.dashboard-thermal-receipt__rule{width:100%;margin:2.5mm 0;border-top:1px dashed #000}.dashboard-thermal-receipt__meta>strong{display:block;margin-bottom:2mm;font-size:11px;text-align:center}.dashboard-thermal-receipt__meta div,.dashboard-thermal-receipt__totals>div{display:flex;justify-content:space-between;gap:2mm;margin-top:.8mm}.dashboard-thermal-receipt__meta b,.dashboard-thermal-receipt__totals b{text-align:right}.dashboard-thermal-receipt__customer strong{margin-bottom:1mm}.dashboard-thermal-receipt__items-head{display:grid;grid-template-columns:1fr auto;gap:2mm;margin-bottom:1.5mm;font-weight:700}.dashboard-thermal-receipt__line{margin:0 0 2mm}.dashboard-thermal-receipt__line-main{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2mm;font-weight:700}.dashboard-thermal-receipt__line-detail{display:flex;justify-content:space-between;gap:2mm;color:#222;font-size:8px}.dashboard-thermal-receipt__grand-total{align-items:baseline;margin:2mm 0!important;padding:1.5mm 0;border-top:1px solid #000;border-bottom:1px solid #000;font-size:13px}p{margin:0;white-space:pre-wrap}.dashboard-thermal-receipt__footer strong{white-space:pre-wrap}.dashboard-thermal-receipt__footer span{margin-top:1mm}.dashboard-thermal-receipt__footer small{display:block;margin-top:2.5mm;font-size:7px;line-height:1.3}
-  </style></head><body>${dashboardReceiptRecordMarkup(receipt)}<script>window.addEventListener('load',()=>setTimeout(()=>window.print(),120));<\/script></body></html>`);
-  printWindow.document.close();
-}
-
-function dashboardReceiptViewRecord(receipt) {
-  if (!receipt) return;
-  const items = dashboardReceiptRecordItems(receipt);
-  const rows = items.map(item => `<tr><td>${escapeHtml(item.description || 'Sin detalle')}</td><td>${escapeHtml((Number(item.quantity) || 0).toLocaleString('es-CL', { maximumFractionDigits: 2 }))}</td><td>${escapeHtml(dashboardReceiptFormatMoney(item.price))}</td><td>${escapeHtml(Number(item.discount) ? `${Number(item.discount).toLocaleString('es-CL', { maximumFractionDigits: 2 })}%` : '—')}</td><td><strong>${escapeHtml(dashboardReceiptFormatMoney(item.total))}</strong></td></tr>`).join('');
-  const reference = dashboardReceiptReference(receipt.receipt_number);
-  openModal(`Boleta ${reference}`, `<div class="dashboard-receipt-detail">
-    <div class="dashboard-receipt-detail__summary">
-      <div class="dashboard-receipt-detail__cell"><span>Fecha de emisión</span><strong>${escapeHtml(dashboardReceiptHistoryDate(receipt))}</strong></div>
-      <div class="dashboard-receipt-detail__cell"><span>Cliente</span><strong>${escapeHtml(receipt.customer_name || 'No informado')}</strong></div>
-      <div class="dashboard-receipt-detail__cell"><span>RUT</span><strong>${escapeHtml(receipt.customer_rut || 'No informado')}</strong></div>
-      <div class="dashboard-receipt-detail__cell"><span>Contacto</span><strong>${escapeHtml(receipt.customer_contact || 'No informado')}</strong></div>
-      <div class="dashboard-receipt-detail__cell"><span>Tipo</span><strong>${escapeHtml(receipt.document_type || '—')}</strong></div>
-      <div class="dashboard-receipt-detail__cell"><span>Medio de pago</span><strong>${escapeHtml(receipt.payment_method || '—')}</strong></div>
-    </div>
-    <div class="table-wrapper"><table class="dashboard-receipt-detail__items"><thead><tr><th>Detalle</th><th>Cant.</th><th>Precio</th><th>Desc.</th><th>Total</th></tr></thead><tbody>${rows || '<tr><td colspan="5">Sin líneas</td></tr>'}</tbody></table></div>
-    ${receipt.note ? `<div class="dashboard-receipt-detail__cell"><span>Nota</span><strong>${escapeHtml(receipt.note)}</strong></div>` : ''}
-    <div class="dashboard-receipt-detail__total"><span>Total</span><strong>${escapeHtml(dashboardReceiptFormatMoney(receipt.total_amount))}</strong></div>
-    ${isButtonAllowed('dashboard-receipt-print') ? `<div class="dashboard-receipt-detail__actions"><button class="btn-dash btn-dash--danger btn-dash--sm" id="dashboard-receipt-delete" type="button"><i data-lucide="trash-2"></i> Eliminar boleta</button></div>` : ''}
-  </div>`, 'Reimprimir', () => dashboardReceiptPrintRecord(receipt), !isButtonAllowed('dashboard-receipt-print'));
-  document.getElementById('dashboard-receipt-delete')?.addEventListener('click', () => dashboardReceiptConfirmDelete(receipt));
-  if (typeof lucide !== 'undefined') lucide.createIcons();
-}
-
-function dashboardReceiptConfirmDelete(receipt) {
-  if (!isButtonAllowed('dashboard-receipt-print')) return showToast('No tienes permiso para gestionar boletas', 'warning');
-  if (!receipt) return;
-  const reference = dashboardReceiptReference(receipt.receipt_number);
-  openModal(`Eliminar boleta ${reference}`, `<p>Se eliminará permanentemente la boleta de <strong>${escapeHtml(receipt.customer_name || 'cliente no informado')}</strong> por <strong>${escapeHtml(dashboardReceiptFormatMoney(receipt.total_amount))}</strong>.</p><p style="margin-top:10px;color:var(--dash-danger);">Esta acción no se puede deshacer.</p>`, 'Eliminar definitivamente', async () => {
-    const button = document.getElementById('modal-confirm');
-    if (button) {
-      button.disabled = true;
-      button.textContent = 'Eliminando…';
-    }
-    const { error } = await supabase.from('thermal_receipts').delete().eq('id', receipt.id);
-    if (error) {
-      if (button) {
-        button.disabled = false;
-        button.textContent = 'Eliminar definitivamente';
-      }
-      showToast(`No se pudo eliminar: ${error.message}`, 'error');
-      return;
-    }
-    dashboardReceiptHistory = dashboardReceiptHistory.filter(item => item.id !== receipt.id);
-    if (dashboardReceiptSaved?.id === receipt.id) {
-      dashboardReceiptSaved = null;
-      dashboardReceiptUpdateStatus();
-      dashboardReceiptRender();
-    }
-    const search = document.getElementById('dashboard-receipt-search');
-    if (search) search.value = '';
-    closeModal();
-    showToast(`Boleta ${reference} eliminada`, 'success');
-  });
-}
-
-function dashboardReceiptOpenPrintWindow(printWindow) {
-  const receipt = document.getElementById('dashboard-receipt-preview');
-  if (!printWindow || !receipt) return false;
-  const markup = receipt.outerHTML;
-  printWindow.document.open();
-  printWindow.document.write(`<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Boleta ${escapeHtml(dashboardReceiptSaved?.reference || '')}</title><style>
-    @page{size:58mm auto;margin:0}*{box-sizing:border-box}html,body{width:58mm;min-width:0;margin:0;padding:0;background:#fff} [hidden]{display:none!important}
-    .dashboard-thermal-receipt{width:58mm;min-height:0;padding:3mm;color:#000;background:#fff;font-family:"Courier New",Courier,monospace;font-size:9px;line-height:1.32;overflow-wrap:anywhere}
-    .dashboard-thermal-receipt__header{display:flex;align-items:center;flex-direction:column;text-align:center}.dashboard-thermal-receipt__header img{display:block;width:38mm;max-width:82%;height:auto;margin:0 auto 1.5mm;object-fit:contain;filter:grayscale(1) contrast(1.7)}.dashboard-thermal-receipt__header strong{font-size:9px}.dashboard-thermal-receipt__header span{display:block;margin-top:1px}
-    .dashboard-thermal-receipt__rule{margin:2.5mm 0;border-top:1px dashed #000}.dashboard-thermal-receipt__meta>strong{display:block;margin-bottom:2mm;font-size:11px;text-align:center}.dashboard-thermal-receipt__meta div,.dashboard-thermal-receipt__totals>div{display:flex;justify-content:space-between;gap:2mm;margin-top:.8mm}.dashboard-thermal-receipt__meta b,.dashboard-thermal-receipt__totals b{text-align:right}
-    #dashboard-preview-customer{display:flex;flex-direction:column}#dashboard-preview-customer strong{margin-bottom:1mm}.dashboard-thermal-receipt__items-head{display:grid;grid-template-columns:1fr auto;gap:2mm;margin-bottom:1.5mm;font-weight:700}.dashboard-thermal-receipt__line{margin:0 0 2mm}.dashboard-thermal-receipt__line-main{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2mm;font-weight:700}.dashboard-thermal-receipt__line-detail{display:flex;justify-content:space-between;gap:2mm;color:#222;font-size:8px}.dashboard-thermal-receipt__grand-total{align-items:baseline;margin:2mm 0!important;padding:1.5mm 0;border-top:1px solid #000;border-bottom:1px solid #000;font-size:13px}#dashboard-preview-note{margin:0;white-space:pre-wrap}.dashboard-thermal-receipt__footer{display:flex;align-items:center;flex-direction:column;text-align:center}.dashboard-thermal-receipt__footer strong{white-space:pre-wrap}.dashboard-thermal-receipt__footer span{margin-top:1mm}.dashboard-thermal-receipt__footer small{display:block;margin-top:2.5mm;font-size:7px;line-height:1.3}
-  </style></head><body>${markup}<script>window.addEventListener('load',()=>setTimeout(()=>window.print(),120));<\/script></body></html>`);
-  printWindow.document.close();
-  return true;
-}
-
-async function dashboardReceiptSaveAndPrint() {
-  if (!isButtonAllowed('dashboard-receipt-print')) return showToast('No tienes permiso para emitir boletas', 'warning');
-  if (dashboardReceiptSaving || !dashboardReceiptValidate()) return;
-  const printWindow = window.open('', '_blank', 'width=420,height=720');
-  if (printWindow) {
-    printWindow.document.write('<!doctype html><title>Preparando boleta</title><p style="font-family:sans-serif;padding:24px">Preparando boleta…</p>');
-  }
-  const button = document.getElementById('dashboard-receipt-print');
-  const message = document.getElementById('dashboard-receipt-message');
-  dashboardReceiptSaving = true;
-  button.disabled = true;
-  button.querySelector('span').textContent = 'Guardando…';
-  try {
-    await dashboardReceiptSaveIfNeeded();
-    if (!dashboardReceiptOpenPrintWindow(printWindow)) {
-      showToast('La boleta quedó guardada, pero el navegador bloqueó la ventana de impresión.', 'warning');
-    } else {
-      showToast(`Boleta ${dashboardReceiptSaved.reference} guardada`, 'success');
-    }
-    dashboardReceiptLoadHistory();
-  } catch (error) {
-    if (printWindow) printWindow.close();
-    console.error('No se pudo guardar la boleta:', error);
-    const missingTable = error?.code === '42P01' || error?.code === 'PGRST205';
-    message.textContent = missingTable
-      ? 'Falta crear la tabla de boletas en Supabase.'
-      : `No se pudo guardar: ${error?.message || 'error de conexión'}`;
-    message.hidden = false;
-    showToast(message.textContent, 'error');
-  } finally {
-    dashboardReceiptSaving = false;
-    button.disabled = false;
-    dashboardReceiptUpdateStatus();
-  }
-}
-
-function initDashboardReceipts() {
-  if (dashboardReceiptInitialized) {
-    dashboardReceiptHandleChange();
-    return;
-  }
-  const fields = dashboardReceiptFields();
-  if (!fields.type) return;
-  dashboardReceiptInitialized = true;
-  Object.values(fields).forEach(field => {
-    field.addEventListener('input', dashboardReceiptHandleChange);
-    field.addEventListener('change', dashboardReceiptHandleChange);
-  });
-  document.getElementById('dashboard-receipt-add-item').addEventListener('click', () => {
-    if (!isButtonAllowed('dashboard-receipt-print')) return showToast('No tienes permiso para modificar boletas', 'warning');
-    const row = dashboardReceiptAddItem();
-    row?.querySelector('.dashboard-receipt-item-description')?.focus();
-  });
-  document.getElementById('dashboard-receipt-reset').addEventListener('click', () => dashboardReceiptReset(true));
-  document.getElementById('dashboard-receipt-print').addEventListener('click', dashboardReceiptSaveAndPrint);
-  document.getElementById('dashboard-receipt-search-form')?.addEventListener('submit', event => {
-    event.preventDefault();
-    dashboardReceiptSearchHistory();
-  });
-  dashboardReceiptReset(false);
-  dashboardReceiptApplyAccess();
-  dashboardReceiptLoadHistory();
-}
-
-// ==========================================================================
-// Solven Labs MAIL
-// ==========================================================================
 const mailState = {
   messages: [],
   mailboxes: [],

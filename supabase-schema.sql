@@ -96,6 +96,20 @@ CREATE TABLE IF NOT EXISTS profiles (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+-- BEGIN COLUMN COMPAT
+-- CREATE TABLE IF NOT EXISTS no actualiza tablas existentes.
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS full_name text NOT NULL,
+  ADD COLUMN IF NOT EXISTS email text NOT NULL,
+  ADD COLUMN IF NOT EXISTS phone text,
+  ADD COLUMN IF NOT EXISTS role text NOT NULL DEFAULT 'client' CHECK (role IN ('administracion', 'contabilidad', 'team', 'client', 'admin')),
+  ADD COLUMN IF NOT EXISTS avatar_url text,
+  ADD COLUMN IF NOT EXISTS company text,
+  ADD COLUMN IF NOT EXISTS position text,
+  ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
+-- END COLUMN COMPAT
+
 
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 -- Política existente del módulo; se reemplaza por las políticas específicas debajo.
@@ -136,12 +150,24 @@ CREATE TABLE IF NOT EXISTS dashboard_roles (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+-- BEGIN COLUMN COMPAT
+-- CREATE TABLE IF NOT EXISTS no actualiza tablas existentes.
+ALTER TABLE public.dashboard_roles
+  ADD COLUMN IF NOT EXISTS name text NOT NULL,
+  ADD COLUMN IF NOT EXISTS description text,
+  ADD COLUMN IF NOT EXISTS pages text[] NOT NULL DEFAULT '{}',
+  ADD COLUMN IF NOT EXISTS buttons text[] NOT NULL DEFAULT '{}',
+  ADD COLUMN IF NOT EXISTS is_system boolean NOT NULL DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
+-- END COLUMN COMPAT
+
 
 ALTER TABLE dashboard_roles ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Allow all on dashboard_roles" ON dashboard_roles;
 CREATE POLICY "Allow all on dashboard_roles" ON dashboard_roles FOR ALL USING (true) WITH CHECK (true);
 
--- ========== PRÁCTICAS Y BITÁCORA ==========
+-- ========== ADMINISTRACIÓN Y PROTECCIÓN DE PERFILES ==========
 CREATE OR REPLACE FUNCTION public.is_dashboard_admin()
 RETURNS BOOLEAN
 LANGUAGE sql
@@ -217,118 +243,6 @@ ON public.dashboard_roles FOR ALL TO authenticated
 USING (public.is_dashboard_admin())
 WITH CHECK (public.is_dashboard_admin());
 
-CREATE TABLE IF NOT EXISTS internship_profiles (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  profile_id UUID NOT NULL UNIQUE REFERENCES profiles(id) ON DELETE CASCADE,
-  institution TEXT,
-  program TEXT,
-  supervisor_name TEXT,
-  start_date DATE,
-  end_date DATE,
-  weekly_hours_goal NUMERIC(5,1) NOT NULL DEFAULT 20 CHECK (weekly_hours_goal > 0 AND weekly_hours_goal <= 60),
-  total_hours_goal NUMERIC(6,1) CHECK (total_hours_goal IS NULL OR (total_hours_goal > 0 AND total_hours_goal <= 5000)),
-  objectives TEXT,
-  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('planned', 'active', 'completed', 'cancelled')),
-  updated_by UUID REFERENCES profiles(id) ON DELETE SET NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  CHECK (end_date IS NULL OR start_date IS NULL OR end_date >= start_date)
-);
-
-CREATE TABLE IF NOT EXISTS internship_logs (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  profile_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  log_date DATE NOT NULL DEFAULT CURRENT_DATE,
-  start_time TIME NOT NULL,
-  end_time TIME NOT NULL,
-  hours NUMERIC(5,2) NOT NULL CHECK (hours > 0 AND hours <= 16),
-  activity TEXT NOT NULL CHECK (length(trim(activity)) > 0),
-  learning TEXT,
-  evidence_url TEXT,
-  status TEXT NOT NULL DEFAULT 'ingresado' CHECK (status IN ('ingresado', 'autorizado', 'validado', 'rechazado')),
-  review_note TEXT,
-  reviewed_by UUID REFERENCES profiles(id) ON DELETE SET NULL,
-  reviewed_at TIMESTAMPTZ,
-  deleted_at TIMESTAMPTZ,
-  deleted_by UUID REFERENCES profiles(id) ON DELETE SET NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  CHECK (end_time > start_time)
-);
-
-CREATE INDEX IF NOT EXISTS idx_internship_logs_profile_date ON internship_logs(profile_id, log_date DESC);
-CREATE INDEX IF NOT EXISTS idx_internship_logs_pending ON internship_logs(status, log_date DESC) WHERE deleted_at IS NULL;
-
--- Mantiene el historial incluso si el rol del usuario cambia en el futuro.
-CREATE OR REPLACE FUNCTION public.ensure_internship_profile_history()
-RETURNS TRIGGER
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-BEGIN
-  IF lower(NEW.role) = 'practicante' THEN
-    INSERT INTO public.internship_profiles (profile_id, status)
-    VALUES (NEW.id, 'active')
-    ON CONFLICT (profile_id) DO NOTHING;
-  END IF;
-  RETURN NEW;
-END;
-$$;
-
-DROP TRIGGER IF EXISTS ensure_internship_profile_history_trigger ON profiles;
-CREATE TRIGGER ensure_internship_profile_history_trigger
-AFTER INSERT OR UPDATE OF role ON profiles
-FOR EACH ROW EXECUTE FUNCTION public.ensure_internship_profile_history();
-
-INSERT INTO internship_profiles (profile_id, status)
-SELECT id, 'active' FROM profiles WHERE lower(role) = 'practicante'
-ON CONFLICT (profile_id) DO NOTHING;
-
-ALTER TABLE internship_profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE internship_logs ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Admins manage internship profiles" ON internship_profiles;
-CREATE POLICY "Admins manage internship profiles" ON internship_profiles FOR ALL
-  USING (public.is_dashboard_admin()) WITH CHECK (public.is_dashboard_admin());
-DROP POLICY IF EXISTS "Practitioners view own internship profile" ON internship_profiles;
-CREATE POLICY "Practitioners view own internship profile" ON internship_profiles FOR SELECT
-  USING (profile_id = auth.uid());
-DROP POLICY IF EXISTS "Practitioners create own internship profile" ON internship_profiles;
-CREATE POLICY "Practitioners create own internship profile" ON internship_profiles FOR INSERT TO authenticated
-  WITH CHECK (profile_id = auth.uid() AND updated_by = auth.uid());
-DROP POLICY IF EXISTS "Practitioners update own internship profile" ON internship_profiles;
-CREATE POLICY "Practitioners update own internship profile" ON internship_profiles FOR UPDATE TO authenticated
-  USING (profile_id = auth.uid())
-  WITH CHECK (profile_id = auth.uid() AND updated_by = auth.uid());
-
-DROP POLICY IF EXISTS "Admins manage internship logs" ON internship_logs;
-CREATE POLICY "Admins manage internship logs" ON internship_logs FOR ALL
-  USING (public.is_dashboard_admin()) WITH CHECK (public.is_dashboard_admin());
-DROP POLICY IF EXISTS "Practitioners view own internship logs" ON internship_logs;
-CREATE POLICY "Practitioners view own internship logs" ON internship_logs FOR SELECT
-  USING (profile_id = auth.uid() AND deleted_at IS NULL);
-DROP POLICY IF EXISTS "Practitioners create own internship logs" ON internship_logs;
-CREATE POLICY "Practitioners create own internship logs" ON internship_logs FOR INSERT
-  WITH CHECK (
-    profile_id = auth.uid() AND status = 'ingresado'
-    AND reviewed_by IS NULL AND reviewed_at IS NULL
-    AND deleted_at IS NULL AND deleted_by IS NULL
-  );
-DROP POLICY IF EXISTS "Practitioners update own entered logs" ON internship_logs;
-CREATE POLICY "Practitioners update own entered logs" ON internship_logs FOR UPDATE
-  USING (profile_id = auth.uid() AND status = 'ingresado' AND deleted_at IS NULL)
-  WITH CHECK (
-    profile_id = auth.uid() AND status = 'ingresado'
-    AND reviewed_by IS NULL AND reviewed_at IS NULL
-    AND deleted_at IS NULL AND deleted_by IS NULL
-  );
-
-GRANT SELECT, INSERT, UPDATE, DELETE ON internship_profiles TO authenticated;
-GRANT SELECT, INSERT, UPDATE, DELETE ON internship_logs TO authenticated;
-GRANT EXECUTE ON FUNCTION public.is_dashboard_admin() TO authenticated;
-GRANT EXECUTE ON FUNCTION public.ensure_internship_profile_history() TO authenticated;
-
 CREATE TABLE IF NOT EXISTS site_content (
   section TEXT PRIMARY KEY CHECK (section IN ('pricing', 'cases', 'contact')),
   content JSONB NOT NULL DEFAULT '{}'::jsonb,
@@ -337,6 +251,16 @@ CREATE TABLE IF NOT EXISTS site_content (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+-- BEGIN COLUMN COMPAT
+-- CREATE TABLE IF NOT EXISTS no actualiza tablas existentes.
+ALTER TABLE public.site_content
+  ADD COLUMN IF NOT EXISTS content jsonb NOT NULL DEFAULT CAST('{}' AS jsonb),
+  ADD COLUMN IF NOT EXISTS is_active boolean NOT NULL DEFAULT TRUE,
+  ADD COLUMN IF NOT EXISTS updated_by uuid REFERENCES auth.users (id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
+-- END COLUMN COMPAT
+
 
 ALTER TABLE site_content ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Allow all on site_content" ON site_content;
@@ -361,6 +285,23 @@ CREATE TABLE IF NOT EXISTS site_messages (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+-- BEGIN COLUMN COMPAT
+-- CREATE TABLE IF NOT EXISTS no actualiza tablas existentes.
+ALTER TABLE public.site_messages
+  ADD COLUMN IF NOT EXISTS name text NOT NULL,
+  ADD COLUMN IF NOT EXISTS email text NOT NULL,
+  ADD COLUMN IF NOT EXISTS company text,
+  ADD COLUMN IF NOT EXISTS phone text,
+  ADD COLUMN IF NOT EXISTS service text,
+  ADD COLUMN IF NOT EXISTS budget text,
+  ADD COLUMN IF NOT EXISTS message text NOT NULL,
+  ADD COLUMN IF NOT EXISTS source text NOT NULL DEFAULT 'landing',
+  ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'read', 'archived')),
+  ADD COLUMN IF NOT EXISTS metadata jsonb NOT NULL DEFAULT CAST('{}' AS jsonb),
+  ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
+-- END COLUMN COMPAT
+
 
 ALTER TABLE site_messages ADD COLUMN IF NOT EXISTS phone TEXT;
 
@@ -413,32 +354,32 @@ INSERT INTO dashboard_roles (slug, name, description, pages, buttons, is_system)
     'administracion',
     'Administración',
     'Acceso completo al dashboard y a las acciones de gestión.',
-    ARRAY['overview','projects','tasks','messages','relations','quotes','contracts','calendar','orders','service-orders','sii','receipts','maintenance','analytics','reports','practices','practitioner-profile','team','settings'],
-    ARRAY['btn-export-report','btn-export-relations','btn-add-client','btn-add-provider','btn-add-project','btn-add-task','btn-add-order','btn-add-service-order','btn-add-event','btn-site-refresh-messages','btn-add-mp-subscription','dashboard-receipt-print','btn-export-cotizaciones','btn-nueva-cotizacion','btn-export-payments','btn-add-payment','btn-add-contrato-pers','btn-add-anexo','btn-add-finiquito','btn-export-expenses','btn-add-expense','btn-export-presii','btn-nueva-presii','btn-export-sii','btn-sii-factura-venta','btn-sii-factura-compra','btn-sii-honorarios','btn-sii-gasto','btn-sii-ingreso','btn-export-f29','btn-export-f22','btn-add-practice-log'],
+    ARRAY['overview','projects','tasks','messages','relations','quotes','contracts','calendar','orders','sii','analytics','reports','team','settings'],
+    ARRAY['btn-export-report','btn-export-relations','btn-add-client','btn-add-provider','btn-add-project','btn-add-task','btn-add-order','btn-add-event','btn-site-refresh-messages','btn-export-cotizaciones','btn-nueva-cotizacion','btn-export-payments','btn-add-payment','btn-add-contrato-pers','btn-add-anexo','btn-add-finiquito','btn-export-expenses','btn-add-expense','btn-export-presii','btn-nueva-presii','btn-export-sii','btn-sii-factura-venta','btn-sii-factura-compra','btn-sii-honorarios','btn-sii-gasto','btn-sii-ingreso','btn-export-f29','btn-export-f22'],
     true
   ),
   (
     'contabilidad',
     'Contabilidad',
     'Acceso centrado en finanzas, impuestos, reportes y analíticas.',
-    ARRAY['sii','receipts','quotes','maintenance','analytics','reports','settings'],
-    ARRAY['btn-export-presii','btn-add-mp-subscription'],
+    ARRAY['sii','quotes','analytics','reports','settings'],
+    ARRAY['btn-export-presii'],
     true
   ),
   (
     'team',
     'Miembro',
     'Acceso operativo a proyectos, tareas, relaciones, tickets y calendario.',
-    ARRAY['overview','projects','tasks','messages','sii','receipts','relations','calendar','orders','service-orders','settings'],
-    ARRAY['btn-add-project','btn-add-service-order'],
+    ARRAY['overview','projects','tasks','messages','sii','relations','calendar','orders','settings'],
+    ARRAY['btn-add-project'],
     true
   ),
   (
     'practicante',
     'Practicante',
     'Acceso exclusivo a su bitácora y perfil de práctica.',
-    ARRAY['practices','practitioner-profile','calendar'],
-    ARRAY['btn-add-practice-log'],
+    ARRAY['calendar'],
+    ARRAY[]::TEXT[],
     true
   )
 ON CONFLICT (slug) DO NOTHING;
@@ -496,11 +437,27 @@ CREATE TABLE IF NOT EXISTS team_members (
   profile_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
   full_name TEXT NOT NULL,
   role_title TEXT NOT NULL,
+  email TEXT,
+  phone TEXT,
   avatar_url TEXT,
   availability team_availability NOT NULL DEFAULT 'available',
   weekly_hours NUMERIC(5,1) DEFAULT 0,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+-- BEGIN COLUMN COMPAT
+-- CREATE TABLE IF NOT EXISTS no actualiza tablas existentes.
+ALTER TABLE public.team_members
+  ADD COLUMN IF NOT EXISTS profile_id uuid REFERENCES profiles (id) ON DELETE CASCADE,
+  ADD COLUMN IF NOT EXISTS full_name text NOT NULL,
+  ADD COLUMN IF NOT EXISTS role_title text NOT NULL,
+  ADD COLUMN IF NOT EXISTS email text,
+  ADD COLUMN IF NOT EXISTS phone text,
+  ADD COLUMN IF NOT EXISTS avatar_url text,
+  ADD COLUMN IF NOT EXISTS availability team_availability NOT NULL DEFAULT 'available',
+  ADD COLUMN IF NOT EXISTS weekly_hours numeric(5, 1) DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now();
+-- END COLUMN COMPAT
+
 
 ALTER TABLE team_members ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Allow all on team_members" ON team_members;
@@ -538,6 +495,26 @@ CREATE TABLE IF NOT EXISTS clients (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+-- BEGIN COLUMN COMPAT
+-- CREATE TABLE IF NOT EXISTS no actualiza tablas existentes.
+ALTER TABLE public.clients
+  ADD COLUMN IF NOT EXISTS name text NOT NULL,
+  ADD COLUMN IF NOT EXISTS company text NOT NULL,
+  ADD COLUMN IF NOT EXISTS relationship client_relationship,
+  ADD COLUMN IF NOT EXISTS rut text,
+  ADD COLUMN IF NOT EXISTS email text,
+  ADD COLUMN IF NOT EXISTS phone text,
+  ADD COLUMN IF NOT EXISTS address text,
+  ADD COLUMN IF NOT EXISTS region text,
+  ADD COLUMN IF NOT EXISTS city text,
+  ADD COLUMN IF NOT EXISTS avatar_url text,
+  ADD COLUMN IF NOT EXISTS status client_status NOT NULL DEFAULT 'active',
+  ADD COLUMN IF NOT EXISTS total_billed bigint NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS notes text,
+  ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
+-- END COLUMN COMPAT
+
 
 CREATE TABLE IF NOT EXISTS providers (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -553,11 +530,38 @@ CREATE TABLE IF NOT EXISTS providers (
   avatar_url TEXT,
   status client_status NOT NULL DEFAULT 'active',
   payment_account TEXT,
+  account_type TEXT,
+  bank TEXT,
+  account_number TEXT,
   total_billed BIGINT NOT NULL DEFAULT 0, -- en CLP
   notes TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+-- BEGIN COLUMN COMPAT
+-- CREATE TABLE IF NOT EXISTS no actualiza tablas existentes.
+ALTER TABLE public.providers
+  ADD COLUMN IF NOT EXISTS name text NOT NULL,
+  ADD COLUMN IF NOT EXISTS company text NOT NULL,
+  ADD COLUMN IF NOT EXISTS relationship client_relationship,
+  ADD COLUMN IF NOT EXISTS rut text,
+  ADD COLUMN IF NOT EXISTS email text,
+  ADD COLUMN IF NOT EXISTS phone text,
+  ADD COLUMN IF NOT EXISTS address text,
+  ADD COLUMN IF NOT EXISTS region text,
+  ADD COLUMN IF NOT EXISTS city text,
+  ADD COLUMN IF NOT EXISTS avatar_url text,
+  ADD COLUMN IF NOT EXISTS status client_status NOT NULL DEFAULT 'active',
+  ADD COLUMN IF NOT EXISTS payment_account text,
+  ADD COLUMN IF NOT EXISTS account_type text,
+  ADD COLUMN IF NOT EXISTS bank text,
+  ADD COLUMN IF NOT EXISTS account_number text,
+  ADD COLUMN IF NOT EXISTS total_billed bigint NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS notes text,
+  ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
+-- END COLUMN COMPAT
+
 
 ALTER TABLE clients ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Allow all on clients" ON clients;
@@ -572,6 +576,7 @@ CREATE TABLE IF NOT EXISTS projects (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL,
   client_id UUID REFERENCES clients(id) ON DELETE SET NULL,
+  client_name TEXT,
   status project_status NOT NULL DEFAULT 'proposal',
   progress INTEGER NOT NULL DEFAULT 0 CHECK (progress >= 0 AND progress <= 100),
   description TEXT,
@@ -592,6 +597,33 @@ CREATE TABLE IF NOT EXISTS projects (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+-- BEGIN COLUMN COMPAT
+-- CREATE TABLE IF NOT EXISTS no actualiza tablas existentes.
+ALTER TABLE public.projects
+  ADD COLUMN IF NOT EXISTS name text NOT NULL,
+  ADD COLUMN IF NOT EXISTS client_id uuid REFERENCES clients (id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS client_name text,
+  ADD COLUMN IF NOT EXISTS status project_status NOT NULL DEFAULT 'proposal',
+  ADD COLUMN IF NOT EXISTS progress integer NOT NULL DEFAULT 0 CHECK (progress >= 0 AND progress <= 100),
+  ADD COLUMN IF NOT EXISTS description text,
+  ADD COLUMN IF NOT EXISTS technologies text[],
+  ADD COLUMN IF NOT EXISTS logo_url text,
+  ADD COLUMN IF NOT EXISTS start_date date,
+  ADD COLUMN IF NOT EXISTS estimated_end_date date,
+  ADD COLUMN IF NOT EXISTS domain_status text NOT NULL DEFAULT 'unknown',
+  ADD COLUMN IF NOT EXISTS frontend_status text NOT NULL DEFAULT 'unknown',
+  ADD COLUMN IF NOT EXISTS backend_status text NOT NULL DEFAULT 'unknown',
+  ADD COLUMN IF NOT EXISTS supabase_database_status text NOT NULL DEFAULT 'unknown',
+  ADD COLUMN IF NOT EXISTS supabase_auth_status text NOT NULL DEFAULT 'unknown',
+  ADD COLUMN IF NOT EXISTS supabase_storage_status text NOT NULL DEFAULT 'unknown',
+  ADD COLUMN IF NOT EXISTS ssl_status text NOT NULL DEFAULT 'unknown',
+  ADD COLUMN IF NOT EXISTS health_check_url text,
+  ADD COLUMN IF NOT EXISTS actual_end_date date,
+  ADD COLUMN IF NOT EXISTS budget bigint DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
+-- END COLUMN COMPAT
+
 
 -- Compatibilidad con instalaciones existentes creadas antes del monitoreo.
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS health_check_url TEXT;
@@ -607,6 +639,14 @@ CREATE TABLE IF NOT EXISTS project_members (
   role TEXT DEFAULT 'developer',
   PRIMARY KEY (project_id, team_member_id)
 );
+-- BEGIN COLUMN COMPAT
+-- CREATE TABLE IF NOT EXISTS no actualiza tablas existentes.
+ALTER TABLE public.project_members
+  ADD COLUMN IF NOT EXISTS project_id uuid REFERENCES projects (id) ON DELETE CASCADE,
+  ADD COLUMN IF NOT EXISTS team_member_id uuid REFERENCES team_members (id) ON DELETE CASCADE,
+  ADD COLUMN IF NOT EXISTS role text DEFAULT 'developer';
+-- END COLUMN COMPAT
+
 
 ALTER TABLE project_members ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Allow all on project_members" ON project_members;
@@ -638,6 +678,33 @@ CREATE TABLE IF NOT EXISTS invoices (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+-- BEGIN COLUMN COMPAT
+-- CREATE TABLE IF NOT EXISTS no actualiza tablas existentes.
+ALTER TABLE public.invoices
+  ADD COLUMN IF NOT EXISTS invoice_number text NOT NULL UNIQUE,
+  ADD COLUMN IF NOT EXISTS client_id uuid REFERENCES clients (id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS project_id uuid REFERENCES projects (id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS amount bigint NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS subtotal bigint NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS iva_amount bigint NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS iva_percentage numeric(5, 2) DEFAULT 19.0,
+  ADD COLUMN IF NOT EXISTS status invoice_status NOT NULL DEFAULT 'draft',
+  ADD COLUMN IF NOT EXISTS description text,
+  ADD COLUMN IF NOT EXISTS bill_to_name text,
+  ADD COLUMN IF NOT EXISTS bill_to_rut text,
+  ADD COLUMN IF NOT EXISTS bill_to_address text,
+  ADD COLUMN IF NOT EXISTS ship_to_name text,
+  ADD COLUMN IF NOT EXISTS ship_to_company text,
+  ADD COLUMN IF NOT EXISTS ship_to_address text,
+  ADD COLUMN IF NOT EXISTS payment_terms text,
+  ADD COLUMN IF NOT EXISTS notes text,
+  ADD COLUMN IF NOT EXISTS issued_at date NOT NULL DEFAULT CURRENT_DATE,
+  ADD COLUMN IF NOT EXISTS due_at date,
+  ADD COLUMN IF NOT EXISTS paid_at date,
+  ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
+-- END COLUMN COMPAT
+
 
 ALTER TABLE invoices ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Allow all on invoices" ON invoices;
@@ -662,6 +729,26 @@ CREATE TABLE IF NOT EXISTS facturacion_items (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+-- BEGIN COLUMN COMPAT
+-- CREATE TABLE IF NOT EXISTS no actualiza tablas existentes.
+ALTER TABLE public.facturacion_items
+  ADD COLUMN IF NOT EXISTS project_id uuid REFERENCES projects (id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS invoice_number text,
+  ADD COLUMN IF NOT EXISTS customer_name text,
+  ADD COLUMN IF NOT EXISTS customer_rut text,
+  ADD COLUMN IF NOT EXISTS title text NOT NULL,
+  ADD COLUMN IF NOT EXISTS type text NOT NULL DEFAULT 'facturacion',
+  ADD COLUMN IF NOT EXISTS billing_cycle text NOT NULL DEFAULT 'one_time',
+  ADD COLUMN IF NOT EXISTS payment_terms text,
+  ADD COLUMN IF NOT EXISTS renewal_date date,
+  ADD COLUMN IF NOT EXISTS amount bigint NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS due_date date,
+  ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'pending',
+  ADD COLUMN IF NOT EXISTS notes text,
+  ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
+-- END COLUMN COMPAT
+
 
 ALTER TABLE facturacion_items ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Allow all on facturacion_items" ON facturacion_items;
@@ -683,6 +770,33 @@ CREATE TABLE IF NOT EXISTS public.cotizaciones (
   observaciones TEXT, project_id UUID REFERENCES public.projects(id) ON DELETE SET NULL,
   created_at TIMESTAMPTZ DEFAULT now()
 );
+-- BEGIN COLUMN COMPAT
+-- CREATE TABLE IF NOT EXISTS no actualiza tablas existentes.
+ALTER TABLE public.cotizaciones
+  ADD COLUMN IF NOT EXISTS folio bigint,
+  ADD COLUMN IF NOT EXISTS fecha date,
+  ADD COLUMN IF NOT EXISTS vigencia integer DEFAULT 30,
+  ADD COLUMN IF NOT EXISTS estado text DEFAULT 'vigente',
+  ADD COLUMN IF NOT EXISTS cliente text,
+  ADD COLUMN IF NOT EXISTS razon_social text,
+  ADD COLUMN IF NOT EXISTS rut_receptor text,
+  ADD COLUMN IF NOT EXISTS giro_receptor text,
+  ADD COLUMN IF NOT EXISTS direccion_receptor text,
+  ADD COLUMN IF NOT EXISTS ciudad_receptor text,
+  ADD COLUMN IF NOT EXISTS email_receptor text,
+  ADD COLUMN IF NOT EXISTS contacto_proveedor_nombre text,
+  ADD COLUMN IF NOT EXISTS contacto_proveedor_telefono text,
+  ADD COLUMN IF NOT EXISTS contacto_proveedor_cargo text,
+  ADD COLUMN IF NOT EXISTS exento boolean DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS items jsonb DEFAULT CAST('[]' AS jsonb),
+  ADD COLUMN IF NOT EXISTS neto numeric DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS iva numeric DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS total numeric DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS observaciones text,
+  ADD COLUMN IF NOT EXISTS project_id uuid REFERENCES public.projects (id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT now();
+-- END COLUMN COMPAT
+
 ALTER TABLE public.cotizaciones ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Dashboard manages quotes" ON public.cotizaciones;
 CREATE POLICY "Dashboard manages quotes" ON public.cotizaciones
@@ -727,6 +841,38 @@ CREATE TABLE IF NOT EXISTS facturas_presii (
   sii_pdf_url TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+-- BEGIN COLUMN COMPAT
+-- CREATE TABLE IF NOT EXISTS no actualiza tablas existentes.
+ALTER TABLE public.facturas_presii
+  ADD COLUMN IF NOT EXISTS folio text,
+  ADD COLUMN IF NOT EXISTS tipo_dte text,
+  ADD COLUMN IF NOT EXISTS razon_social text,
+  ADD COLUMN IF NOT EXISTS rut_receptor text,
+  ADD COLUMN IF NOT EXISTS fecha date,
+  ADD COLUMN IF NOT EXISTS fecha_vencimiento date,
+  ADD COLUMN IF NOT EXISTS items jsonb,
+  ADD COLUMN IF NOT EXISTS neto numeric,
+  ADD COLUMN IF NOT EXISTS iva numeric,
+  ADD COLUMN IF NOT EXISTS total numeric,
+  ADD COLUMN IF NOT EXISTS estado text,
+  ADD COLUMN IF NOT EXISTS periodo text,
+  ADD COLUMN IF NOT EXISTS operacion text DEFAULT 'venta',
+  ADD COLUMN IF NOT EXISTS emi_name text,
+  ADD COLUMN IF NOT EXISTS emi_rut text,
+  ADD COLUMN IF NOT EXISTS emi_giro text,
+  ADD COLUMN IF NOT EXISTS emi_address text,
+  ADD COLUMN IF NOT EXISTS giro_receptor text,
+  ADD COLUMN IF NOT EXISTS direccion_receptor text,
+  ADD COLUMN IF NOT EXISTS ciudad_receptor text,
+  ADD COLUMN IF NOT EXISTS comuna_receptor text,
+  ADD COLUMN IF NOT EXISTS exento boolean DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS observaciones text,
+  ADD COLUMN IF NOT EXISTS project_id uuid REFERENCES projects (id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS sii_pdf_path text,
+  ADD COLUMN IF NOT EXISTS sii_pdf_url text,
+  ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT now();
+-- END COLUMN COMPAT
+
 
 ALTER TABLE facturas_presii ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Allow all on facturas_presii" ON facturas_presii;
@@ -751,8 +897,46 @@ CREATE TABLE IF NOT EXISTS pagos (
   descripcion TEXT,
   status TEXT NOT NULL DEFAULT 'pendiente',
   skip_analytics BOOLEAN NOT NULL DEFAULT false,
+  sueldo_base NUMERIC NOT NULL DEFAULT 0,
+  bono NUMERIC NOT NULL DEFAULT 0,
+  gratificacion NUMERIC NOT NULL DEFAULT 0,
+  horas_extra NUMERIC NOT NULL DEFAULT 0,
+  cot_afp NUMERIC NOT NULL DEFAULT 0,
+  cot_vol_afp NUMERIC NOT NULL DEFAULT 0,
+  cot_pact_salud NUMERIC NOT NULL DEFAULT 0,
+  dif_plan_salud NUMERIC NOT NULL DEFAULT 0,
+  seguro_cesantia NUMERIC NOT NULL DEFAULT 0,
+  impuesto_unico NUMERIC NOT NULL DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+-- BEGIN COLUMN COMPAT
+-- CREATE TABLE IF NOT EXISTS no actualiza tablas existentes.
+ALTER TABLE public.pagos
+  ADD COLUMN IF NOT EXISTS fecha date,
+  ADD COLUMN IF NOT EXISTS tipo text,
+  ADD COLUMN IF NOT EXISTS operacion text,
+  ADD COLUMN IF NOT EXISTS nombre text,
+  ADD COLUMN IF NOT EXISTS rut text,
+  ADD COLUMN IF NOT EXISTS cargo text,
+  ADD COLUMN IF NOT EXISTS bruto numeric,
+  ADD COLUMN IF NOT EXISTS descuentos numeric,
+  ADD COLUMN IF NOT EXISTS neto numeric,
+  ADD COLUMN IF NOT EXISTS descripcion text,
+  ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'pendiente',
+  ADD COLUMN IF NOT EXISTS skip_analytics boolean NOT NULL DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS sueldo_base numeric NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS bono numeric NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS gratificacion numeric NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS horas_extra numeric NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS cot_afp numeric NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS cot_vol_afp numeric NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS cot_pact_salud numeric NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS dif_plan_salud numeric NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS seguro_cesantia numeric NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS impuesto_unico numeric NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT now();
+-- END COLUMN COMPAT
+
 
 ALTER TABLE pagos ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'pendiente';
 ALTER TABLE pagos ADD COLUMN IF NOT EXISTS operacion TEXT NOT NULL DEFAULT 'compra';
@@ -776,62 +960,28 @@ CREATE TABLE IF NOT EXISTS orders (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+-- BEGIN COLUMN COMPAT
+-- CREATE TABLE IF NOT EXISTS no actualiza tablas existentes.
+ALTER TABLE public.orders
+  ADD COLUMN IF NOT EXISTS title text NOT NULL,
+  ADD COLUMN IF NOT EXISTS description text,
+  ADD COLUMN IF NOT EXISTS category text,
+  ADD COLUMN IF NOT EXISTS status order_status NOT NULL DEFAULT 'pending',
+  ADD COLUMN IF NOT EXISTS priority order_priority NOT NULL DEFAULT 'medium',
+  ADD COLUMN IF NOT EXISTS project_id uuid REFERENCES projects (id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS assigned_to uuid REFERENCES team_members (id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS due_date date,
+  ADD COLUMN IF NOT EXISTS sort_order integer DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
+-- END COLUMN COMPAT
+
 
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Allow all on orders" ON orders;
 CREATE POLICY "Allow all on orders" ON orders FOR ALL USING (true) WITH CHECK (true);
 
 -- ========== SERVICE ORDERS (Servicio técnico) ==========
-CREATE TABLE IF NOT EXISTS service_orders (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  folio TEXT NOT NULL UNIQUE,
-  service_date DATE NOT NULL DEFAULT CURRENT_DATE,
-  status TEXT NOT NULL DEFAULT 'received'
-    CHECK (status IN ('received', 'diagnosis', 'in_progress', 'ready', 'delivered', 'cancelled')),
-  provider_rut_name TEXT,
-  technician_name TEXT NOT NULL,
-  technician_contact TEXT,
-  client_name TEXT NOT NULL,
-  client_rut TEXT,
-  client_phone TEXT,
-  service_address TEXT,
-  service_at_home BOOLEAN NOT NULL DEFAULT false,
-  equipment_received BOOLEAN NOT NULL DEFAULT false,
-  diagnosis_only BOOLEAN NOT NULL DEFAULT false,
-  equipment_type TEXT NOT NULL,
-  brand_model TEXT,
-  serial_number TEXT,
-  access_password TEXT,
-  reported_failure TEXT NOT NULL,
-  diagnosis_work TEXT,
-  parts_observations TEXT,
-  labor_detail TEXT,
-  labor_amount NUMERIC(12,2) NOT NULL DEFAULT 0 CHECK (labor_amount >= 0),
-  materials_detail TEXT,
-  materials_amount NUMERIC(12,2) NOT NULL DEFAULT 0 CHECK (materials_amount >= 0),
-  travel_detail TEXT,
-  travel_amount NUMERIC(12,2) NOT NULL DEFAULT 0 CHECK (travel_amount >= 0),
-  total_amount NUMERIC(12,2) NOT NULL DEFAULT 0 CHECK (total_amount >= 0),
-  payment_method TEXT NOT NULL DEFAULT 'pending'
-    CHECK (payment_method IN ('cash', 'transfer', 'card', 'pending')),
-  document_number TEXT,
-  technician_signature_name TEXT,
-  client_signature_name TEXT,
-  client_conformity BOOLEAN NOT NULL DEFAULT false,
-  created_by UUID REFERENCES profiles(id) ON DELETE SET NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX IF NOT EXISTS idx_service_orders_date ON service_orders(service_date DESC);
-CREATE INDEX IF NOT EXISTS idx_service_orders_status ON service_orders(status);
-CREATE INDEX IF NOT EXISTS idx_service_orders_client ON service_orders(client_name);
-
-ALTER TABLE service_orders ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "Allow all on service_orders" ON service_orders;
-CREATE POLICY "Allow all on service_orders" ON service_orders FOR ALL USING (true) WITH CHECK (true);
-
--- ========== TASKS ==========
 CREATE TABLE IF NOT EXISTS tasks (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   title TEXT NOT NULL,
@@ -846,6 +996,22 @@ CREATE TABLE IF NOT EXISTS tasks (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+-- BEGIN COLUMN COMPAT
+-- CREATE TABLE IF NOT EXISTS no actualiza tablas existentes.
+ALTER TABLE public.tasks
+  ADD COLUMN IF NOT EXISTS title text NOT NULL,
+  ADD COLUMN IF NOT EXISTS completed boolean NOT NULL DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS priority task_priority NOT NULL DEFAULT 'medium',
+  ADD COLUMN IF NOT EXISTS category text,
+  ADD COLUMN IF NOT EXISTS project_id uuid REFERENCES projects (id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS assigned_to uuid REFERENCES team_members (id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS due_date date,
+  ADD COLUMN IF NOT EXISTS completed_at timestamptz,
+  ADD COLUMN IF NOT EXISTS sort_order integer DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
+-- END COLUMN COMPAT
+
 
 ALTER TABLE tasks ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Allow all on tasks" ON tasks;
@@ -863,6 +1029,19 @@ CREATE TABLE IF NOT EXISTS documents (
   uploaded_by UUID REFERENCES profiles(id) ON DELETE SET NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+-- BEGIN COLUMN COMPAT
+-- CREATE TABLE IF NOT EXISTS no actualiza tablas existentes.
+ALTER TABLE public.documents
+  ADD COLUMN IF NOT EXISTS file_name text NOT NULL,
+  ADD COLUMN IF NOT EXISTS file_path text NOT NULL,
+  ADD COLUMN IF NOT EXISTS file_size bigint DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS mime_type text,
+  ADD COLUMN IF NOT EXISTS folder doc_folder NOT NULL DEFAULT 'otros',
+  ADD COLUMN IF NOT EXISTS project_id uuid REFERENCES projects (id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS uploaded_by uuid REFERENCES profiles (id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now();
+-- END COLUMN COMPAT
+
 
 ALTER TABLE documents ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Allow all on documents" ON documents;
@@ -872,6 +1051,12 @@ CREATE POLICY "Allow all on documents" ON documents FOR ALL USING (true) WITH CH
 CREATE TABLE IF NOT EXISTS expenses (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   date DATE NOT NULL DEFAULT CURRENT_DATE,
+  date_incurred DATE,
+  receipt_number TEXT,
+  cost_center TEXT,
+  iva_percentage NUMERIC(5,2) DEFAULT 19,
+  iva_amount BIGINT NOT NULL DEFAULT 0,
+  discount_amount BIGINT NOT NULL DEFAULT 0,
   category expense_category NOT NULL,
   description TEXT NOT NULL,
   amount BIGINT NOT NULL DEFAULT 0, -- en CLP
@@ -889,12 +1074,61 @@ CREATE TABLE IF NOT EXISTS expenses (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+-- BEGIN COLUMN COMPAT
+-- CREATE TABLE IF NOT EXISTS no actualiza tablas existentes.
+ALTER TABLE public.expenses
+  ADD COLUMN IF NOT EXISTS date date NOT NULL DEFAULT CURRENT_DATE,
+  ADD COLUMN IF NOT EXISTS date_incurred date,
+  ADD COLUMN IF NOT EXISTS receipt_number text,
+  ADD COLUMN IF NOT EXISTS cost_center text,
+  ADD COLUMN IF NOT EXISTS iva_percentage numeric(5, 2) DEFAULT 19,
+  ADD COLUMN IF NOT EXISTS iva_amount bigint NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS discount_amount bigint NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS category expense_category NOT NULL,
+  ADD COLUMN IF NOT EXISTS description text NOT NULL,
+  ADD COLUMN IF NOT EXISTS amount bigint NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS currency text DEFAULT 'CLP',
+  ADD COLUMN IF NOT EXISTS vendor text,
+  ADD COLUMN IF NOT EXISTS project_id uuid REFERENCES projects (id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS submitted_by uuid REFERENCES profiles (id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS approved_by uuid REFERENCES profiles (id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS status expense_status NOT NULL DEFAULT 'draft',
+  ADD COLUMN IF NOT EXISTS receipt_path text,
+  ADD COLUMN IF NOT EXISTS receipt_filename text,
+  ADD COLUMN IF NOT EXISTS notes text,
+  ADD COLUMN IF NOT EXISTS payment_method text DEFAULT 'transfer',
+  ADD COLUMN IF NOT EXISTS paid_at date,
+  ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
+-- END COLUMN COMPAT
+
 
 ALTER TABLE expenses ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Allow all on expenses" ON expenses;
 CREATE POLICY "Allow all on expenses" ON expenses FOR ALL USING (true) WITH CHECK (true);
 
 -- Índices para expenses
+-- El dashboard usa date_incurred; los informes históricos usan date.
+UPDATE public.expenses SET date_incurred = date WHERE date_incurred IS NULL;
+CREATE OR REPLACE FUNCTION public.sync_expense_dates()
+RETURNS TRIGGER LANGUAGE plpgsql SET search_path = public AS $$
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    NEW.date_incurred := COALESCE(NEW.date_incurred, NEW.date, CURRENT_DATE);
+    NEW.date := NEW.date_incurred;
+  ELSIF NEW.date_incurred IS DISTINCT FROM OLD.date_incurred THEN
+    NEW.date := COALESCE(NEW.date_incurred, NEW.date);
+    NEW.date_incurred := NEW.date;
+  ELSIF NEW.date IS DISTINCT FROM OLD.date THEN
+    NEW.date_incurred := NEW.date;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+DROP TRIGGER IF EXISTS sync_expense_dates ON public.expenses;
+CREATE TRIGGER sync_expense_dates BEFORE INSERT OR UPDATE ON public.expenses
+FOR EACH ROW EXECUTE FUNCTION public.sync_expense_dates();
+
 CREATE INDEX IF NOT EXISTS idx_expenses_date ON expenses USING btree (date DESC);
 CREATE INDEX IF NOT EXISTS idx_expenses_category ON expenses USING btree (category);
 CREATE INDEX IF NOT EXISTS idx_expenses_status ON expenses USING btree (status);
@@ -925,14 +1159,34 @@ CREATE TABLE IF NOT EXISTS events (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+-- BEGIN COLUMN COMPAT
+-- CREATE TABLE IF NOT EXISTS no actualiza tablas existentes.
+ALTER TABLE public.events
+  ADD COLUMN IF NOT EXISTS title text NOT NULL,
+  ADD COLUMN IF NOT EXISTS description text,
+  ADD COLUMN IF NOT EXISTS event_type event_type NOT NULL DEFAULT 'meeting',
+  ADD COLUMN IF NOT EXISTS event_date date NOT NULL,
+  ADD COLUMN IF NOT EXISTS start_time time,
+  ADD COLUMN IF NOT EXISTS end_time time,
+  ADD COLUMN IF NOT EXISTS project_id uuid REFERENCES projects (id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS created_by uuid REFERENCES profiles (id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS meet_link text,
+  ADD COLUMN IF NOT EXISTS location text,
+  ADD COLUMN IF NOT EXISTS timezone text NOT NULL DEFAULT 'America/Santiago',
+  ADD COLUMN IF NOT EXISTS ical_uid text NOT NULL DEFAULT CAST(uuid_generate_v4() AS text) || '@calendar.solvenlabs.cl',
+  ADD COLUMN IF NOT EXISTS ical_sequence integer NOT NULL DEFAULT 0 CHECK (ical_sequence >= 0),
+  ADD COLUMN IF NOT EXISTS organizer_mailbox_id uuid,
+  ADD COLUMN IF NOT EXISTS meeting_notes text,
+  ADD COLUMN IF NOT EXISTS blocks_bookings boolean NOT NULL DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS recurrence_group_id uuid,
+  ADD COLUMN IF NOT EXISTS recurrence_rule jsonb,
+  ADD COLUMN IF NOT EXISTS recurrence_sequence integer,
+  ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
+-- END COLUMN COMPAT
 
--- Si ya existe la tabla, agregar las columnas con:
--- ALTER TABLE events ADD COLUMN IF NOT EXISTS meet_link TEXT;
--- ALTER TABLE events ADD COLUMN IF NOT EXISTS meeting_notes TEXT;
--- ALTER TABLE events ADD COLUMN IF NOT EXISTS blocks_bookings BOOLEAN NOT NULL DEFAULT false;
--- ALTER TABLE events ADD COLUMN IF NOT EXISTS recurrence_group_id UUID;
--- ALTER TABLE events ADD COLUMN IF NOT EXISTS recurrence_rule JSONB;
--- ALTER TABLE events ADD COLUMN IF NOT EXISTS recurrence_sequence INTEGER;
+
+-- Las columnas de agenda se actualizan en COLUMN COMPAT, antes de los índices.
 
 ALTER TABLE events ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Allow all on events" ON events;
@@ -952,6 +1206,17 @@ CREATE TABLE IF NOT EXISTS event_attendees (
   CHECK (email = lower(email) AND email ~ '^[^[:space:]@]+@[^[:space:]@]+\.[^[:space:]@]+$'),
   UNIQUE (event_id, email)
 );
+-- BEGIN COLUMN COMPAT
+-- CREATE TABLE IF NOT EXISTS no actualiza tablas existentes.
+ALTER TABLE public.event_attendees
+  ADD COLUMN IF NOT EXISTS event_id uuid NOT NULL REFERENCES events (id) ON DELETE CASCADE,
+  ADD COLUMN IF NOT EXISTS email text NOT NULL,
+  ADD COLUMN IF NOT EXISTS name text,
+  ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'tentative', 'declined')),
+  ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
+-- END COLUMN COMPAT
+
 
 CREATE INDEX IF NOT EXISTS idx_event_attendees_event ON event_attendees (event_id);
 ALTER TABLE event_attendees ENABLE ROW LEVEL SECURITY;
@@ -974,6 +1239,18 @@ CREATE TABLE IF NOT EXISTS calendar_invitation_requests (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+-- BEGIN COLUMN COMPAT
+-- CREATE TABLE IF NOT EXISTS no actualiza tablas existentes.
+ALTER TABLE public.calendar_invitation_requests
+  ADD COLUMN IF NOT EXISTS owner_id uuid NOT NULL REFERENCES auth.users (id) ON DELETE CASCADE,
+  ADD COLUMN IF NOT EXISTS event_id uuid REFERENCES events (id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS action text NOT NULL CHECK (action IN ('create', 'update', 'cancel')),
+  ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'processing' CHECK (status IN ('processing', 'sent', 'failed')),
+  ADD COLUMN IF NOT EXISTS result jsonb,
+  ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
+-- END COLUMN COMPAT
+
 
 ALTER TABLE calendar_invitation_requests ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Owners read calendar invitation requests" ON calendar_invitation_requests;
@@ -991,6 +1268,18 @@ CREATE TABLE IF NOT EXISTS activity_log (
   entity_name TEXT, -- Nombre legible
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+-- BEGIN COLUMN COMPAT
+-- CREATE TABLE IF NOT EXISTS no actualiza tablas existentes.
+ALTER TABLE public.activity_log
+  ADD COLUMN IF NOT EXISTS user_id uuid REFERENCES profiles (id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS user_name text,
+  ADD COLUMN IF NOT EXISTS activity_type activity_type NOT NULL DEFAULT 'general',
+  ADD COLUMN IF NOT EXISTS description text NOT NULL,
+  ADD COLUMN IF NOT EXISTS entity_id uuid,
+  ADD COLUMN IF NOT EXISTS entity_name text,
+  ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now();
+-- END COLUMN COMPAT
+
 
 ALTER TABLE activity_log ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON public.activity_log FROM anon, authenticated;
@@ -1354,6 +1643,19 @@ CREATE TABLE IF NOT EXISTS project_updates (
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+-- BEGIN COLUMN COMPAT
+-- CREATE TABLE IF NOT EXISTS no actualiza tablas existentes.
+ALTER TABLE public.project_updates
+  ADD COLUMN IF NOT EXISTS project_id uuid NOT NULL REFERENCES projects (id) ON DELETE CASCADE,
+  ADD COLUMN IF NOT EXISTS title text NOT NULL,
+  ADD COLUMN IF NOT EXISTS description text,
+  ADD COLUMN IF NOT EXISTS type update_type NOT NULL DEFAULT 'update',
+  ADD COLUMN IF NOT EXISTS visible_to_client boolean NOT NULL DEFAULT TRUE,
+  ADD COLUMN IF NOT EXISTS created_by uuid REFERENCES profiles (id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
+-- END COLUMN COMPAT
+
 
 ALTER TABLE project_updates ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Allow all on project_updates" ON project_updates;
@@ -1388,6 +1690,22 @@ CREATE TABLE IF NOT EXISTS fin_ingresos (
   monto      BIGINT      NOT NULL DEFAULT 0,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+-- BEGIN COLUMN COMPAT
+-- CREATE TABLE IF NOT EXISTS no actualiza tablas existentes.
+ALTER TABLE public.fin_ingresos
+  ADD COLUMN IF NOT EXISTS fecha date,
+  ADD COLUMN IF NOT EXISTS concepto text NOT NULL,
+  ADD COLUMN IF NOT EXISTS cliente text,
+  ADD COLUMN IF NOT EXISTS origen text,
+  ADD COLUMN IF NOT EXISTS categoria text NOT NULL DEFAULT 'servicio',
+  ADD COLUMN IF NOT EXISTS metodo_pago text,
+  ADD COLUMN IF NOT EXISTS referencia text,
+  ADD COLUMN IF NOT EXISTS observaciones text,
+  ADD COLUMN IF NOT EXISTS estado text NOT NULL DEFAULT 'registrado',
+  ADD COLUMN IF NOT EXISTS monto bigint NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now();
+-- END COLUMN COMPAT
+
 ALTER TABLE fin_ingresos ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "fin_ingresos_all" ON fin_ingresos;
 CREATE POLICY "fin_ingresos_all" ON fin_ingresos FOR ALL USING (true) WITH CHECK (true);
@@ -1409,6 +1727,16 @@ CREATE TABLE IF NOT EXISTS fin_gastos (
   monto      BIGINT      NOT NULL DEFAULT 0,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+-- BEGIN COLUMN COMPAT
+-- CREATE TABLE IF NOT EXISTS no actualiza tablas existentes.
+ALTER TABLE public.fin_gastos
+  ADD COLUMN IF NOT EXISTS fecha date,
+  ADD COLUMN IF NOT EXISTS proveedor text NOT NULL,
+  ADD COLUMN IF NOT EXISTS concepto text,
+  ADD COLUMN IF NOT EXISTS monto bigint NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now();
+-- END COLUMN COMPAT
+
 ALTER TABLE fin_gastos ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "fin_gastos_all" ON fin_gastos;
 CREATE POLICY "fin_gastos_all" ON fin_gastos FOR ALL USING (true) WITH CHECK (true);
@@ -1432,6 +1760,25 @@ CREATE TABLE IF NOT EXISTS contratos_personal (
   signed_name   TEXT,
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+-- BEGIN COLUMN COMPAT
+-- CREATE TABLE IF NOT EXISTS no actualiza tablas existentes.
+ALTER TABLE public.contratos_personal
+  ADD COLUMN IF NOT EXISTS empleado text NOT NULL,
+  ADD COLUMN IF NOT EXISTS cargo text,
+  ADD COLUMN IF NOT EXISTS domicilio text,
+  ADD COLUMN IF NOT EXISTS inicio date,
+  ADD COLUMN IF NOT EXISTS fin date,
+  ADD COLUMN IF NOT EXISTS estado text NOT NULL DEFAULT 'activo',
+  ADD COLUMN IF NOT EXISTS bank text,
+  ADD COLUMN IF NOT EXISTS account_type text,
+  ADD COLUMN IF NOT EXISTS account_number text,
+  ADD COLUMN IF NOT EXISTS access_token text,
+  ADD COLUMN IF NOT EXISTS access_expires_at timestamptz,
+  ADD COLUMN IF NOT EXISTS signed_at timestamptz,
+  ADD COLUMN IF NOT EXISTS signed_name text,
+  ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now();
+-- END COLUMN COMPAT
+
 ALTER TABLE contratos_personal ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "contratos_personal_all" ON contratos_personal;
 CREATE POLICY "contratos_personal_all" ON contratos_personal FOR ALL USING (true) WITH CHECK (true);
@@ -1482,6 +1829,29 @@ CREATE TABLE IF NOT EXISTS public.visit_reservations (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+-- BEGIN COLUMN COMPAT
+-- CREATE TABLE IF NOT EXISTS no actualiza tablas existentes.
+ALTER TABLE public.visit_reservations
+  ADD COLUMN IF NOT EXISTS service_name text NOT NULL,
+  ADD COLUMN IF NOT EXISTS customer_name text NOT NULL,
+  ADD COLUMN IF NOT EXISTS customer_email text NOT NULL,
+  ADD COLUMN IF NOT EXISTS customer_phone text NOT NULL,
+  ADD COLUMN IF NOT EXISTS visit_date date NOT NULL,
+  ADD COLUMN IF NOT EXISTS visit_time time NOT NULL,
+  ADD COLUMN IF NOT EXISTS end_time time NOT NULL,
+  ADD COLUMN IF NOT EXISTS amount integer NOT NULL DEFAULT 5000 CHECK (amount = 5000),
+  ADD COLUMN IF NOT EXISTS currency text NOT NULL DEFAULT 'CLP' CHECK (currency = 'CLP'),
+  ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'cancelled', 'expired', 'payment_mismatch', 'needs_review')),
+  ADD COLUMN IF NOT EXISTS mercado_pago_preference_id text UNIQUE,
+  ADD COLUMN IF NOT EXISTS mercado_pago_payment_id text UNIQUE,
+  ADD COLUMN IF NOT EXISTS mercado_pago_status text,
+  ADD COLUMN IF NOT EXISTS event_id uuid UNIQUE REFERENCES public.events (id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS expires_at timestamptz NOT NULL,
+  ADD COLUMN IF NOT EXISTS approved_at timestamptz,
+  ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
+-- END COLUMN COMPAT
+
 
 CREATE INDEX IF NOT EXISTS idx_visit_reservations_date
   ON public.visit_reservations(visit_date, visit_time);
@@ -1541,6 +1911,23 @@ CREATE TABLE IF NOT EXISTS public.free_consultation_bookings (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+-- BEGIN COLUMN COMPAT
+-- CREATE TABLE IF NOT EXISTS no actualiza tablas existentes.
+ALTER TABLE public.free_consultation_bookings
+  ADD COLUMN IF NOT EXISTS customer_name text NOT NULL,
+  ADD COLUMN IF NOT EXISTS customer_email text NOT NULL,
+  ADD COLUMN IF NOT EXISTS customer_phone text NOT NULL,
+  ADD COLUMN IF NOT EXISTS company text,
+  ADD COLUMN IF NOT EXISTS topic text,
+  ADD COLUMN IF NOT EXISTS booking_date date NOT NULL,
+  ADD COLUMN IF NOT EXISTS booking_time time NOT NULL,
+  ADD COLUMN IF NOT EXISTS end_time time NOT NULL,
+  ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'confirmed' CHECK (status IN ('confirmed', 'cancelled')),
+  ADD COLUMN IF NOT EXISTS event_id uuid UNIQUE REFERENCES public.events (id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
+-- END COLUMN COMPAT
+
 
 CREATE INDEX IF NOT EXISTS idx_free_consultation_bookings_date
   ON public.free_consultation_bookings(booking_date, booking_time);
@@ -1852,75 +2239,8 @@ REVOKE ALL ON FUNCTION public.delete_calendar_event_series(UUID) FROM PUBLIC, an
 GRANT EXECUTE ON FUNCTION public.delete_calendar_event_series(UUID) TO authenticated;
 
 -- ============================================================================
--- HISTORIAL DE MANTENCIONES
--- Conservado para las consultas de facturación del dashboard; sin cobro en línea.
+-- FILTRO DEL HISTORIAL DE ACTIVIDAD
 -- ============================================================================
-CREATE TABLE IF NOT EXISTS public.maintenance_billing_plans (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  project_id UUID NOT NULL REFERENCES public.projects(id) ON DELETE CASCADE,
-  client_id UUID REFERENCES public.clients(id) ON DELETE SET NULL,
-  plan_code TEXT NOT NULL CHECK (plan_code IN ('presencia','impulso','operacion','custom')),
-  plan_name TEXT NOT NULL,
-  amount INTEGER NOT NULL CHECK (amount BETWEEN 1000 AND 5000000),
-  currency TEXT NOT NULL DEFAULT 'CLP' CHECK (currency = 'CLP'),
-  customer_name TEXT NOT NULL,
-  customer_rut TEXT NOT NULL,
-  customer_email TEXT,
-  customer_phone TEXT,
-  billing_day SMALLINT NOT NULL CHECK (billing_day BETWEEN 1 AND 28),
-  next_issue_date DATE NOT NULL,
-  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','paused','cancelled')),
-  balance_confirmed_at TIMESTAMPTZ NOT NULL,
-  cancelled_at TIMESTAMPTZ,
-  deleted_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS public.maintenance_bills (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  billing_plan_id UUID NOT NULL REFERENCES public.maintenance_billing_plans(id) ON DELETE RESTRICT,
-  project_id UUID NOT NULL REFERENCES public.projects(id) ON DELETE CASCADE,
-  customer_rut TEXT NOT NULL,
-  period_start DATE NOT NULL,
-  issued_at DATE NOT NULL,
-  due_at DATE NOT NULL,
-  amount INTEGER NOT NULL CHECK (amount BETWEEN 1000 AND 5000000),
-  currency TEXT NOT NULL DEFAULT 'CLP' CHECK (currency = 'CLP'),
-  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','paid','overdue','cancelled','payment_mismatch')),
-  mercado_pago_preference_id TEXT,
-  mercado_pago_payment_id TEXT UNIQUE,
-  mercado_pago_status TEXT,
-  checkout_url TEXT,
-  paid_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  UNIQUE (billing_plan_id, period_start)
-);
-
-CREATE INDEX IF NOT EXISTS idx_maintenance_billing_plans_project
-  ON public.maintenance_billing_plans(project_id, status) WHERE deleted_at IS NULL;
-CREATE UNIQUE INDEX IF NOT EXISTS idx_maintenance_billing_plans_one_current
-  ON public.maintenance_billing_plans(project_id)
-  WHERE deleted_at IS NULL AND status IN ('active','paused');
-CREATE INDEX IF NOT EXISTS idx_maintenance_bills_project ON public.maintenance_bills(project_id, issued_at DESC);
-CREATE UNIQUE INDEX IF NOT EXISTS idx_maintenance_bills_one_open
-  ON public.maintenance_bills(billing_plan_id)
-  WHERE status IN ('pending', 'overdue', 'payment_mismatch');
-CREATE INDEX IF NOT EXISTS idx_maintenance_bills_rut
-  ON public.maintenance_bills((regexp_replace(lower(customer_rut), '[^0-9k]', '', 'g')), issued_at DESC);
-
-ALTER TABLE public.maintenance_billing_plans ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.maintenance_bills ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "Dashboard reads maintenance billing plans" ON public.maintenance_billing_plans;
-CREATE POLICY "Dashboard reads maintenance billing plans" ON public.maintenance_billing_plans FOR SELECT TO authenticated USING (true);
-DROP POLICY IF EXISTS "Dashboard reads maintenance bills" ON public.maintenance_bills;
-CREATE POLICY "Dashboard reads maintenance bills" ON public.maintenance_bills FOR SELECT TO authenticated USING (true);
-REVOKE ALL ON public.maintenance_billing_plans FROM anon;
-REVOKE ALL ON public.maintenance_bills FROM anon;
-GRANT SELECT ON public.maintenance_billing_plans TO authenticated;
-GRANT SELECT ON public.maintenance_bills TO authenticated;
-
 CREATE OR REPLACE FUNCTION public.discard_low_value_activity_log()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -1972,6 +2292,16 @@ CREATE TABLE IF NOT EXISTS public.requirement_intakes (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+-- BEGIN COLUMN COMPAT
+-- CREATE TABLE IF NOT EXISTS no actualiza tablas existentes.
+ALTER TABLE public.requirement_intakes
+  ADD COLUMN IF NOT EXISTS project_id uuid REFERENCES public.projects (id) ON DELETE RESTRICT,
+  ADD COLUMN IF NOT EXISTS data jsonb NOT NULL CHECK (jsonb_typeof(data) = 'object' AND length(CAST(data AS text)) <= 3500000 AND COALESCE(length(pg_catalog.btrim(data ->> 'project_name')) BETWEEN 1 AND 300, FALSE) AND COALESCE(length(pg_catalog.btrim(data ->> 'client_name')) BETWEEN 1 AND 300, FALSE) AND COALESCE(length(pg_catalog.btrim(data ->> 'version')) BETWEEN 1 AND 40, FALSE) AND COALESCE(data ->> 'status' IN ('En levantamiento', 'En revisión', 'Validada'), FALSE) AND COALESCE(jsonb_typeof(data -> 'features') = 'array', FALSE) AND COALESCE(jsonb_typeof(data -> 'pending') = 'array', FALSE)),
+  ADD COLUMN IF NOT EXISTS created_by uuid DEFAULT auth.uid() REFERENCES auth.users (id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
+-- END COLUMN COMPAT
+
 CREATE INDEX IF NOT EXISTS requirement_intakes_project_idx ON public.requirement_intakes(project_id, updated_at DESC);
 ALTER TABLE public.requirement_intakes ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS requirement_intakes_read ON public.requirement_intakes;
@@ -2010,39 +2340,24 @@ CREATE TABLE IF NOT EXISTS public.order_subtasks (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+-- BEGIN COLUMN COMPAT
+-- CREATE TABLE IF NOT EXISTS no actualiza tablas existentes.
+ALTER TABLE public.order_subtasks
+  ADD COLUMN IF NOT EXISTS order_id uuid NOT NULL REFERENCES public.orders (id) ON DELETE CASCADE,
+  ADD COLUMN IF NOT EXISTS title text NOT NULL,
+  ADD COLUMN IF NOT EXISTS completed boolean NOT NULL DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS due_date date,
+  ADD COLUMN IF NOT EXISTS sort_order integer NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
+-- END COLUMN COMPAT
+
 CREATE INDEX IF NOT EXISTS idx_order_subtasks_order ON public.order_subtasks(order_id, sort_order);
 ALTER TABLE public.order_subtasks ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Dashboard manages order subtasks" ON public.order_subtasks;
 CREATE POLICY "Dashboard manages order subtasks" ON public.order_subtasks
   FOR ALL TO authenticated USING (true) WITH CHECK (true);
 GRANT ALL ON public.order_subtasks TO authenticated, service_role;
-
-CREATE TABLE IF NOT EXISTS public.thermal_receipts (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  receipt_number BIGINT GENERATED BY DEFAULT AS IDENTITY UNIQUE,
-  document_type TEXT NOT NULL, issued_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  customer_name TEXT, customer_rut TEXT, customer_contact TEXT,
-  items JSONB NOT NULL DEFAULT '[]'::jsonb,
-  tax_mode TEXT, net_amount NUMERIC NOT NULL DEFAULT 0,
-  tax_amount NUMERIC NOT NULL DEFAULT 0, total_amount NUMERIC NOT NULL DEFAULT 0,
-  payment_method TEXT, amount_received NUMERIC, change_amount NUMERIC,
-  note TEXT, footer_note TEXT, paper_width INTEGER NOT NULL DEFAULT 58,
-  created_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-ALTER TABLE public.thermal_receipts ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "Dashboard reads receipts" ON public.thermal_receipts;
-CREATE POLICY "Dashboard reads receipts" ON public.thermal_receipts
-  FOR SELECT TO authenticated USING (true);
-DROP POLICY IF EXISTS "Users create own receipts" ON public.thermal_receipts;
-CREATE POLICY "Users create own receipts" ON public.thermal_receipts
-  FOR INSERT TO authenticated WITH CHECK (created_by = auth.uid());
-DROP POLICY IF EXISTS "Owners delete receipts" ON public.thermal_receipts;
-CREATE POLICY "Owners delete receipts" ON public.thermal_receipts
-  FOR DELETE TO authenticated USING (created_by = auth.uid() OR public.is_dashboard_admin());
-GRANT SELECT, INSERT, DELETE ON public.thermal_receipts TO authenticated;
-GRANT ALL ON public.thermal_receipts TO service_role;
-GRANT USAGE, SELECT ON SEQUENCE public.thermal_receipts_receipt_number_seq TO authenticated, service_role;
 
 -- Correo: necesario también para seleccionar el remitente de las invitaciones.
 -- La entrega de correo requiere el servicio externo configurado por la aplicación.
@@ -2053,6 +2368,16 @@ CREATE TABLE IF NOT EXISTS public.mailboxes (
   active BOOLEAN NOT NULL DEFAULT true,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+-- BEGIN COLUMN COMPAT
+-- CREATE TABLE IF NOT EXISTS no actualiza tablas existentes.
+ALTER TABLE public.mailboxes
+  ADD COLUMN IF NOT EXISTS owner_id uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users (id) ON DELETE CASCADE,
+  ADD COLUMN IF NOT EXISTS address text NOT NULL UNIQUE,
+  ADD COLUMN IF NOT EXISTS display_name text,
+  ADD COLUMN IF NOT EXISTS active boolean NOT NULL DEFAULT TRUE,
+  ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now();
+-- END COLUMN COMPAT
+
 CREATE TABLE IF NOT EXISTS public.mail_messages (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   mailbox_id UUID NOT NULL REFERENCES public.mailboxes(id) ON DELETE CASCADE,
@@ -2066,6 +2391,33 @@ CREATE TABLE IF NOT EXISTS public.mail_messages (
   direction TEXT NOT NULL DEFAULT 'inbound', delivery_status TEXT,
   in_reply_to TEXT, message_references JSONB DEFAULT '[]'::jsonb
 );
+-- BEGIN COLUMN COMPAT
+-- CREATE TABLE IF NOT EXISTS no actualiza tablas existentes.
+ALTER TABLE public.mail_messages
+  ADD COLUMN IF NOT EXISTS mailbox_id uuid NOT NULL REFERENCES public.mailboxes (id) ON DELETE CASCADE,
+  ADD COLUMN IF NOT EXISTS message_id text,
+  ADD COLUMN IF NOT EXISTS from_address text,
+  ADD COLUMN IF NOT EXISTS from_name text,
+  ADD COLUMN IF NOT EXISTS reply_to_address text,
+  ADD COLUMN IF NOT EXISTS reply_to_name text,
+  ADD COLUMN IF NOT EXISTS to_address text,
+  ADD COLUMN IF NOT EXISTS to_addresses jsonb DEFAULT CAST('[]' AS jsonb),
+  ADD COLUMN IF NOT EXISTS cc_addresses jsonb DEFAULT CAST('[]' AS jsonb),
+  ADD COLUMN IF NOT EXISTS bcc_addresses jsonb DEFAULT CAST('[]' AS jsonb),
+  ADD COLUMN IF NOT EXISTS subject text,
+  ADD COLUMN IF NOT EXISTS body_text text,
+  ADD COLUMN IF NOT EXISTS body_html text,
+  ADD COLUMN IF NOT EXISTS headers jsonb DEFAULT CAST('{}' AS jsonb),
+  ADD COLUMN IF NOT EXISTS received_at timestamptz DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS sent_at timestamptz,
+  ADD COLUMN IF NOT EXISTS is_read boolean NOT NULL DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS read_at timestamptz,
+  ADD COLUMN IF NOT EXISTS direction text NOT NULL DEFAULT 'inbound',
+  ADD COLUMN IF NOT EXISTS delivery_status text,
+  ADD COLUMN IF NOT EXISTS in_reply_to text,
+  ADD COLUMN IF NOT EXISTS message_references jsonb DEFAULT CAST('[]' AS jsonb);
+-- END COLUMN COMPAT
+
 CREATE INDEX IF NOT EXISTS idx_mail_messages_mailbox_received ON public.mail_messages(mailbox_id, received_at DESC);
 ALTER TABLE public.mailboxes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.mail_messages ENABLE ROW LEVEL SECURITY;
@@ -2158,6 +2510,41 @@ REVOKE ALL ON FUNCTION public.manage_public_booking(TEXT, UUID, TEXT, DATE, TIME
 GRANT EXECUTE ON FUNCTION public.manage_public_booking(TEXT, UUID, TEXT, DATE, TIME, TIME) TO authenticated;
 
 -- ========== VISTAS (tras completar las columnas) ==========
+-- Reparar relaciones de lecturas anidadas aunque la columna ya existiera.
+-- NOT VALID conserva filas antiguas huérfanas para revisión; las nuevas escrituras
+-- sí respetan la relación. No se eliminan ni inventan registros relacionados.
+DO $relationships$
+DECLARE r RECORD; source_att SMALLINT; target_att SMALLINT;
+BEGIN
+  FOR r IN SELECT * FROM (VALUES
+    ('projects', 'client_id', 'clients', 'SET NULL'),
+    ('tasks', 'project_id', 'projects', 'SET NULL'),
+    ('orders', 'project_id', 'projects', 'SET NULL'),
+    ('orders', 'assigned_to', 'team_members', 'SET NULL'),
+    ('facturacion_items', 'project_id', 'projects', 'SET NULL'),
+    ('project_members', 'team_member_id', 'team_members', 'CASCADE'),
+    ('project_members', 'project_id', 'projects', 'CASCADE'),
+    ('documents', 'uploaded_by', 'profiles', 'SET NULL'),
+    ('documents', 'project_id', 'projects', 'SET NULL'),
+    ('event_attendees', 'event_id', 'events', 'CASCADE')
+  ) AS relationships(source_table, source_column, target_table, delete_action)
+  LOOP
+    SELECT attnum INTO source_att FROM pg_attribute
+      WHERE attrelid = to_regclass('public.' || r.source_table) AND attname = r.source_column AND NOT attisdropped;
+    SELECT attnum INTO target_att FROM pg_attribute
+      WHERE attrelid = to_regclass('public.' || r.target_table) AND attname = 'id' AND NOT attisdropped;
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE contype = 'f'
+      AND conrelid = to_regclass('public.' || r.source_table)
+      AND confrelid = to_regclass('public.' || r.target_table)
+      AND conkey = ARRAY[source_att] AND confkey = ARRAY[target_att]) THEN
+      EXECUTE format('ALTER TABLE public.%I ADD CONSTRAINT %I FOREIGN KEY (%I) REFERENCES public.%I(id) ON DELETE %s NOT VALID',
+        r.source_table, r.source_table || '_' || r.source_column || '_dashboard_fkey',
+        r.source_column, r.target_table, r.delete_action);
+    END IF;
+  END LOOP;
+END;
+$relationships$;
+
 CREATE OR REPLACE VIEW dashboard_kpis AS
 SELECT
   (SELECT COUNT(*) FROM projects WHERE status = 'in_development') AS active_projects,
@@ -2189,7 +2576,7 @@ SELECT
   p.supabase_database_status, p.supabase_auth_status, p.supabase_storage_status,
   p.ssl_status, p.health_check_url, p.actual_end_date, p.budget,
   p.created_at, p.updated_at,
-  c.name AS client_name,
+  COALESCE(c.name, p.client_name) AS client_name,
   c.company AS client_company,
   (SELECT COUNT(*) FROM project_members pm WHERE pm.project_id = p.id) AS member_count,
   p.client_token, p.client_visible, p.client_notes
@@ -2221,7 +2608,7 @@ SELECT
   p.client_notes,
   p.client_visible,
   c.company AS client_company,
-  c.name    AS client_name,
+  COALESCE(c.name, p.client_name) AS client_name,
   (
     SELECT json_agg(u ORDER BY u.created_at DESC)
     FROM (
