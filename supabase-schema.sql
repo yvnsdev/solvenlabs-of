@@ -461,24 +461,34 @@ INSERT INTO site_content (section, content) VALUES
 ON CONFLICT (section) DO NOTHING;
 
 -- Trigger para crear profile automáticamente al registrarse
-CREATE OR REPLACE FUNCTION handle_new_user()
-RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
 BEGIN
-  INSERT INTO profiles (id, full_name, email, role)
+  INSERT INTO public.profiles (id, full_name, email, role)
   VALUES (
     NEW.id,
-    COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.email),
-    NEW.email,
-    COALESCE(NEW.raw_user_meta_data->>'role', 'client')
-  );
+    COALESCE(NULLIF(trim(NEW.raw_user_meta_data->>'full_name'), ''),
+             NULLIF(NEW.email, ''), 'Usuario'),
+    COALESCE(NEW.email, ''),
+    COALESCE(NULLIF(trim(NEW.raw_user_meta_data->>'role'), ''), 'client')
+  )
+  ON CONFLICT (id) DO NOTHING;
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
+
+ALTER FUNCTION public.handle_new_user() OWNER TO postgres;
+REVOKE ALL ON FUNCTION public.handle_new_user() FROM PUBLIC, anon, authenticated;
 
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION handle_new_user();
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
 
 -- ========== TEAM MEMBERS ==========
 CREATE TABLE IF NOT EXISTS team_members (

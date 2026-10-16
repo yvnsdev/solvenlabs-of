@@ -1,4 +1,4 @@
-project_id = "oxyhuxnkhogmuholomis"
+project_id = "goqovtiffajnslsyuwbg"
 
 [functions.booking-availability]
 entrypoint = "./functions/booking-availability/index.js"

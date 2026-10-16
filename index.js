@@ -687,8 +687,8 @@ if (fallbackRoute && /^\/(?!\/)/.test(fallbackRoute)) {
   };
 
   const siteContentState = {
-    apiBase: 'https://oxyhuxnkhogmuholomis.supabase.co/rest/v1',
-    anonKey: 'sb_publishable_Hc5VQX3uTZ_K9BiQ9kf0rA_ri3wYpjS',
+    apiBase: 'https://goqovtiffajnslsyuwbg.supabase.co/rest/v1',
+    anonKey: 'sb_publishable_YOvjyW8D7ZhQT05pojpNSg_Fh42OLKt',
     content: {}
   };
 

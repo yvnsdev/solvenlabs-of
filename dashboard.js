@@ -447,8 +447,8 @@ if (fallbackRoute && /^\/(?!\/)/.test(fallbackRoute)) {
   window.history.replaceState({}, '', fallbackRoute);
 }
 
-const supabaseUrl = 'https://oxyhuxnkhogmuholomis.supabase.co'
-const supabaseKey = 'sb_publishable_Hc5VQX3uTZ_K9BiQ9kf0rA_ri3wYpjS'
+const supabaseUrl = 'https://goqovtiffajnslsyuwbg.supabase.co'
+const supabaseKey = 'sb_publishable_YOvjyW8D7ZhQT05pojpNSg_Fh42OLKt'
 const mailWorkerUrl = String(document.querySelector('meta[name="ntek-mail-worker-url"]')?.content || '').replace(/\/$/, '')
 const mailSendEndpoint = (() => {
   try {
@@ -481,7 +481,7 @@ const tabSessionStorage = {
   setItem(key, value) { try { window.sessionStorage.setItem(key, value); } catch (_) {} },
   removeItem(key) { try { window.sessionStorage.removeItem(key); } catch (_) {} }
 };
-const SUPABASE_AUTH_STORAGE_KEY = 'sb-oxyhuxnkhogmuholomis-auth-token';
+const SUPABASE_AUTH_STORAGE_KEY = 'sb-goqovtiffajnslsyuwbg-auth-token';
 try {
   const legacyAuthSession = window.localStorage.getItem(SUPABASE_AUTH_STORAGE_KEY);
   if (legacyAuthSession && !tabSessionStorage.getItem(SUPABASE_AUTH_STORAGE_KEY)) {

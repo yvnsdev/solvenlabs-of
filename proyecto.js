@@ -167,8 +167,8 @@
 ;
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.112.4';
 
-const SUPABASE_URL = 'https://oxyhuxnkhogmuholomis.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_Hc5VQX3uTZ_K9BiQ9kf0rA_ri3wYpjS';
+const SUPABASE_URL = 'https://goqovtiffajnslsyuwbg.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_YOvjyW8D7ZhQT05pojpNSg_Fh42OLKt';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
 });
