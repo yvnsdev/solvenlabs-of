@@ -74,7 +74,7 @@
   "address": {
     "@type": "PostalAddress",
     "addressCountry": "CL",
-    "addressLocality": "Concepción"
+    "addressLocality": "Chillán"
   },
   "contactPoint": {
     "@type": "ContactPoint",
@@ -176,7 +176,7 @@
           </div>
         </div>
 
-        <a href="/blog/" class="navbar__link">Blog</a>
+        <a href="/noticias" class="navbar__link" data-section="noticias">Noticias</a>
 
         <!-- Dropdown: Más -->
         <div class="navbar__dropdown">
@@ -187,10 +187,6 @@
             <a href="/diagnostico-digital" class="navbar__dropdown-item" data-section="simulador">
               <i data-lucide="calculator"></i>
               <span>Orientador de proyecto</span>
-            </a>
-            <a href="/tecnologias" class="navbar__dropdown-item" data-section="tecnologias">
-              <i data-lucide="cpu"></i>
-              <span>Herramientas que usamos</span>
             </a>
             <a href="/preguntas-frecuentes" class="navbar__dropdown-item" data-section="faq">
               <i data-lucide="help-circle"></i>
@@ -229,9 +225,8 @@
         <a href="/proyectos" class="mobile-menu__link" data-section="casos"><i data-lucide="quote"></i><span>Proyectos</span></a>
         <a href="/como-trabajamos" class="mobile-menu__link" data-section="proceso"><i data-lucide="git-branch"></i><span>Cómo trabajamos</span></a>
         <a href="/equipo" class="mobile-menu__link" data-section="equipo"><i data-lucide="users"></i><span>Equipo</span></a>
-        <a href="/blog/" class="mobile-menu__link"><i data-lucide="newspaper"></i><span>Blog</span></a>
+        <a href="/noticias" class="mobile-menu__link" data-section="noticias"><i data-lucide="newspaper"></i><span>Noticias</span></a>
         <a href="/diagnostico-digital" class="mobile-menu__link" data-section="simulador"><i data-lucide="calculator"></i><span>Orientador</span></a>
-        <a href="/tecnologias" class="mobile-menu__link" data-section="tecnologias"><i data-lucide="cpu"></i><span>Herramientas que usamos</span></a>
         <a href="/preguntas-frecuentes" class="mobile-menu__link" data-section="faq"><i data-lucide="help-circle"></i><span>Preguntas frecuentes</span></a>
         <a href="/contacto" class="mobile-menu__link" data-section="contacto"><i data-lucide="message-circle"></i><span>Contacto</span></a>
       </div>
@@ -356,7 +351,7 @@
     </section>
 
     <!-- ========== EQUIPO DE TRABAJO ========== -->
-    <section id="equipo" class="section section--alt" aria-labelledby="equipo-heading"><div class="container"><div class="section__header reveal"><span class="section__badge">Quiénes somos</span><h2 id="equipo-heading" class="section__title">Tecnología y ciencia, en un mismo equipo</h2><p class="section__subtitle">Personas curiosas, ciencia aplicada y ganas de resolver. Conoce qué mueve a cada integrante.</p></div><div class="ai-solutions__usecases solven-team"><article class="usecase-card reveal"><div class="usecase-card__image"><img src="assets/tomas.png" alt="Tomás Yévenes" class="usecase-card__profile" loading="lazy" decoding="async"></div><h3 class="usecase-card__title">Tomás Yévenes</h3><span class="usecase-card__role">Software e inteligencia artificial</span><button type="button" class="btn btn--outline btn--sm team-member-btn" data-member="tomas">Conoce mi trabajo ↗</button></article><article class="usecase-card reveal"><div class="usecase-card__image"><img src="assets/team-carola.jpg" alt="Dra. Carola Figueroa" class="usecase-card__profile" loading="lazy" decoding="async"></div><h3 class="usecase-card__title">Dra. Carola Figueroa</h3><span class="usecase-card__role">IA y ciencia de datos</span><button type="button" class="btn btn--outline btn--sm team-member-btn" data-member="carola">Conoce mi trabajo ↗</button></article><article class="usecase-card reveal"><div class="usecase-card__image"><img src="assets/team-daniela.webp" alt="Dra. Daniela Mennickent" class="usecase-card__profile" loading="lazy" decoding="async"></div><h3 class="usecase-card__title">Dra. Daniela Mennickent</h3><span class="usecase-card__role">Bioquímica y aprendizaje automático</span><button type="button" class="btn btn--outline btn--sm team-member-btn" data-member="daniela">Conoce mi trabajo ↗</button></article><article class="usecase-card reveal"><div class="usecase-card__image"><img src="assets/team-lara.jpg" alt="Dra. Lara Monteiro" class="usecase-card__profile" loading="lazy" decoding="async"></div><h3 class="usecase-card__title">Dra. Lara Monteiro</h3><span class="usecase-card__role">Biomedicina y salud reproductiva</span><button type="button" class="btn btn--outline btn--sm team-member-btn" data-member="lara">Conoce mi trabajo ↗</button></article></div></div></section>
+    <section id="equipo" class="section section--alt" aria-labelledby="equipo-heading"><div class="container"><div class="section__header reveal"><span class="section__badge">Quiénes somos</span><h2 id="equipo-heading" class="section__title">Tecnología y ciencia, en un mismo equipo</h2><p class="section__subtitle">Personas curiosas, ciencia aplicada y ganas de resolver. Conoce qué mueve a cada integrante.</p></div><div class="ai-solutions__usecases solven-team"><article class="usecase-card reveal"><div class="usecase-card__image"><img src="assets/tomas.png" alt="Tomás Yévenes" class="usecase-card__profile" loading="lazy" decoding="async"></div><h3 class="usecase-card__title">Tomás Yévenes</h3><span class="usecase-card__role">Software e inteligencia artificial</span><span class="team-member__university"><img src="assets/ubb.png" alt="Universidad del Bío-Bío">Universidad del Bío-Bío</span><button type="button" class="btn btn--outline btn--sm team-member-btn" data-member="tomas">Conoce mi trabajo ↗</button></article><article class="usecase-card reveal"><div class="usecase-card__image"><img src="assets/team-carola.jpg" alt="Dra. Carola Figueroa" class="usecase-card__profile" loading="lazy" decoding="async"></div><h3 class="usecase-card__title">Dra. Carola Figueroa</h3><span class="usecase-card__role">IA y ciencia de datos</span><span class="team-member__university"><img src="assets/ubb.png" alt="Universidad del Bío-Bío">Universidad del Bío-Bío</span><button type="button" class="btn btn--outline btn--sm team-member-btn" data-member="carola">Conoce mi trabajo ↗</button></article><article class="usecase-card reveal"><div class="usecase-card__image"><img src="assets/team-daniela.webp" alt="Dra. Daniela Mennickent" class="usecase-card__profile" loading="lazy" decoding="async"></div><h3 class="usecase-card__title">Dra. Daniela Mennickent</h3><span class="usecase-card__role">Bioquímica y aprendizaje automático</span><span class="team-member__university"><img src="assets/ucsc.png" alt="Universidad Católica de la Santísima Concepción">Universidad Católica de la Santísima Concepción</span><button type="button" class="btn btn--outline btn--sm team-member-btn" data-member="daniela">Conoce mi trabajo ↗</button></article><article class="usecase-card reveal"><div class="usecase-card__image"><img src="assets/team-lara.jpg" alt="Dra. Lara Monteiro" class="usecase-card__profile" loading="lazy" decoding="async"></div><h3 class="usecase-card__title">Dra. Lara Monteiro</h3><span class="usecase-card__role">Biomedicina y salud reproductiva</span><span class="team-member__university"><img src="assets/uandes.png" alt="Universidad de los Andes">Universidad de los Andes</span><button type="button" class="btn btn--outline btn--sm team-member-btn" data-member="lara">Conoce mi trabajo ↗</button></article></div></div></section>
 
     <!-- ========== PROCESO ========== -->
     <section id="proceso" class="section" aria-labelledby="proceso-heading" itemscope
@@ -524,295 +519,54 @@
 </section>
 
 
-    <!-- ========== COMPARADOR ========== -->
-    <section id="comparador" class="section ntek-comparison" aria-labelledby="comparador-heading" hidden aria-hidden="true">
+    <!-- ========== NOTICIAS ========== -->
+    <section id="noticias" class="section university-news" aria-labelledby="noticias-heading">
       <div class="container">
         <div class="section__header reveal">
-          <span class="section__badge">
-            <i data-lucide="columns-3" class="icon icon--sm"></i>
-            Comparador
-          </span>
-          <h2 id="comparador-heading" class="section__title">Encuentra el plan que calza contigo</h2>
-          <p class="section__subtitle">Compara según lo que quieres lograr hoy. Si todavía no lo tienes claro, te
-            ayudamos a elegir sin compromiso y sin sobredimensionar la solución.</p>
+          <span class="section__badge"><i data-lucide="newspaper" class="icon icon--sm"></i> Actualidad</span>
+          <h2 id="noticias-heading" class="section__title">Noticias, investigación y proyectos que avanzan.</h2>
+          <p class="section__subtitle">Conoce novedades sobre ciencia aplicada, innovación y las personas que impulsan nuestro trabajo.</p>
         </div>
-
-        <div class="ntek-comparison__table-wrap reveal">
-          <table class="ntek-comparison__table">
-            <thead>
-              <tr>
-                <th>Necesidad</th>
-                <th>Web y Redes</th>
-                <th>Catálogo y Tienda</th>
-                <th>IA y Automatización</th>
-                <th>A medida</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <th><span>Presencia web confiable</span><small>Base profesional para que te encuentren y confíen.</small></th>
-                <td><span class="comparison-pill comparison-pill--yes">Incluido</span></td>
-                <td><span class="comparison-pill comparison-pill--yes">Incluido</span></td>
-                <td><span class="comparison-pill comparison-pill--yes">Incluido</span></td>
-                <td><span class="comparison-pill comparison-pill--custom">A medida</span></td>
-              </tr>
-              <tr>
-                <th><span>Redes, WhatsApp y formulario</span><small>Canales conectados para convertir visitas en conversaciones.</small></th>
-                <td><span class="comparison-pill comparison-pill--yes">Incluido</span></td>
-                <td><span class="comparison-pill comparison-pill--yes">Incluido</span></td>
-                <td><span class="comparison-pill comparison-pill--yes">Incluido</span></td>
-                <td><span class="comparison-pill comparison-pill--custom">A medida</span></td>
-              </tr>
-              <tr>
-                <th><span>Catálogo de productos o servicios</span><small>Presenta tu oferta con fotos, precios y fichas claras.</small></th>
-                <td><span class="comparison-pill comparison-pill--no">No incluido</span></td>
-                <td><span class="comparison-pill comparison-pill--yes">Incluido</span></td>
-                <td><span class="comparison-pill comparison-pill--yes">Incluido</span></td>
-                <td><span class="comparison-pill comparison-pill--custom">A medida</span></td>
-              </tr>
-              <tr>
-                <th><span>Tienda y pagos online</span><small>Carrito y cobro para vender directamente desde tu web.</small></th>
-                <td><span class="comparison-pill comparison-pill--no">No incluido</span></td>
-                <td><span class="comparison-pill comparison-pill--yes">Incluido</span></td>
-                <td><span class="comparison-pill comparison-pill--yes">Incluido</span></td>
-                <td><span class="comparison-pill comparison-pill--custom">A medida</span></td>
-              </tr>
-              <tr>
-                <th><span>Panel administrativo</span><small>Actualiza contenido, pedidos o datos sin depender de terceros.</small></th>
-                <td><span class="comparison-pill comparison-pill--no">No incluido</span></td>
-                <td><span class="comparison-pill">Básico</span></td>
-                <td><span class="comparison-pill comparison-pill--yes">Incluido</span></td>
-                <td><span class="comparison-pill comparison-pill--custom">A medida</span></td>
-              </tr>
-              <tr>
-                <th><span>IA y automatizaciones</span><small>Atención, avisos, agenda, seguimiento e integraciones.</small></th>
-                <td><span class="comparison-pill comparison-pill--no">No incluido</span></td>
-                <td><span class="comparison-pill comparison-pill--no">No incluido</span></td>
-                <td><span class="comparison-pill comparison-pill--strong">Incluido</span></td>
-                <td><span class="comparison-pill comparison-pill--custom">Avanzadas</span></td>
-              </tr>
-              <tr class="ntek-comparison__summary-row">
-                <th><span>Mejor para</span><small>Una orientación rápida según el momento de tu negocio.</small></th>
-                <td><strong>Partir ordenado</strong></td>
-                <td><strong>Vender mejor</strong></td>
-                <td><strong>Gestionar online</strong></td>
-                <td><strong>Procesos propios</strong></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- ========== SECCIÓN TECNOLOGÍAS ========== -->
-    <section id="tecnologias" class="section" aria-labelledby="tecnologias-heading">
-      <div class="container">
-        <div class="section__header reveal">
-          <span class="section__badge">
-            <i data-lucide="cpu" class="icon icon--sm"></i>
-            Herramientas que usamos
-          </span>
-          <h2 id="tecnologias-heading" class="section__title">La tecnología se elige según el problema, no por tendencia.</h2>
-          <p class="section__subtitle">Elegimos las herramientas según lo que necesitas,
-            tus datos y cómo las usará tu equipo.</p>
-        </div>
-        <!-- Carrusel 1: De izquierda a derecha -->
-        <div class="tech-carousel">
-          <div class="tech-viewport">
-            <div class="tech-track">
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://images.seeklogo.com/logo-png/53/2/render-logo-png_seeklogo-532232.png" alt="Render">
-              </div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://wp.logos-download.com/wp-content/uploads/2023/02/Supabase_Logo.png?dl" alt="Supabase">
-              </div>
-              <div class="tech-item"><img loading="lazy" decoding="async" src="https://upload.wikimedia.org/wikipedia/commons/1/1e/Docker_Logo.png"
-                  alt="Docker"></div>
-              <div class="tech-item"><img loading="lazy" decoding="async" src="https://pngimg.com/uploads/github/github_PNG23.png" alt="GitHub"></div>
-              <div class="tech-item"><img loading="lazy" decoding="async" src="https://cdn.worldvectorlogo.com/logos/sonarqube.svg" alt="SonarQube">
-              </div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Google_Cloud_logo.svg/960px-Google_Cloud_logo.svg.png"
-                  alt="GCP"></div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/NVIDIA_logo.svg/1280px-NVIDIA_logo.svg.png"
-                  alt="NVIDIA"></div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Microsoft_Azure_Logo.svg/1280px-Microsoft_Azure_Logo.svg.png"
-                  alt="Microsoft Azure"></div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Cloudflare_Logo.svg/960px-Cloudflare_Logo.svg.png"
-                  alt="Cloudflare"></div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/N8n-logo-new.svg/3840px-N8n-logo-new.svg.png"
-                  alt="n8n"></div>
-              <div class="tech-item"><img loading="lazy" decoding="async" src="https://upload.wikimedia.org/wikipedia/commons/c/ce/Nic-chile.png"
-                  alt="NIC Chile"></div>
-              <div class="tech-item"><img loading="lazy" decoding="async" src="https://www.mercadopublico.cl/Home/Imagenes/NuevoHome/logo-chilecompra-original.png"
-                  alt="Mercado Publico"></div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://cdn.worldvectorlogo.com/logos/cd4804d4-fa18-4481-8595-e4fff80e6ce8/mercado-pago-1.svg"
-                  alt="Mercado Pago"></div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Shopify_logo_2018.svg/960px-Shopify_logo_2018.svg.png"
-                  alt="Shopify"></div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Google_Search_Console.svg/3840px-Google_Search_Console.svg.png"
-                  alt="Google Search Console"></div>
-              <div class="tech-item"><img loading="lazy" decoding="async" src="https://logos-world.net/wp-content/uploads/2020/12/Google-Play-Logo.png"
-                  alt="Google Play"></div>
-
-              <!-- duplicated items for infinite loop -->
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://images.seeklogo.com/logo-png/53/2/render-logo-png_seeklogo-532232.png" alt="Render">
-              </div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://wp.logos-download.com/wp-content/uploads/2023/02/Supabase_Logo.png?dl" alt="Supabase">
-              </div>
-              <div class="tech-item"><img loading="lazy" decoding="async" src="https://upload.wikimedia.org/wikipedia/commons/1/1e/Docker_Logo.png"
-                  alt="Docker"></div>
-              <div class="tech-item"><img loading="lazy" decoding="async" src="https://pngimg.com/uploads/github/github_PNG23.png" alt="GitHub"></div>
-              <div class="tech-item"><img loading="lazy" decoding="async" src="https://cdn.worldvectorlogo.com/logos/sonarqube.svg" alt="SonarQube">
-              </div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Google_Cloud_logo.svg/960px-Google_Cloud_logo.svg.png"
-                  alt="GCP"></div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/NVIDIA_logo.svg/1280px-NVIDIA_logo.svg.png"
-                  alt="NVIDIA"></div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Microsoft_Azure_Logo.svg/1280px-Microsoft_Azure_Logo.svg.png"
-                  alt="Microsoft Azure"></div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Cloudflare_Logo.svg/960px-Cloudflare_Logo.svg.png"
-                  alt="Cloudflare"></div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/N8n-logo-new.svg/3840px-N8n-logo-new.svg.png"
-                  alt="n8n"></div>
-              <div class="tech-item"><img loading="lazy" decoding="async" src="https://upload.wikimedia.org/wikipedia/commons/c/ce/Nic-chile.png"
-                  alt="NIC Chile"></div>
-              <div class="tech-item"><img loading="lazy" decoding="async" src="https://www.mercadopublico.cl/Home/Imagenes/NuevoHome/logo-chilecompra-original.png"
-                  alt="Mercado Publico"></div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Mercado_Pago.svg/1280px-Mercado_Pago.svg.png"
-                  alt="Mercado Pago"></div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Shopify_logo_2018.svg/960px-Shopify_logo_2018.svg.png"
-                  alt="Shopify"></div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Google_Search_Console.svg/3840px-Google_Search_Console.svg.png"
-                  alt="Google Search Console"></div>
-              <div class="tech-item"><img loading="lazy" decoding="async" src="https://logos-world.net/wp-content/uploads/2020/12/Google-Play-Logo.png"
-                  alt="Google Play"></div>
+        <div class="news-carousel" data-news-carousel>
+          <button class="news-carousel__control news-carousel__control--prev" type="button" data-news-prev aria-label="Noticia anterior"><i data-lucide="arrow-left" aria-hidden="true"></i></button>
+          <div class="news-carousel__viewport">
+            <div class="news-carousel__track" data-news-track>
+              <article class="news-card">
+                <img class="news-card__image" src="https://noticias.ubiobio.cl/wp-content/uploads//2026/10/IMG_4054.jpg" alt="Reconocimiento UBB a estudiantes y académicos que adjudicaron fondos de innovación" loading="lazy">
+                <div class="news-card__body"><span class="news-card__meta">UBB · 15 octubre 2026</span><h3>UBB reconoce a estudiantes y académicos que adjudicaron fondos para impulsar la innovación</h3><p>La universidad destacó nuevos proyectos que fortalecen la transferencia tecnológica y el vínculo con el entorno.</p><a href="https://noticias.ubiobio.cl/2026/10/15/ubb-reconoce-a-estudiantes-y-academicos-que-adjudicaron-fondos-para-impulsar-la-innovacion-y-la-transferencia-tecnologica/" target="_blank" rel="noopener noreferrer">Leer noticia original <span aria-hidden="true">↗</span></a></div>
+              </article>
+              <article class="news-card">
+                <img class="news-card__image" src="https://noticias.ubiobio.cl/wp-content/uploads//2026/03/VRIP_Noticias_Emprendimiento-portada.png" alt="Estudiantes UBB reconocidos por proyectos de tesis con impacto" loading="lazy">
+                <div class="news-card__body"><span class="news-card__meta">UBB · 17 marzo 2026</span><h3>Proyectos de tesis con impacto en I+D+i+e reciben apoyo en la UBB</h3><p>La convocatoria reconoce iniciativas estudiantiles que buscan transformar conocimiento en soluciones.</p><a href="https://noticias.ubiobio.cl/2026/03/17/ubb-reconoce-a-estudiantes-que-adjudican-concurso-de-apoyo-a-proyectos-de-tesis-con-impacto-en-idie/" target="_blank" rel="noopener noreferrer">Leer noticia original <span aria-hidden="true">↗</span></a></div>
+              </article>
+              <article class="news-card">
+                <img class="news-card__image" src="https://noticias.ubiobio.cl/wp-content/uploads//2026/07/20260624_100939-1-scaled-e1783699972152.jpg" alt="Diagnóstico de madurez en salud digital en Ñuble" loading="lazy">
+                <div class="news-card__body"><span class="news-card__meta">UBB · 10 julio 2026</span><h3>Proyecto impulsa el primer diagnóstico de madurez en salud digital en Ñuble</h3><p>La iniciativa busca identificar brechas y oportunidades para fortalecer la transformación digital de la red asistencial.</p><a href="https://noticias.ubiobio.cl/2026/07/10/proyecto-fic-ubb-impulsa-primer-diagnostico-de-madurez-en-salud-digital-en-nuble/" target="_blank" rel="noopener noreferrer">Leer noticia original <span aria-hidden="true">↗</span></a></div>
+              </article>
+              <article class="news-card">
+                <img class="news-card__image" src="https://noticias.ubiobio.cl/wp-content/uploads//2026/07/PHOTO-2026-07-03-12-34-02.jpg" alt="Investigación UBB sobre modelos estadísticos para cáncer" loading="lazy">
+                <div class="news-card__body"><span class="news-card__meta">UBB · 6 julio 2026</span><h3>Investigación desarrolla modelos estadísticos para estudiar el cáncer</h3><p>Un proyecto Fondecyt culminó con avances metodológicos para apoyar la investigación biomédica.</p><a href="https://noticias.ubiobio.cl/2026/07/06/proyecto-fondecyt-ubb-culmina-con-innovadores-avances-en-modelos-estadisticos-para-la-investigacion-del-cancer/" target="_blank" rel="noopener noreferrer">Leer noticia original <span aria-hidden="true">↗</span></a></div>
+              </article>
+              <article class="news-card">
+                <img class="news-card__image" src="https://www.24horas.cl/24horas/site/artic/20250819/imag/foto_0000001520250819095558/Daniela-Mennickent.jpg" alt="Dra. Daniela Mennickent en entrevista sobre inteligencia artificial y endometriosis" loading="lazy">
+                <div class="news-card__body"><span class="news-card__meta">24 Horas · 19 agosto 2025</span><h3>IA y bioquímica se unen para cambiar la detección de la endometriosis</h3><p>Una publicación aborda el trabajo de la investigadora Daniela Mennickent y el desarrollo de métodos no invasivos.</p><a href="https://www.24horas.cl/conciencia-24-7/innovacion-y-emprendimiento/inteligencia-artificial-endometriosis" target="_blank" rel="noopener noreferrer">Leer noticia original <span aria-hidden="true">↗</span></a></div>
+              </article>
+              <article class="news-card">
+                <img class="news-card__image" src="https://www.who.int/images/default-source/departments/reproductive-health/sexual-health/endometriosis.tmb-1200v.jpg?Culture=en&amp;sfvrsn=3d477f90_6" alt="Ilustración sobre endometriosis de la Organización Mundial de la Salud" loading="lazy">
+                <div class="news-card__body"><span class="news-card__meta">OMS · Salud global</span><h3>La OMS actualiza la información sobre endometriosis</h3><p>La organización explica sus efectos, el retraso diagnóstico y los desafíos para mejorar el acceso a atención.</p><a href="https://www.who.int/news-room/fact-sheets/detail/endometriosis" target="_blank" rel="noopener noreferrer">Leer publicación original <span aria-hidden="true">↗</span></a></div>
+              </article>
+              <article class="news-card">
+                <img class="news-card__image" src="https://www.24horas.cl/24horas/site/artic/20250819/imag/foto_0000001520250819095558/Daniela-Mennickent.jpg" alt="Investigación de la UCSC sobre endometriosis y ciencia de frontera" loading="lazy">
+                <div class="news-card__body"><span class="news-card__meta">UCSC · Ciencia de frontera</span><h3>Investigadora UCSC presenta avances sobre endometriosis en Congreso Futuro</h3><p>La investigación integra biomedicina y aprendizaje automático para abordar una enfermedad con alto impacto en la salud femenina.</p><a href="https://medicina.ucsc.cl/noticias/endometriosis-y-ciencia-de-frontera-academica-ucsc-expone-a-congreso-futuro/" target="_blank" rel="noopener noreferrer">Leer noticia UCSC <span aria-hidden="true">↗</span></a></div>
+              </article>
+              <article class="news-card">
+                <img class="news-card__image" src="https://www.uandes.cl/wp-content/uploads/2026/01/Diseno-sin-titulo-10.jpg" alt="Resultados de la convocatoria Fondecyt 2026 de la Universidad de los Andes" loading="lazy">
+                <div class="news-card__body"><span class="news-card__meta">UANDES · 2 enero 2026</span><h3>UANDES presenta resultados de la convocatoria Fondecyt 2026</h3><p>La adjudicación impulsa nuevas investigaciones y fortalece la generación de conocimiento en distintas áreas.</p><a href="https://www.uandes.cl/actualidad/noticias/conoce-los-resultados-de-la-convocatoria-fondecyt-2026-iniciacion-y-postdoctorado/" target="_blank" rel="noopener noreferrer">Leer noticia UANDES <span aria-hidden="true">↗</span></a></div>
+              </article>
             </div>
           </div>
-        </div>
-
-        <!-- Carrusel 2: De derecha a izquierda -->
-        <div class="tech-carousel tech-carousel--reverse">
-          <div class="tech-viewport">
-            <div class="tech-track tech-track--reverse">
-              <div class="tech-item"><img loading="lazy" decoding="async" src="https://upload.wikimedia.org/wikipedia/commons/4/40/Apple_Store.png"
-                  alt="Apple Store"></div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a0/OpenAI_wordmark_2017.svg/1280px-OpenAI_wordmark_2017.svg.png?utm_source=es.wikipedia.org&utm_campaign=index&utm_content=thumbnail"
-                  alt="OpenAI"></div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Meta_Platforms_Inc._logo.svg/3840px-Meta_Platforms_Inc._logo.svg.png"
-                  alt="Meta Platforms"></div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://cdn.pagerduty.com/wp-content/uploads/2021/03/uptimerobot-logo-09.png" alt="UptimeRobot">
-              </div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://s3.us-west-2.amazonaws.com/dev-byflow.com/uploads/iconos_adicionales_figma_webpay_258d8eda34_9b635f36cf.webp"
-                  alt="Webpay">
-              </div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Microsoft_logo_%282012%29.svg/1280px-Microsoft_logo_%282012%29.svg.png"
-                  alt="Microsoft">
-              </div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4rPF_c55KR46kUoZ-8vvMCETEFtE6WKlk0g&s"
-                  alt="Google Workspace">
-              </div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Logo_Google_Analytics.svg/1280px-Logo_Google_Analytics.svg.png"
-                  alt="Google Analytics">
-              </div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://images.icon-icons.com/2699/PNG/512/google_ads_logo_icon_169088.png" alt="Google Ads">
-              </div>
-              <div class="tech-item"><img loading="lazy" decoding="async" src="https://help.cxr.skeepers.com/hc/article_attachments/11623978509852"
-                  alt="Google Business Profile">
-              </div>
-              <div class="tech-item"><img loading="lazy" decoding="async" src="https://get.site/wp-content/uploads/2021/10/notion-logo.png"
-                  alt="Notion">
-              </div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Jira_Logo.svg/3840px-Jira_Logo.svg.png"
-                  alt="Jira">
-              </div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/1280px-PayPal.svg.png"
-                  alt="PayPal">
-              </div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Stripe_Logo%2C_revised_2016.svg/960px-Stripe_Logo%2C_revised_2016.svg.png"
-                  alt="Stripe">
-              </div>
-
-              <!-- duplicated items for infinite loop -->
-              <div class="tech-item"><img loading="lazy" decoding="async" src="https://upload.wikimedia.org/wikipedia/commons/4/40/Apple_Store.png"
-                  alt="Apple Store"></div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a0/OpenAI_wordmark_2017.svg/1280px-OpenAI_wordmark_2017.svg.png?utm_source=es.wikipedia.org&utm_campaign=index&utm_content=thumbnail"
-                  alt="OpenAI"></div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Meta_Platforms_Inc._logo.svg/3840px-Meta_Platforms_Inc._logo.svg.png"
-                  alt="Meta Platforms"></div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://cdn.pagerduty.com/wp-content/uploads/2021/03/uptimerobot-logo-09.png" alt="UptimeRobot">
-              </div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://s3.us-west-2.amazonaws.com/dev-byflow.com/uploads/iconos_adicionales_figma_webpay_258d8eda34_9b635f36cf.webp"
-                  alt="Webpay">
-              </div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Microsoft_logo_%282012%29.svg/1280px-Microsoft_logo_%282012%29.svg.png"
-                  alt="Microsoft">
-              </div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4rPF_c55KR46kUoZ-8vvMCETEFtE6WKlk0g&s"
-                  alt="Google Workspace">
-              </div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Logo_Google_Analytics.svg/1280px-Logo_Google_Analytics.svg.png"
-                  alt="Google Analytics">
-              </div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://images.icon-icons.com/2699/PNG/512/google_ads_logo_icon_169088.png" alt="Google Ads">
-              </div>
-              <div class="tech-item"><img loading="lazy" decoding="async" src="https://help.cxr.skeepers.com/hc/article_attachments/11623978509852"
-                  alt="Google Business Profile">
-              </div>
-              <div class="tech-item"><img loading="lazy" decoding="async" src="https://get.site/wp-content/uploads/2021/10/notion-logo.png"
-                  alt="Notion">
-              </div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Jira_Logo.svg/3840px-Jira_Logo.svg.png"
-                  alt="Jira">
-              </div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/1280px-PayPal.svg.png"
-                  alt="PayPal">
-              </div>
-              <div class="tech-item"><img loading="lazy" decoding="async"
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Stripe_Logo%2C_revised_2016.svg/960px-Stripe_Logo%2C_revised_2016.svg.png"
-                  alt="Stripe">
-              </div>
-            </div>
-          </div>
+          <button class="news-carousel__control news-carousel__control--next" type="button" data-news-next aria-label="Noticia siguiente"><i data-lucide="arrow-right" aria-hidden="true"></i></button>
+          <div class="news-carousel__dots" data-news-dots aria-label="Seleccionar noticia"></div>
         </div>
       </div>
     </section>
@@ -1252,7 +1006,7 @@
             <img loading="lazy" decoding="async" src="assets/logo%20blanco.png" alt="Solven Labs" class="footer__logo-img">
           </a>
           <p class="footer__desc">
-            Somos una EBCT apoyada por ANID. Transformamos ciencia y tecnología en soluciones con IA. Desde Concepción para todo Chile.
+            Somos una EBCT apoyada por ANID. Transformamos ciencia y tecnología en soluciones con IA. Desde Chillán para todo Chile.
           </p>
           <form class="footer__newsletter" data-newsletter-form action="https://formsubmit.co/tomas@solvenlabs.cl" method="POST">
             <input type="hidden" name="_subject" value="Nueva suscripcion newsletter Solven Labs">
@@ -1271,11 +1025,11 @@
           <nav class="footer__links">
             <a href="/" class="footer__link">Inicio</a>
             <a href="/servicios" class="footer__link" data-section="servicios">Qué hacemos</a>
-            <a href="/#casos" class="footer__link">Proyectos</a>
-            <a href="/#proceso" class="footer__link">Cómo trabajamos</a>
-            <a href="/#equipo" class="footer__link">Equipo</a>
-            <a href="/blog/" class="footer__link">Blog</a>
-            <a href="/#contacto" class="footer__link">Contacto</a>
+            <a href="/proyectos" class="footer__link" data-section="casos">Proyectos</a>
+            <a href="/como-trabajamos" class="footer__link" data-section="proceso">Cómo trabajamos</a>
+            <a href="/equipo" class="footer__link" data-section="equipo">Equipo</a>
+            <a href="/noticias" class="footer__link" data-section="noticias">Noticias</a>
+            <a href="/contacto" class="footer__link" data-section="contacto">Contacto</a>
           </nav>
         </div>
 
@@ -1295,7 +1049,7 @@
           <div class="footer__tax">
             <div class="footer__tax-item">
               <span class="footer__tax-label">Nombre legal</span>
-              <span class="footer__tax-value">Solven Labs Ltda.</span>
+              <span class="footer__tax-value">Solven Labs SPA</span>
             </div>
             <div class="footer__tax-item">
               <span class="footer__tax-label">Dirección</span>
@@ -1336,7 +1090,7 @@
           </a>
         </div>
         <p class="footer__copyright">
-          © 2026 Solven Labs. Tecnología que se siente cercana.
+          © 2026 Solven Labs. Ciencia que se transforma en soluciones.
         </p>
       </div>
     </div>

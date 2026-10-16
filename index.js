@@ -887,7 +887,7 @@ if (fallbackRoute && /^\/(?!\/)/.test(fallbackRoute)) {
     equipo: '/equipo',
     proceso: '/como-trabajamos',
     casos: '/proyectos',
-    tecnologias: '/tecnologias',
+    noticias: '/noticias',
     simulador: '/diagnostico-digital',
     testimonios: '/testimonios',
     garantias: '/garantias',
@@ -909,7 +909,8 @@ if (fallbackRoute && /^\/(?!\/)/.test(fallbackRoute)) {
     '/planes': 'servicios',
     '/pricing': 'servicios',
     '/simulador': 'simulador',
-    '/faq': 'faq'
+    '/faq': 'faq',
+    '/tecnologias': 'noticias'
   });
 
   const SECTION_TITLES = {
@@ -918,7 +919,7 @@ if (fallbackRoute && /^\/(?!\/)/.test(fallbackRoute)) {
     equipo: 'Equipo de ingeniería e investigación | Solven Labs',
     proceso: 'Cómo trabajamos | Solven Labs',
     casos: 'Proyectos de desarrollo tecnológico | Solven Labs',
-    tecnologias: 'Herramientas que usamos | Solven Labs',
+    noticias: 'Noticias e investigación | Solven Labs',
     simulador: 'Encuentra el próximo paso de tu proyecto | Solven Labs',
     testimonios: 'Instituciones y colaboración | Solven Labs',
     garantias: 'Garantías | Solven Labs',
@@ -932,7 +933,7 @@ if (fallbackRoute && /^\/(?!\/)/.test(fallbackRoute)) {
     equipo: 'Conoce a Tomás Yévenes y a las doctoras Carola Figueroa, Daniela Mennickent y Lara Monteiro: software, IA e investigación biomédica.',
     proceso: 'Acordamos qué necesitas, construimos por etapas y probamos el resultado contigo.',
     casos: 'Conoce los proyectos y plataformas desarrollados por Solven Labs y su aplicación en organizaciones, educación y salud.',
-    tecnologias: 'Conoce las herramientas que usamos para crear aplicaciones, analizar datos y mantener tus sistemas funcionando.',
+    noticias: 'Conoce novedades sobre ciencia aplicada, innovación y los proyectos que impulsan nuestro trabajo.',
     simulador: 'Cuéntanos en qué etapa está tu proyecto y descubre cómo podemos ayudarte a avanzar.',
     testimonios: 'Instituciones de salud, investigación y emprendimiento vinculadas a nuestros proyectos HealthTech.',
     garantias: 'Conoce qué incluye tu proyecto, cuándo lo entregamos y cómo te apoyamos después.',
@@ -1147,8 +1148,7 @@ if (fallbackRoute && /^\/(?!\/)/.test(fallbackRoute)) {
         if (href.startsWith('/')) {
           const url = new URL(href, location.origin);
           const isHtmlPage = url.pathname.endsWith('.html');
-          const isStandalonePage = url.pathname === '/blog/' || url.pathname.startsWith('/blog/');
-          if (url.origin === location.origin && !isHtmlPage && !isStandalonePage) {
+          if (url.origin === location.origin && !isHtmlPage) {
             e.preventDefault();
             navigateTo(url.pathname);
 
@@ -1596,7 +1596,7 @@ if (fallbackRoute && /^\/(?!\/)/.test(fallbackRoute)) {
       if (e.key === 'Escape') closeAllModals();
     });
 
-    // Permite abrir una política directamente desde enlaces del blog o externos.
+    // Permite abrir una política directamente desde enlaces externos.
     const hashModal = window.location.hash.replace(/^#/, '');
     if (hashModal && document.getElementById(hashModal)?.classList.contains('modal')) {
       openModal(hashModal);
@@ -1643,6 +1643,76 @@ if (fallbackRoute && /^\/(?!\/)/.test(fallbackRoute)) {
     
     
     // Touch/swipe support básico
+  };
+
+  const initNewsCarousel = () => {
+    const carousel = document.querySelector('[data-news-carousel]');
+    const track = carousel?.querySelector('[data-news-track]');
+    const cards = [...carousel?.querySelectorAll('.news-card') || []];
+    const dots = carousel?.querySelector('[data-news-dots]');
+    if (!carousel || !track || !dots || cards.length < 2) return;
+
+    let currentIndex = 0;
+    let autoAdvance;
+
+    cards.forEach((card, index) => {
+      const dot = document.createElement('button');
+      dot.type = 'button';
+      dot.className = 'news-carousel__dot';
+      dot.setAttribute('aria-label', `Mostrar noticia ${index + 1}`);
+      dot.addEventListener('click', () => {
+        goTo(index);
+        restartAutoAdvance();
+      });
+      dots.appendChild(dot);
+    });
+
+    const getVisibleCards = () => window.matchMedia('(max-width: 760px)').matches ? 1 : 2;
+    const update = () => {
+      const card = cards[currentIndex];
+      if (!card) return;
+      const maxIndex = Math.max(0, cards.length - getVisibleCards());
+      currentIndex = Math.min(currentIndex, maxIndex);
+      track.style.transform = `translateX(-${card.offsetLeft}px)`;
+      dots.querySelectorAll('.news-carousel__dot').forEach((dot, index) => {
+        dot.hidden = index > maxIndex;
+        dot.classList.toggle('is-active', index === currentIndex);
+        dot.setAttribute('aria-current', index === currentIndex ? 'true' : 'false');
+      });
+    };
+
+    const goTo = (index) => {
+      const maxIndex = Math.max(0, cards.length - getVisibleCards());
+      currentIndex = Math.max(0, Math.min(index, maxIndex));
+      update();
+    };
+
+    const restartAutoAdvance = () => {
+      window.clearInterval(autoAdvance);
+      autoAdvance = window.setInterval(() => {
+        const maxIndex = cards.length - getVisibleCards();
+        goTo(currentIndex >= maxIndex ? 0 : currentIndex + 1);
+      }, 6000);
+    };
+
+    carousel.querySelector('[data-news-prev]')?.addEventListener('click', () => {
+      goTo(currentIndex - 1);
+      restartAutoAdvance();
+    });
+    carousel.querySelector('[data-news-next]')?.addEventListener('click', () => {
+      const maxIndex = cards.length - getVisibleCards();
+      goTo(currentIndex >= maxIndex ? 0 : currentIndex + 1);
+      restartAutoAdvance();
+    });
+    carousel.addEventListener('mouseenter', () => window.clearInterval(autoAdvance));
+    carousel.addEventListener('mouseleave', restartAutoAdvance);
+    carousel.addEventListener('focusin', () => window.clearInterval(autoAdvance));
+    carousel.addEventListener('focusout', (event) => {
+      if (!carousel.contains(event.relatedTarget)) restartAutoAdvance();
+    });
+    window.addEventListener('resize', update);
+    update();
+    restartAutoAdvance();
   };
 
   // ==========================================================================
@@ -3503,7 +3573,7 @@ if (fallbackRoute && /^\/(?!\/)/.test(fallbackRoute)) {
               </div>
               <div class="service-modal__section">
                 <h4><i data-lucide="clock" class="icon icon--sm"></i> Duración y formato</h4>
-                <p>45 minutos por videollamada o coordinación desde nuestra oficina central en Concepción. Recibes el informe en 24 horas hábiles.</p>
+                <p>45 minutos por videollamada o coordinación desde nuestra oficina central en Chillán. Recibes el informe en 24 horas hábiles.</p>
               </div>`,
 
             'Integración simple': `
@@ -4684,7 +4754,7 @@ if (fallbackRoute && /^\/(?!\/)/.test(fallbackRoute)) {
 
       // 📍 Cobertura
       { keys: ['chillan', 'ñuble', 'nuble', 'santiago', 'region', 'regiones', 'todo chile', 'presencial', 'remoto'],
-        resp: '📍 Tenemos oficina central en Concepción y trabajamos con equipos de todo Chile. Podemos coordinarnos por videollamada y realizar sesiones presenciales cuando el proyecto lo requiera.' },
+        resp: '📍 Tenemos oficina central en Chillán y trabajamos con equipos de todo Chile. Podemos coordinarnos por videollamada y realizar sesiones presenciales cuando el proyecto lo requiera.' },
 
       // ✅ Garantía
       { keys: ['garantia', 'que pasa si falla', 'errores', 'bugs'],
@@ -4692,7 +4762,7 @@ if (fallbackRoute && /^\/(?!\/)/.test(fallbackRoute)) {
 
       // 📆 Agendar / reunión
       { keys: ['agendar', 'agenda', 'reunion', 'cita', 'llamada', 'videollamada', 'reunirse', 'como los contacto'],
-        resp: '📅 Puedes agendar una reunión gratuita de 30 min aquí: <a href="#agenda-sin-costo" data-free-booking style="color:inherit;text-decoration:underline">ver horarios disponibles</a> — La reunión puede ser por videollamada o coordinación desde nuestra oficina central en Concepción.' },
+        resp: '📅 Puedes agendar una reunión gratuita de 30 min aquí: <a href="#agenda-sin-costo" data-free-booking style="color:inherit;text-decoration:underline">ver horarios disponibles</a> — La reunión puede ser por videollamada o coordinación desde nuestra oficina central en Chillán.' },
 
       // 📞 Contacto
       { keys: ['contacto', 'email', 'telefono', 'numero', 'escribirles', 'escribir'],
@@ -4742,7 +4812,7 @@ if (fallbackRoute && /^\/(?!\/)/.test(fallbackRoute)) {
       '¿Trabajan con IA y datos?',
       '¿Cómo agendo una reunión?',
       '¿Cómo estiman un proyecto?',
-      '¿Atienden fuera de Concepción?',
+      '¿Atienden fuera de Chillán?',
       '¿Pueden mejorar una primera versión?',
       '¿Conectan nuestras herramientas y datos?',
       '¿El código queda para el proyecto?',
@@ -5003,7 +5073,7 @@ if (fallbackRoute && /^\/(?!\/)/.test(fallbackRoute)) {
 
   const initHomeSectionLayout = () => {
     // Estas secciones se retiraron del recorrido principal para mantener la home enfocada.
-    ['agenda', 'comparador'].forEach(id => document.getElementById(id)?.remove());
+    document.getElementById('agenda')?.remove();
     document.querySelector('.webinar-countdown')?.remove();
     document.querySelectorAll('.project-status-lookup').forEach(lookup => {
       if (!lookup.closest('#proceso')) lookup.remove();
@@ -5044,11 +5114,6 @@ if (fallbackRoute && /^\/(?!\/)/.test(fallbackRoute)) {
       guaranteesSection.remove();
     }
 
-    // La tecnología respalda la propuesta, pero aparece después de las decisiones comerciales.
-    const technologiesSection = document.getElementById('tecnologias');
-    const faqSection = document.getElementById('faq');
-    if (technologiesSection && faqSection) faqSection.before(technologiesSection);
-
     // Recorrido comercial: oferta, evidencia, forma de trabajo, equipo y herramientas de decisión.
     const homeMain = document.querySelector('main');
     const contactSection = document.getElementById('contacto');
@@ -5059,7 +5124,7 @@ if (fallbackRoute && /^\/(?!\/)/.test(fallbackRoute)) {
       'proceso',
       'equipo',
       'simulador',
-      'tecnologias',
+      'noticias',
       'faq'
     ];
     if (homeMain && contactSection) {
@@ -5087,6 +5152,7 @@ if (fallbackRoute && /^\/(?!\/)/.test(fallbackRoute)) {
     initPortfolioCarousel();
     initModals();
     initTestimonialsCarousel();
+    initNewsCarousel();
     initFAQ();
     initContactForm();
     initNewsletter();
@@ -5095,8 +5161,6 @@ if (fallbackRoute && /^\/(?!\/)/.test(fallbackRoute)) {
     initCaseModals();
     initTeamModals();
     initCarousel('.logos__track');
-    initCarousel('.tech-track');
-    initCarousel('.tech-track--reverse', 'rtl');
     initCounters();
     initChatbot();
     initSolviFloat();

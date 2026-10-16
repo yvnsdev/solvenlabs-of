@@ -364,9 +364,9 @@ const PDF_SCRIPT_ID = 'jspdf-runtime';
 const PDF_SCRIPT_URL = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
 const PDF_SCRIPT_INTEGRITY = 'sha384-JcnsjUPPylna1s1fvi1u12X5qjY5OL56iySh75FdtrwhO/SWXgMjoVqcKyIIWOLk';
 const COMPANY = Object.freeze({
-  name: 'Servicios Informaticos Yevenes & CIA LTDA', rut: '78.352.809-6',
+  name: 'Solven Labs SPA', rut: '21.131.588-1',
   giro: 'Actividades de consultoria informatica y de gestion de instalaciones informatica',
-  address: 'Colo-Colo 379 Of. 706, Concepción, Chile', city: 'Concepción', region: 'Región del Biobío',
+  address: 'Avenida Andrés Bello 720, Chillán, Chile', city: 'Chillán', region: 'Región de Ñuble',
   phone: '+56 9 7702 9753', email: 'tomas@solvenlabs.cl', website: 'www.solvenlabs.cl'
 });
 let runtimePromise = null;
@@ -11232,19 +11232,19 @@ async function openPresiiModal(id, prefill = {}) {
       <div class="doc-modal-grid">
         <div>
           <label class="form-field__label">Razón Social</label>
-          <input type="text" class="modal-form__input" id="emi-name" value="${escapeHtml(doc?.emi_name || (defaultOperacion === 'venta' ? 'Servicios Informaticos Yevenes & Compañia Limitada' : ''))}">
+          <input type="text" class="modal-form__input" id="emi-name" value="${escapeHtml(doc?.emi_name || (defaultOperacion === 'venta' ? COMPANY.name : ''))}">
         </div>
         <div>
           <label class="form-field__label">RUT</label>
-          <input type="text" class="modal-form__input" id="emi-rut" value="${escapeHtml(doc?.emi_rut || (defaultOperacion === 'venta' ? '78.352.809-6' : ''))}">
+          <input type="text" class="modal-form__input" id="emi-rut" value="${escapeHtml(doc?.emi_rut || (defaultOperacion === 'venta' ? COMPANY.rut : ''))}">
         </div>
         <div>
           <label class="form-field__label">Giro</label>
-          <input type="text" class="modal-form__input" id="emi-giro" value="${escapeHtml(doc?.emi_giro || (defaultOperacion === 'venta' ? 'Actividades de consultoria informatica' : ''))}">
+          <input type="text" class="modal-form__input" id="emi-giro" value="${escapeHtml(doc?.emi_giro || (defaultOperacion === 'venta' ? COMPANY.giro : ''))}">
         </div>
         <div>
           <label class="form-field__label">Dirección</label>
-          <input type="text" class="modal-form__input" id="emi-address" value="${escapeHtml(doc?.emi_address || (defaultOperacion === 'venta' ? 'Colo-Colo 379, Of 706, Ed. Amanecer' : ''))}">
+          <input type="text" class="modal-form__input" id="emi-address" value="${escapeHtml(doc?.emi_address || (defaultOperacion === 'venta' ? COMPANY.address : ''))}">
         </div>
       </div>
 
@@ -11270,27 +11270,27 @@ async function openPresiiModal(id, prefill = {}) {
       <div class="doc-modal-grid">
         <div>
           <label class="form-field__label">Razón Social</label>
-          <input type="text" class="modal-form__input" id="rec-name" value="${escapeHtml(doc?.razon_social || prefill.razon_social || (defaultOperacion === 'compra' ? 'Servicios Informaticos Yevenes & Compañia Limitada' : ''))}" required>
+          <input type="text" class="modal-form__input" id="rec-name" value="${escapeHtml(doc?.razon_social || prefill.razon_social || (defaultOperacion === 'compra' ? COMPANY.name : ''))}" required>
         </div>
         <div>
           <label class="form-field__label">RUT Receptor</label>
-          <input type="text" class="modal-form__input" id="rec-rut" value="${escapeHtml(doc?.rut_receptor || prefill.rut_receptor || (defaultOperacion === 'compra' ? '78.352.809-6' : ''))}">
+          <input type="text" class="modal-form__input" id="rec-rut" value="${escapeHtml(doc?.rut_receptor || prefill.rut_receptor || (defaultOperacion === 'compra' ? COMPANY.rut : ''))}">
         </div>
         <div>
           <label class="form-field__label">Giro</label>
-          <input type="text" class="modal-form__input" id="rec-giro" value="${escapeHtml(doc?.giro_receptor || prefill.giro_receptor || (defaultOperacion === 'compra' ? 'Actividades de consultoria informatica' : ''))}">
+          <input type="text" class="modal-form__input" id="rec-giro" value="${escapeHtml(doc?.giro_receptor || prefill.giro_receptor || (defaultOperacion === 'compra' ? COMPANY.giro : ''))}">
         </div>
         <div>
           <label class="form-field__label">Dirección</label>
-          <input type="text" class="modal-form__input" id="rec-dir" value="${escapeHtml(doc?.direccion_receptor || prefill.direccion_receptor || (defaultOperacion === 'compra' ? 'Colo-Colo 379, Of 706, Ed. Amanecer' : ''))}">
+          <input type="text" class="modal-form__input" id="rec-dir" value="${escapeHtml(doc?.direccion_receptor || prefill.direccion_receptor || (defaultOperacion === 'compra' ? COMPANY.address : ''))}">
         </div>
         <div>
           <label class="form-field__label">Ciudad</label>
-          <input type="text" class="modal-form__input" id="rec-ciudad" value="${escapeHtml(doc?.ciudad_receptor || prefill.ciudad_receptor || (defaultOperacion === 'compra' ? 'Concepcion' : ''))}">
+          <input type="text" class="modal-form__input" id="rec-ciudad" value="${escapeHtml(doc?.ciudad_receptor || prefill.ciudad_receptor || (defaultOperacion === 'compra' ? COMPANY.city : ''))}">
         </div>
         <div>
           <label class="form-field__label">Comuna</label>
-          <input type="text" class="modal-form__input" id="rec-comuna" value="${escapeHtml(doc?.comuna_receptor || (defaultOperacion === 'compra' ? 'Concepcion' : ''))}">
+          <input type="text" class="modal-form__input" id="rec-comuna" value="${escapeHtml(doc?.comuna_receptor || (defaultOperacion === 'compra' ? COMPANY.city : ''))}">
         </div>
       </div>
 
@@ -11772,7 +11772,7 @@ async function buildDocPDF(docType, doc) {
 
   // Generated-by note
   set('bold', 6.5, C_GREEN_DARK);
-  pdf.text('Solven Labs  |  Tecnologia que impulsa tu negocio', ML, H - 8);
+  pdf.text('Solven Labs SPA  |  Ciencia que se transforma en soluciones', ML, H - 8);
   set('italic', 6, [150, 150, 150]);
   pdf.text('Generado por Solven Labs Portal de Gestión', ML + CW, H - 8, { align: 'right' });
 
