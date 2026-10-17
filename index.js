@@ -887,7 +887,7 @@ if (fallbackRoute && /^\/(?!\/)/.test(fallbackRoute)) {
     equipo: '/equipo',
     proceso: '/como-trabajamos',
     casos: '/proyectos',
-    noticias: '/noticias',
+    guias: '/guias',
     simulador: '/diagnostico-digital',
     testimonios: '/testimonios',
     garantias: '/garantias',
@@ -910,7 +910,9 @@ if (fallbackRoute && /^\/(?!\/)/.test(fallbackRoute)) {
     '/pricing': 'servicios',
     '/simulador': 'simulador',
     '/faq': 'faq',
-    '/tecnologias': 'noticias'
+    '/noticias': 'guias',
+    '/articulos': 'guias',
+    '/tecnologias': 'guias'
   });
 
   const SECTION_TITLES = {
@@ -919,7 +921,7 @@ if (fallbackRoute && /^\/(?!\/)/.test(fallbackRoute)) {
     equipo: 'Equipo de ingeniería e investigación | Solven Labs',
     proceso: 'Cómo trabajamos | Solven Labs',
     casos: 'Proyectos de desarrollo tecnológico | Solven Labs',
-    noticias: 'Noticias e investigación | Solven Labs',
+    guias: 'Blog sobre investigación, tecnología e innovación | Solven Labs',
     simulador: 'Encuentra el próximo paso de tu proyecto | Solven Labs',
     testimonios: 'Instituciones y colaboración | Solven Labs',
     garantias: 'Garantías | Solven Labs',
@@ -933,7 +935,7 @@ if (fallbackRoute && /^\/(?!\/)/.test(fallbackRoute)) {
     equipo: 'Conoce a Tomás Yévenes y a las doctoras Carola Figueroa, Daniela Mennickent y Lara Monteiro: software, IA e investigación biomédica.',
     proceso: 'Acordamos qué necesitas, construimos por etapas y probamos el resultado contigo.',
     casos: 'Conoce los proyectos y plataformas desarrollados por Solven Labs y su aplicación en organizaciones, educación y salud.',
-    noticias: 'Conoce novedades sobre ciencia aplicada, innovación y los proyectos que impulsan nuestro trabajo.',
+    guias: 'El blog de Solven Labs reúne ideas, aprendizajes y recursos sobre datos, prototipos, inteligencia artificial y proyectos de innovación.',
     simulador: 'Cuéntanos en qué etapa está tu proyecto y descubre cómo podemos ayudarte a avanzar.',
     testimonios: 'Instituciones de salud, investigación y emprendimiento vinculadas a nuestros proyectos HealthTech.',
     garantias: 'Conoce qué incluye tu proyecto, cuándo lo entregamos y cómo te apoyamos después.',
@@ -1659,7 +1661,7 @@ if (fallbackRoute && /^\/(?!\/)/.test(fallbackRoute)) {
       const dot = document.createElement('button');
       dot.type = 'button';
       dot.className = 'news-carousel__dot';
-      dot.setAttribute('aria-label', `Mostrar noticia ${index + 1}`);
+      dot.setAttribute('aria-label', `Mostrar entrada ${index + 1}`);
       dot.addEventListener('click', () => {
         goTo(index);
         restartAutoAdvance();
@@ -5124,7 +5126,7 @@ if (fallbackRoute && /^\/(?!\/)/.test(fallbackRoute)) {
       'proceso',
       'equipo',
       'simulador',
-      'noticias',
+      'guias',
       'faq'
     ];
     if (homeMain && contactSection) {

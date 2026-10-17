@@ -1,0 +1,62 @@
+/* Illustrated reading and practical activities. Loaded after the legacy bundle. */
+#article-view .editorial-media { margin: 48px 0; border: 1px solid #d3e1e9; border-radius: 22px; overflow: hidden; background: #fff; box-shadow: 0 16px 38px #163b5010; }
+#article-view .editorial-media img { border: 0; border-radius: 0; box-shadow: none; aspect-ratio: auto; object-fit: contain; }
+.figure-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 22px; border-bottom: 1px solid #e2ebf0; }
+.figure-toolbar > span { color: #557184; font-size: .64rem; font-weight: 800; letter-spacing: .12em; }
+.figure-toolbar b { margin-left: 10px; color: #087e99; }
+.figure-toolbar button { border: 0; background: #edf6f9; color: #12627c; border-radius: 8px; padding: 10px 12px; font: 700 .75rem 'DM Sans', sans-serif; cursor: pointer; }
+#article-view .editorial-media figcaption { max-width: none; margin: 0; padding: 18px 24px; border-top: 1px solid #e2ebf0; text-align: left; font-size: .85rem; line-height: 1.6; }
+.figure-dialog { width: min(1280px, 95vw); max-width: 95vw; max-height: 92vh; padding: 16px; border: 1px solid #d0e0e8; border-radius: 20px; background: #f7fafc; }
+.figure-dialog::backdrop { background: #071c31cc; backdrop-filter: blur(5px); }
+.figure-dialog img { display: block; width: 100%; height: auto; margin-top: 12px; }
+.figure-dialog > button { display: block; margin-left: auto; padding: 12px 18px; border: 0; border-radius: 8px; background: #103c56; color: #fff; font: inherit; cursor: pointer; }
+#article-view .reading-activity { margin: 52px 0; padding: clamp(20px, 4vw, 36px); border: 1px solid #c9dde7; border-top: 4px solid #087e99; border-radius: 20px; background: #fff; box-shadow: 0 18px 45px #123a5210; }
+#article-view .activity-topline { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 28px; color: #537184; font-size: .62rem; font-weight: 800; letter-spacing: .09em; }
+#article-view .activity-topline > span:last-child { flex-shrink: 0; padding: 5px 9px; border-radius: 20px; background: #e8f5f1; color: #236952; letter-spacing: 0; }
+#article-view .reading-activity__eyebrow { color: #087e99; font-size: .72rem; letter-spacing: .05em; }
+#article-view .reading-activity h2 { margin: 8px 0 20px; font-size: clamp(1.45rem, 3vw, 2rem); }
+.activity-progress { margin: 0 0 24px; }
+.activity-progress label { display: grid; gap: 9px; font-size: .75rem; color: #537184; }
+.activity-progress progress { width: 100%; height: 6px; border: 0; border-radius: 8px; accent-color: #087e99; overflow: hidden; background: #e7eff3; }
+.activity-progress progress::-webkit-progress-bar { background: #e7eff3; border-radius: 8px; }
+.activity-progress progress::-webkit-progress-value { background: #087e99; border-radius: 8px; transition: width .2s; }
+#article-view .reading-activity fieldset { margin: 26px 0 0; padding: 20px 0; border-top: 1px solid #e1ebef; }
+#article-view .reading-activity legend { padding-right: 12px; color: #163c52; line-height: 1.6; }
+#article-view .reading-option { padding: 14px 16px; border: 1px solid #d5e3eb; border-radius: 12px; box-shadow: none; background: #f8fbfd; }
+#article-view .reading-option:has(input:checked) { border-color: #087e99; background: #e9f6f8; }
+#article-view .reading-option input { accent-color: #087e99; }
+#article-view .activity-workspace { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); align-items: start; gap: 24px; margin: 26px 0; }
+#article-view .activity-workspace .reading-clues { margin: 0; padding: 0; list-style: none; counter-reset: clue; }
+#article-view .activity-workspace .reading-clues li { counter-increment: clue; margin: 0 0 12px; padding: 14px; border: 1px solid #dce7ed; border-radius: 12px; font-size: .82rem; line-height: 1.6; background: #f7fafc; }
+#article-view .activity-workspace .reading-clues li::before { content: counter(clue, decimal-leading-zero); display: block; margin-bottom: 4px; color: #087e99; font-size: .65rem; font-weight: 800; }
+#article-view .activity-workspace .reading-clues li.is-found { background: #e5f5ed; border-color: #95ceb2; color: #175c41; }
+#article-view .wordsearch-grid, #article-view .crossword-grid { width: 100%; max-width: none; margin: 0; padding: 12px; gap: 4px; border: 1px solid #cfdee7; border-radius: 16px; background: #edf4f7; box-sizing: border-box; }
+#article-view .wordsearch-grid button { display: grid; place-items: center; min-width: 0; min-height: 0; padding: 0; aspect-ratio: 1; font-size: clamp(.75rem, 2vw, 1.15rem); font-weight: 700; border: 1px solid #d3e1e9; border-radius: 6px; color: #244b62; background: #fff; }
+#article-view .wordsearch-grid button.is-found { color: #fff; background: #217558; border-color: #217558; }
+#article-view .wordsearch-grid button.is-selected { outline: 3px solid #c78117; outline-offset: -3px; background: #fff0cf; color: #724700; }
+#article-view .crossword-cell input { border-radius: 7px; border-color: #b6ccd8; color: #183e56; font: 800 1.25rem 'DM Sans', sans-serif; }
+#article-view .crossword-cell > span { z-index: 1; color: #3f6276; }
+#article-view .crossword-block { background: #dce8ef; border-radius: 6px; }
+#article-view .crossword-cell input[aria-invalid="true"] { border: 2px dashed #b34622; background: #fff1ea; }
+#article-view .crossword-cell input[aria-invalid="false"] { background: #e5f5ed; border-color: #217558; }
+#article-view .reading-activity [data-activity-result]:not(:empty) { margin: 22px 0 0; padding: 18px 20px; border-left: 3px solid #087e99; border-radius: 0 10px 10px 0; background: #eef7fa; color: #204c62; font-size: .9rem; line-height: 1.65; }
+#article-view .reading-actions { gap: 10px; }
+#article-view .reading-activity button[type="submit"] { color: #fff; background: #0b637e; border-color: #0b637e; }
+#article-view .reading-activity button[type="reset"], #article-view [data-reset-game] { background: #f2f6f8; border-color: #d2e1e8; color: #426377; }
+#article-view .reading-poll-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+#article-view .reading-poll-options button { padding: 18px 14px; text-align: left; font-size: .85rem; line-height: 1.5; }
+#article-view .reading-poll-options button[aria-pressed="true"] { background: #0b637e; border-color: #0b637e; color: #fff; }
+#article-view .reading-activity details { padding-top: 18px; border-top: 1px solid #dce7ed; }
+#article-view .reading-activity summary { color: #43677b; font-weight: 600; text-decoration: none; }
+.figure-toolbar button:focus-visible, .figure-dialog button:focus-visible { outline: 3px solid #c78117; outline-offset: 3px; }
+@media (max-width: 680px) {
+  #article-view .activity-workspace { grid-template-columns: minmax(0, 1fr); }
+  #article-view .reading-poll-options { grid-template-columns: minmax(0, 1fr); }
+  #article-view .wordsearch-grid { max-width: 420px; margin-inline: auto; padding: 8px; gap: 3px; }
+  #article-view .crossword-grid { max-width: 380px; margin-inline: auto; }
+  #article-view .activity-topline { font-size: .56rem; }
+  .figure-toolbar { padding: 12px; }
+  .figure-toolbar > span { font-size: .55rem; }
+  #article-view .reading-actions button { flex: 1 1 160px; }
+}
+@media (prefers-reduced-motion: reduce) { .activity-progress progress::-webkit-progress-value { transition: none; } }

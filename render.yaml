@@ -47,10 +47,13 @@ services:
         source: /login
         destination: /dashboard.html
 
-      # Blog estático: conserva las URLs limpias de los artículos
-      - type: rewrite
-        source: /blog/*
-        destination: /blog/index.html
+      # El índice independiente del blog se consolidó en la sección de guías.
+      - type: redirect
+        source: /blog
+        destination: /guias
+      - type: redirect
+        source: /blog/
+        destination: /guias
 
       # SEO redirects
       - type: redirect

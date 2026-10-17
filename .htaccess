@@ -25,11 +25,6 @@ RewriteEngine On
 RewriteRule ^dashboard(?:/.*)?$ dashboard.html [L]
 RewriteRule ^login/?$ dashboard.html [L]
 
-# Blog estático: servir el índice del blog para sus URLs limpias
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^blog/[^/]+/?$ blog/index.html [L]
-
 # Si la URL no es archivo real
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d

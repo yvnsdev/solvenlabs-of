@@ -5,8 +5,10 @@
 /mail/          /dashboard        301
 /login          /dashboard.html   200!
 
-# Blog estático: permite URLs limpias para cada artículo
-/blog/*        /blog/index.html   200
+# El índice independiente del blog se consolidó en la sección de guías.
+/blog          /guias            301
+/blog/         /guias            301
+/articulos     /guias            301
 
 # Netlify rewrite: portal de estado de proyecto para clientes
 /proyecto.html  /proyecto         301!
