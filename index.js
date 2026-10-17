@@ -994,6 +994,7 @@ if (fallbackRoute && /^\/(?!\/)/.test(fallbackRoute)) {
 
     // Para evitar /servicios etc en URL, cuando es sección conocida mantenemos la base "/"
     if (sectionId) {
+      document.body.dataset.routeSection = sectionId;
       if (replace) history.replaceState({ section: sectionId }, '', finalPath);
       else history.pushState({ section: sectionId }, '', finalPath);
       updateSectionMetadata(sectionId, finalPath);

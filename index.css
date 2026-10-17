@@ -15825,6 +15825,108 @@ main > .section .section__header {
 .team-modal[data-profile-ready] .team-modal__contact { margin-top: 1.25rem; gap: .6rem; }
 .team-modal[data-profile-ready] .team-modal__contact-link { font-size: .8rem; overflow-wrap: anywhere; border: 1px solid #d5e8ef30; background: #ffffff0a; border-radius: 10px; transition: background 160ms, border-color 160ms; }
 .team-modal[data-profile-ready] .team-modal__contact-link:hover { background: #ffffff20; border-color: #d5e8ef80; }
+
+/* Contacto móvil: evita desbordes y mantiene los campos completamente visibles. */
+@media (max-width: 600px) {
+  #contacto {
+    overflow: clip;
+    padding-block: 2.75rem;
+  }
+
+  #contacto > .container {
+    width: 100%;
+    max-width: 100%;
+    padding-inline: 1rem;
+  }
+
+  #contacto .section__header {
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 1.5rem;
+    padding-inline: .25rem;
+  }
+
+  #contacto .section__title {
+    max-width: 20ch;
+    margin-inline: auto;
+    font-size: clamp(1.75rem, 8.5vw, 2.15rem);
+    line-height: 1.08;
+    overflow-wrap: normal;
+  }
+
+  #contacto .section__subtitle {
+    max-width: 32ch;
+    margin-inline: auto;
+    line-height: 1.65;
+  }
+
+  #contacto .contact__grid,
+  #contacto .contact__form,
+  #contacto .contact__info,
+  #contacto .form__content,
+  #contacto .form__row,
+  #contacto .form__group {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  #contacto .contact__grid {
+    gap: 1rem;
+  }
+
+  #contacto .contact__form,
+  #contacto .contact__info {
+    padding: 1.25rem;
+    border-radius: 1rem;
+  }
+
+  #contacto .form__row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  #contacto .form__group {
+    margin-bottom: 1.1rem;
+  }
+
+  #contacto .form__input,
+  #contacto .form__select,
+  #contacto .form__textarea {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    font-size: 16px;
+  }
+
+  #contacto .form__select {
+    padding-right: 2.5rem;
+    text-overflow: ellipsis;
+  }
+
+  #contacto .cf-turnstile {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  #contacto .contact__channel > div:last-child {
+    min-width: 0;
+  }
+
+  #contacto .contact__channel-value,
+  #contacto .contact__map-note {
+    overflow-wrap: anywhere;
+  }
+
+  body[data-route-section="contacto"] .solvi-float {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(12px);
+  }
+}
 .team-modal[data-profile-ready] .team-modal__body {
   display: block;
   min-width: 0;
