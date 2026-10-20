@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="1400" viewBox="0 0 600 1400" role="img" aria-labelledby="title desc"><title id="title">El fondo correcto empieza por el encaje</title><desc id="desc">No todos los instrumentos acompañan la misma etapa. Quién: Comprueba la entidad o persona elegible.. Para qué: Relaciona el objetivo con tu proyecto.. Cómo: Revisa gastos, aportes y entregables.</desc>
+<rect x="0" y="0" width="600" height="1400" rx="0" fill="#f4f7fa" stroke="none"/>
+<g font-family="Arial, Helvetica, sans-serif">
+<path d="M40 43h34" fill="none" stroke="#258778" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/>
+<text x="40" y="77" font-size="15" fill="#258778" font-weight="700" text-anchor="start">ESTRATEGIA DE POSTULACIÓN</text>
+<text x="40" y="134" font-size="38" fill="#17364e" font-weight="700" text-anchor="start">El fondo correcto empieza</text>
+<text x="40" y="182.64" font-size="38" fill="#17364e" font-weight="700" text-anchor="start">por el encaje</text>
+<text x="40" y="245.27999999999997" font-size="21" fill="#506b7e" font-weight="400" text-anchor="start">No todos los instrumentos acompañan la</text>
+<text x="40" y="272.15999999999997" font-size="21" fill="#506b7e" font-weight="400" text-anchor="start">misma etapa.</text>
+<g transform="translate(40 330)"><path d="M20.0 40h480l-35 92H55.0Z" fill="#e1f0ee" stroke="#258778" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><text x="260" y="92" font-size="17" fill="#17364e" font-weight="700" text-anchor="middle">¿QUIÉN PUEDE POSTULAR?</text><path d="M260 140v30m-6-6 6 6 6-6" fill="none" stroke="#258778" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><path d="M75.0 180h370l-35 92H110.0Z" fill="#e1f0ee" stroke="#258778" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><text x="260" y="232" font-size="17" fill="#17364e" font-weight="700" text-anchor="middle">¿QUÉ BUSCA EL FONDO?</text><path d="M260 280v30m-6-6 6 6 6-6" fill="none" stroke="#258778" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><path d="M130.0 320h260l-35 92H165.0Z" fill="#e1f0ee" stroke="#258778" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><text x="260" y="372" font-size="17" fill="#17364e" font-weight="700" text-anchor="middle">¿QUÉ FINANCIA?</text><rect x="115" y="441" width="290" height="40" rx="10" fill="#eaf2f7" stroke="none"/><text x="260.0" y="467" font-size="15" fill="#17364e" font-weight="700" text-anchor="middle">Encaje con tu proyecto</text></g>
+<circle cx="53" cy="894" r="13" fill="#dce8ef" stroke="none" stroke-width="2"/>
+<text x="53" y="899" font-size="13" fill="#258778" font-weight="700" text-anchor="middle">1</text>
+<text x="80" y="900" font-size="21" fill="#17364e" font-weight="700" text-anchor="start">Quién</text>
+<text x="80" y="928" font-size="18" fill="#506b7e" font-weight="400" text-anchor="start">Comprueba la entidad o persona elegible.</text>
+<circle cx="53" cy="1017" r="13" fill="#dce8ef" stroke="none" stroke-width="2"/>
+<text x="53" y="1022" font-size="13" fill="#258778" font-weight="700" text-anchor="middle">2</text>
+<text x="80" y="1023" font-size="21" fill="#17364e" font-weight="700" text-anchor="start">Para qué</text>
+<text x="80" y="1051" font-size="18" fill="#506b7e" font-weight="400" text-anchor="start">Relaciona el objetivo con tu proyecto.</text>
+<circle cx="53" cy="1140" r="13" fill="#dce8ef" stroke="none" stroke-width="2"/>
+<text x="53" y="1145" font-size="13" fill="#258778" font-weight="700" text-anchor="middle">3</text>
+<text x="80" y="1146" font-size="21" fill="#17364e" font-weight="700" text-anchor="start">Cómo</text>
+<text x="80" y="1174" font-size="18" fill="#506b7e" font-weight="400" text-anchor="start">Revisa gastos, aportes y entregables.</text>
+<path d="M40 1343H560" fill="none" stroke="#d2dfe7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/>
+<text x="40" y="1371" font-size="14" fill="#506b7e" font-weight="400" text-anchor="start">Elige el instrumento que corresponde a tu etapa.</text>
+</g></svg>

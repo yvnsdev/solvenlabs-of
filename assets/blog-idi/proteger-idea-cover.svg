@@ -1,7 +1,25 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc">
-  <title id="title">Proteger un proyecto temprano</title><desc id="desc">Una idea se ordena con registro, conversación y criterio</desc>
-  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#111f3d"/><stop offset="1" stop-color="#234f70"/></linearGradient><filter id="shadow"><feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#07162c" flood-opacity=".25"/></filter></defs>
-  <rect width="1200" height="680" rx="36" fill="url(#bg)"/><circle cx="1050" cy="100" r="210" fill="#ffae67" opacity=".14"/><text x="92" y="108" fill="#8de0d2" font-family="Arial,sans-serif" font-size="20" font-weight="700" letter-spacing="3">ANTES DE CREAR</text><text x="92" y="164" fill="#fff" font-family="Arial,sans-serif" font-size="48" font-weight="800">Protege el proceso,<tspan x="92" dy="56" fill="#ffbd79">no solo la idea.</tspan></text>
-  <g filter="url(#shadow)"><rect x="92" y="290" width="1016" height="230" rx="28" fill="#f6fbfc"/><path d="M260 348v-24a56 56 0 0 1 112 0v24" fill="none" stroke="#e68a49" stroke-width="16"/><rect x="244" y="344" width="144" height="112" rx="18" fill="#e68a49"/><path d="M316 378v42" stroke="#fff" stroke-width="10" stroke-linecap="round"/><circle cx="316" cy="373" r="9" fill="#fff"/><path d="M500 354h190M500 394h150M500 434h110" stroke="#284a66" stroke-width="13" stroke-linecap="round"/><path d="M818 346h174M818 390h135M818 434h92" stroke="#16a89b" stroke-width="13" stroke-linecap="round"/></g>
-  <g font-family="Arial,sans-serif" font-size="18" font-weight="700"><text x="226" y="574" fill="#fff">DOCUMENTA</text><text x="518" y="574" fill="#fff">CONVERSA</text><text x="814" y="574" fill="#fff">COMPARTE CON CRITERIO</text></g><path d="M370 570h100M665 570h100" stroke="#ffbd79" stroke-width="4" stroke-linecap="round"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc"><title id="title">Tu proyecto empieza antes del prototipo</title><desc id="desc">Ordena lo que creas y cómo lo compartes. Documentar: Registra tus avances. Delimitar: Define qué compartir. Acordar: Aclara la colaboración</desc>
+<rect x="0" y="0" width="1200" height="680" rx="0" fill="#102c42" stroke="none"/>
+<g font-family="Arial, Helvetica, sans-serif">
+<path d="M40 43h34" fill="none" stroke="#79cfbf" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/>
+<text x="40" y="77" font-size="15" fill="#8edaca" font-weight="700" text-anchor="start">PROPIEDAD INTELECTUAL</text>
+<text x="40" y="134" font-size="42" fill="#fff" font-weight="700" text-anchor="start">Tu proyecto empieza</text>
+<text x="40" y="187.76" font-size="42" fill="#fff" font-weight="700" text-anchor="start">antes del prototipo</text>
+<text x="40" y="255.51999999999998" font-size="21" fill="#b9d2df" font-weight="400" text-anchor="start">Ordena lo que creas y cómo lo</text>
+<text x="40" y="282.4" font-size="21" fill="#b9d2df" font-weight="400" text-anchor="start">compartes.</text>
+<g transform="translate(620 100)"><rect x="50" y="88" width="272" height="340" rx="16" fill="#d0ddea" stroke="none"/><rect x="76" y="64" width="272" height="340" rx="16" fill="#fff" stroke="none"/><text x="100" y="109" font-size="15" fill="#258778" font-weight="700" text-anchor="start">REGISTRO DEL PROYECTO</text><path d="M100 148h212" fill="none" stroke="#b8cad8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><path d="M100 183h175" fill="none" stroke="#b8cad8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><path d="M100 218h205" fill="none" stroke="#b8cad8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><path d="M100 253h140" fill="none" stroke="#b8cad8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><text x="100" y="356" font-size="17" fill="#17364e" font-weight="400" text-anchor="start">Versión / autor / fecha</text><path d="M378 189 489 228v95q0 94-111 144-111-50-111-144v-95Z" fill="#235b64" stroke="#b9e9de" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><path d="M350 307v-28a28 28 0 0 1 56 0v28" fill="none" stroke="#d1f1e8" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><rect x="337" y="306" width="82" height="68" rx="12" fill="#d1f1e8" stroke="none"/><circle cx="378" cy="333" r="6" fill="#258778" stroke="none" stroke-width="2"/><path d="M378 336v17" fill="none" stroke="#258778" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/></g>
+<circle cx="53" cy="379" r="13" fill="#31556b" stroke="none" stroke-width="2"/>
+<text x="53" y="384" font-size="13" fill="#d5eee8" font-weight="700" text-anchor="middle">1</text>
+<text x="80" y="385" font-size="21" fill="#fff" font-weight="700" text-anchor="start">Documentar</text>
+<text x="80" y="413" font-size="18" fill="#b9d2df" font-weight="400" text-anchor="start">Registra tus avances</text>
+<circle cx="53" cy="452" r="13" fill="#31556b" stroke="none" stroke-width="2"/>
+<text x="53" y="457" font-size="13" fill="#d5eee8" font-weight="700" text-anchor="middle">2</text>
+<text x="80" y="458" font-size="21" fill="#fff" font-weight="700" text-anchor="start">Delimitar</text>
+<text x="80" y="486" font-size="18" fill="#b9d2df" font-weight="400" text-anchor="start">Define qué compartir</text>
+<circle cx="53" cy="525" r="13" fill="#31556b" stroke="none" stroke-width="2"/>
+<text x="53" y="530" font-size="13" fill="#d5eee8" font-weight="700" text-anchor="middle">3</text>
+<text x="80" y="531" font-size="21" fill="#fff" font-weight="700" text-anchor="start">Acordar</text>
+<text x="80" y="559" font-size="18" fill="#b9d2df" font-weight="400" text-anchor="start">Aclara la colaboración</text>
+<path d="M40 623H1160" fill="none" stroke="#345064" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/>
+<text x="40" y="651" font-size="16" fill="#b9d2df" font-weight="400" text-anchor="start">SOLVEN LABS / BLOG I+D</text>
+</g></svg>

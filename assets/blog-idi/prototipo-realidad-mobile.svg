@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="1400" viewBox="0 0 600 1400" role="img" aria-labelledby="title desc"><title id="title">La entrega tiene más de una pieza</title><desc id="desc">Una captura no es un manual de operación. Uso: Escenarios probados y límites conocidos.. Continuidad: Código, accesos y documentación acordados.. Siguiente paso: Hallazgos y prioridades de evolución.</desc>
+<rect x="0" y="0" width="600" height="1400" rx="0" fill="#f4f7fa" stroke="none"/>
+<g font-family="Arial, Helvetica, sans-serif">
+<path d="M40 43h34" fill="none" stroke="#366ba2" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/>
+<text x="40" y="77" font-size="15" fill="#366ba2" font-weight="700" text-anchor="start">DESARROLLO DE PRODUCTO</text>
+<text x="40" y="134" font-size="38" fill="#17364e" font-weight="700" text-anchor="start">La entrega tiene más de</text>
+<text x="40" y="182.64" font-size="38" fill="#17364e" font-weight="700" text-anchor="start">una pieza</text>
+<text x="40" y="245.27999999999997" font-size="21" fill="#506b7e" font-weight="400" text-anchor="start">Una captura no es un manual de operación.</text>
+<g transform="translate(40 330)"><rect x="25" y="35" width="300" height="200" rx="18" fill="#fff" stroke="#d6e3eb"/><text x="47" y="70" font-size="17" fill="#366ba2" font-weight="700" text-anchor="start">USO</text><rect x="47" y="92" width="256" height="105" rx="8" fill="#e8eff7" stroke="none"/><rect x="61" y="106" width="58" height="77" rx="5" fill="#c8daed" stroke="none"/><path d="M136 120h135M136 143h100" fill="none" stroke="#8da8bf" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><rect x="210" y="185" width="285" height="165" rx="18" fill="#fff" stroke="#d6e3eb"/><text x="232" y="220" font-size="17" fill="#366ba2" font-weight="700" text-anchor="start">CONTINUIDAD</text><text x="232" y="260" font-size="21" fill="#17364e" font-weight="400" text-anchor="start">Código / accesos</text><text x="232" y="295" font-size="21" fill="#17364e" font-weight="400" text-anchor="start">Documentación</text><rect x="45" y="325" width="320" height="145" rx="18" fill="#fff" stroke="#d6e3eb"/><text x="67" y="360" font-size="17" fill="#366ba2" font-weight="700" text-anchor="start">EVOLUCIÓN</text><path d="M69 433l54-12 46-34 45 8 78-24" fill="none" stroke="#366ba2" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/></g>
+<circle cx="53" cy="894" r="13" fill="#dce8ef" stroke="none" stroke-width="2"/>
+<text x="53" y="899" font-size="13" fill="#366ba2" font-weight="700" text-anchor="middle">1</text>
+<text x="80" y="900" font-size="21" fill="#17364e" font-weight="700" text-anchor="start">Uso</text>
+<text x="80" y="928" font-size="18" fill="#506b7e" font-weight="400" text-anchor="start">Escenarios probados y límites conocidos.</text>
+<circle cx="53" cy="1017" r="13" fill="#dce8ef" stroke="none" stroke-width="2"/>
+<text x="53" y="1022" font-size="13" fill="#366ba2" font-weight="700" text-anchor="middle">2</text>
+<text x="80" y="1023" font-size="21" fill="#17364e" font-weight="700" text-anchor="start">Continuidad</text>
+<text x="80" y="1051" font-size="18" fill="#506b7e" font-weight="400" text-anchor="start">Código, accesos y documentación acordados.</text>
+<circle cx="53" cy="1140" r="13" fill="#dce8ef" stroke="none" stroke-width="2"/>
+<text x="53" y="1145" font-size="13" fill="#366ba2" font-weight="700" text-anchor="middle">3</text>
+<text x="80" y="1146" font-size="21" fill="#17364e" font-weight="700" text-anchor="start">Siguiente paso</text>
+<text x="80" y="1174" font-size="18" fill="#506b7e" font-weight="400" text-anchor="start">Hallazgos y prioridades de evolución.</text>
+<path d="M40 1343H560" fill="none" stroke="#d2dfe7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/>
+<text x="40" y="1371" font-size="14" fill="#506b7e" font-weight="400" text-anchor="start">Una entrega útil se puede usar, mantener y mejorar.</text>
+</g></svg>

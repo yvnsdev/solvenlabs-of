@@ -1,21 +1,25 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc">
-<title id="title">Tu investigación tiene un siguiente capítulo</title><desc id="desc">Del conocimiento a una experiencia real de uso. Hallazgo, Personas, Piloto</desc>
-<defs>
-<linearGradient id="paper" x2="1" y2="1"><stop stop-color="#f9fcfd"/><stop offset="1" stop-color="#eaf2f6"/></linearGradient>
-<linearGradient id="night" x2="1" y2="1"><stop stop-color="#102d45"/><stop offset="1" stop-color="#061b2b"/></linearGradient>
-<linearGradient id="glass" x2="0" y2="1"><stop stop-color="#fff" stop-opacity=".12"/><stop offset="1" stop-color="#fff" stop-opacity=".025"/></linearGradient>
-<filter id="shadow" x="-30%" y="-30%" width="160%" height="180%"><feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#052d45" flood-opacity=".1"/></filter>
-<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="m1 1 7 4-7 4" fill="none" stroke="#56a4b9" stroke-width="1.5"/></marker>
-</defs>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc"><title id="title">Tu investigación tiene un siguiente capítulo</title><desc id="desc">Del conocimiento a una experiencia real de uso. Hallazgo: Identifica el aporte. Personas: Explora una necesidad. Piloto: Prueba en un contexto real</desc>
+<rect x="0" y="0" width="1200" height="680" rx="0" fill="#102c42" stroke="none"/>
 <g font-family="Arial, Helvetica, sans-serif">
-<rect width="1200" height="680" fill="url(#night)"/>
-<circle cx="1000" cy="300" r="320" fill="none" stroke="#7bd3ef" stroke-opacity=".09"/><circle cx="1000" cy="300" r="245" fill="none" stroke="#7bd3ef" stroke-opacity=".12"/>
-<path d="M60 56h34" stroke="#7bd3ef" stroke-width="4"/><text x="108" y="62" fill="#b0cbd9" font-size="16" font-weight="700">SOLVEN LABS  /  BLOG I+D</text>
-<text x="60" y="152" fill="#7bd3ef" font-size="15" font-weight="700">INVESTIGACIÓN APLICADA</text><text x="60" y="220" fill="#fff" font-size="49" font-weight="700">Tu investigación tiene</text><text x="60" y="282.23" fill="#fff" font-size="49" font-weight="700">un siguiente capítulo</text>
-<text x="60" y="448" fill="#aec9d9" font-size="23" font-weight="400">Del conocimiento a una experiencia</text><text x="60" y="477.21" fill="#aec9d9" font-size="23" font-weight="400">real de uso.</text>
-<path d="M60 550h440" stroke="#345265"/><text x="60" y="586" fill="#7bd3ef" font-size="13" font-weight="700">01</text><text x="60" y="615" fill="#d9e9f2" font-size="18" font-weight="500">Hallazgo</text><text x="213" y="586" fill="#7bd3ef" font-size="13" font-weight="700">02</text><text x="213" y="615" fill="#d9e9f2" font-size="18" font-weight="500">Personas</text><text x="366" y="586" fill="#7bd3ef" font-size="13" font-weight="700">03</text><text x="366" y="615" fill="#d9e9f2" font-size="18" font-weight="500">Piloto</text><g transform="translate(590 132)"><rect width="550" height="460" rx="26" fill="url(#glass)" stroke="#648ea1" stroke-opacity=".32"/><path d="M100 320C260 320 245 120 427 120" fill="none" stroke="#7bd3ef" stroke-width="3" stroke-dasharray="6 8" marker-end="url(#arrow)"/>
-<g transform="rotate(-8 133 200)"><rect x="52" y="100" width="170" height="224" rx="12" fill="#eff7fa"/><g transform="translate(75 125) scale(1.3)" fill="none" stroke="#176083" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 9h23l11 11v35H17z"/><path d="M40 9v12h11M25 31h18M25 39h18M25 47h12"/></g><text x="76" y="250" fill="#345f78" font-size="13" font-weight="700">INVESTIGACIÓN</text><path d="M76 268h118m-118 17h85" stroke="#b0cbd9" stroke-width="6"/></g>
-<rect x="292" y="220" width="218" height="174" rx="16" fill="#fff"/><text x="312" y="250" fill="#087e99" font-size="13" font-weight="700">PRIMER PILOTO</text>
-<g transform="translate(310 268) scale(0.85)" fill="none" stroke="#197293" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="26" cy="23" r="9"/><path d="M9 54v-5c0-12 34-12 34 0v5M44 14a9 9 0 0 1 0 18M49 39c8 1 12 5 12 12"/></g><path d="M384 283h96m-96 20h73" stroke="#d0e2ea" stroke-width="7"/>
-<rect x="312" y="342" width="176" height="28" rx="8" fill="#e0f4ed"/><text x="333" y="361" fill="#247263" font-size="13" font-weight="700">Listo para aprender</text>
-<circle cx="417" cy="120" r="42" fill="#183e56" stroke="#7bd3ef"/><g transform="translate(390 94) scale(0.85)" fill="none" stroke="#7bd3ef" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="32" cy="32" r="23"/><circle cx="32" cy="32" r="13"/><circle cx="32" cy="32" r="3"/><path d="m33 31 23-23M47 8h9v9"/></g></g></g></svg>
+<path d="M40 43h34" fill="none" stroke="#79cfbf" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/>
+<text x="40" y="77" font-size="15" fill="#8edaca" font-weight="700" text-anchor="start">INVESTIGACIÓN APLICADA</text>
+<text x="40" y="134" font-size="42" fill="#fff" font-weight="700" text-anchor="start">Tu investigación tiene</text>
+<text x="40" y="187.76" font-size="42" fill="#fff" font-weight="700" text-anchor="start">un siguiente capítulo</text>
+<text x="40" y="255.51999999999998" font-size="21" fill="#b9d2df" font-weight="400" text-anchor="start">Del conocimiento a una experiencia</text>
+<text x="40" y="282.4" font-size="21" fill="#b9d2df" font-weight="400" text-anchor="start">real de uso.</text>
+<g transform="translate(620 100)"><path d="M258 410Q160 370 42 402V85q112-30 216 16 104-46 216-16v317q-118-32-216 8Z" fill="#f4f9fc" stroke="#9dbbcd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><path d="M258 102v307" fill="none" stroke="#b7cdd9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><path d="M75 145h140" fill="none" stroke="#acc2d2" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><path d="M75 177h115" fill="none" stroke="#acc2d2" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><path d="M75 209h140" fill="none" stroke="#acc2d2" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><path d="M75 241h95" fill="none" stroke="#acc2d2" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><text x="75" y="328" font-size="18" fill="#476d92" font-weight="700" text-anchor="start">HALLAZGO</text><rect x="294" y="137" width="144" height="208" rx="12" fill="#deeee9" stroke="none"/><circle cx="366" cy="192" r="25" fill="#fff" stroke="#476d92" stroke-width="2"/><path d="M332 263q34-48 68 0" fill="none" stroke="#476d92" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><text x="366" y="315" font-size="17" fill="#476d92" font-weight="700" text-anchor="middle">USO REAL</text><path d="M166 454h187m-10-8 10 8-10 8" fill="none" stroke="#88d8c9" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/></g>
+<circle cx="53" cy="379" r="13" fill="#31556b" stroke="none" stroke-width="2"/>
+<text x="53" y="384" font-size="13" fill="#d5eee8" font-weight="700" text-anchor="middle">1</text>
+<text x="80" y="385" font-size="21" fill="#fff" font-weight="700" text-anchor="start">Hallazgo</text>
+<text x="80" y="413" font-size="18" fill="#b9d2df" font-weight="400" text-anchor="start">Identifica el aporte</text>
+<circle cx="53" cy="452" r="13" fill="#31556b" stroke="none" stroke-width="2"/>
+<text x="53" y="457" font-size="13" fill="#d5eee8" font-weight="700" text-anchor="middle">2</text>
+<text x="80" y="458" font-size="21" fill="#fff" font-weight="700" text-anchor="start">Personas</text>
+<text x="80" y="486" font-size="18" fill="#b9d2df" font-weight="400" text-anchor="start">Explora una necesidad</text>
+<circle cx="53" cy="525" r="13" fill="#31556b" stroke="none" stroke-width="2"/>
+<text x="53" y="530" font-size="13" fill="#d5eee8" font-weight="700" text-anchor="middle">3</text>
+<text x="80" y="531" font-size="21" fill="#fff" font-weight="700" text-anchor="start">Piloto</text>
+<text x="80" y="559" font-size="18" fill="#b9d2df" font-weight="400" text-anchor="start">Prueba en un contexto real</text>
+<path d="M40 623H1160" fill="none" stroke="#345064" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/>
+<text x="40" y="651" font-size="16" fill="#b9d2df" font-weight="400" text-anchor="start">SOLVEN LABS / BLOG I+D</text>
+</g></svg>

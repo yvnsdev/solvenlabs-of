@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="1400" viewBox="0 0 600 1400" role="img" aria-labelledby="title desc"><title id="title">Una entrega que no depende de tu memoria</title><desc id="desc">El conocimiento también necesita instrucciones para viajar. Uso: Guía para ejecutar la tarea.. Técnica: Código, versiones y configuración.. Continuidad: Responsable y próximo hito.</desc>
+<rect x="0" y="0" width="600" height="1400" rx="0" fill="#f4f7fa" stroke="none"/>
+<g font-family="Arial, Helvetica, sans-serif">
+<path d="M40 43h34" fill="none" stroke="#476d92" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/>
+<text x="40" y="77" font-size="15" fill="#476d92" font-weight="700" text-anchor="start">TRANSFERENCIA</text>
+<text x="40" y="134" font-size="38" fill="#17364e" font-weight="700" text-anchor="start">Una entrega que no</text>
+<text x="40" y="182.64" font-size="38" fill="#17364e" font-weight="700" text-anchor="start">depende de tu memoria</text>
+<text x="40" y="245.27999999999997" font-size="21" fill="#506b7e" font-weight="400" text-anchor="start">El conocimiento también necesita</text>
+<text x="40" y="272.15999999999997" font-size="21" fill="#506b7e" font-weight="400" text-anchor="start">instrucciones para viajar.</text>
+<g transform="translate(40 330)"><rect x="38" y="52" width="444" height="400" rx="20" fill="#e6edf5" stroke="#d6e3eb"/><rect x="38" y="32" width="200" height="55" rx="12" fill="#c6d7e8" stroke="none"/><rect x="62" y="106" width="396" height="88" rx="9" fill="#fff" stroke="#d6e3eb"/><text x="82" y="137" font-size="16" fill="#476d92" font-weight="700" text-anchor="start">01 / GUÍA DE USO</text><text x="82" y="166" font-size="19" fill="#17364e" font-weight="400" text-anchor="start">Cómo ejecutar la tarea</text><circle cx="433" cy="131" r="14" fill="#476d92" stroke="none" stroke-width="2"/><path d="M427 131l4 4 8-9" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><rect x="62" y="211" width="396" height="88" rx="9" fill="#fff" stroke="#d6e3eb"/><text x="82" y="242" font-size="16" fill="#476d92" font-weight="700" text-anchor="start">02 / DOCUMENTACIÓN</text><text x="82" y="271" font-size="19" fill="#17364e" font-weight="400" text-anchor="start">Versiones y configuración</text><circle cx="433" cy="236" r="14" fill="#476d92" stroke="none" stroke-width="2"/><path d="M427 236l4 4 8-9" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><rect x="62" y="316" width="396" height="88" rx="9" fill="#fff" stroke="#d6e3eb"/><text x="82" y="347" font-size="16" fill="#476d92" font-weight="700" text-anchor="start">03 / CONTINUIDAD</text><text x="82" y="376" font-size="19" fill="#17364e" font-weight="400" text-anchor="start">Responsable y próximo hito</text><circle cx="433" cy="341" r="14" fill="#476d92" stroke="none" stroke-width="2"/><path d="M427 341l4 4 8-9" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/></g>
+<circle cx="53" cy="894" r="13" fill="#dce8ef" stroke="none" stroke-width="2"/>
+<text x="53" y="899" font-size="13" fill="#476d92" font-weight="700" text-anchor="middle">1</text>
+<text x="80" y="900" font-size="21" fill="#17364e" font-weight="700" text-anchor="start">Uso</text>
+<text x="80" y="928" font-size="18" fill="#506b7e" font-weight="400" text-anchor="start">Guía para ejecutar la tarea.</text>
+<circle cx="53" cy="1017" r="13" fill="#dce8ef" stroke="none" stroke-width="2"/>
+<text x="53" y="1022" font-size="13" fill="#476d92" font-weight="700" text-anchor="middle">2</text>
+<text x="80" y="1023" font-size="21" fill="#17364e" font-weight="700" text-anchor="start">Técnica</text>
+<text x="80" y="1051" font-size="18" fill="#506b7e" font-weight="400" text-anchor="start">Código, versiones y configuración.</text>
+<circle cx="53" cy="1140" r="13" fill="#dce8ef" stroke="none" stroke-width="2"/>
+<text x="53" y="1145" font-size="13" fill="#476d92" font-weight="700" text-anchor="middle">3</text>
+<text x="80" y="1146" font-size="21" fill="#17364e" font-weight="700" text-anchor="start">Continuidad</text>
+<text x="80" y="1174" font-size="18" fill="#506b7e" font-weight="400" text-anchor="start">Responsable y próximo hito.</text>
+<path d="M40 1343H560" fill="none" stroke="#d2dfe7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/>
+<text x="40" y="1371" font-size="14" fill="#506b7e" font-weight="400" text-anchor="start">Documentar permite que otros continúen el trabajo.</text>
+</g></svg>

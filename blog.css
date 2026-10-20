@@ -17817,3 +17817,20 @@ body {
   #article-view .editorial-section--intro, #article-view .reading-activity, #article-view .editorial-section--closing { padding: 24px 21px; border-radius: 19px; }
   #article-view .article-cta { padding: 30px 22px; border-radius: 22px; }
 }
+
+/* Editorial diagrams: preserve the complete canvas and use vertical art on phones. */
+#article-view .editorial-picture { display: block; width: 100%; }
+#article-view .editorial-media { margin-inline: 0; }
+#article-view .editorial-media img[src*="blog-idi/"],
+#article-view .article-cover img[src*="blog-idi/"] {
+  display: block; width: 100%; height: auto; max-height: none;
+  aspect-ratio: 1200 / 680; object-fit: contain;
+  border-radius: 16px; box-shadow: none;
+}
+#article-view .article-cover:has(.editorial-picture) { aspect-ratio: auto; }
+#article-view .editorial-media figcaption { max-width: 100%; text-align: left; line-height: 1.65; }
+@media (max-width: 600px) {
+  #article-view .editorial-media img[src*="blog-idi/"],
+  #article-view .article-cover img[src*="blog-idi/"] { aspect-ratio: 600 / 1400; }
+  #article-view .editorial-media { margin-inline: 0; }
+}

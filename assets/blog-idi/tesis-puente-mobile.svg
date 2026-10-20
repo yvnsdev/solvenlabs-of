@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="1400" viewBox="0 0 600 1400" role="img" aria-labelledby="title desc"><title id="title">Del conocimiento al uso</title><desc id="desc">El puente necesita personas a ambos lados. Hallazgo: ¿Qué aprendiste en la investigación?. Aplicación: ¿Quién podría usar ese conocimiento?. Piloto: ¿Cómo lo probarás de forma acotada?</desc>
+<rect x="0" y="0" width="600" height="1400" rx="0" fill="#f4f7fa" stroke="none"/>
+<g font-family="Arial, Helvetica, sans-serif">
+<path d="M40 43h34" fill="none" stroke="#476d92" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/>
+<text x="40" y="77" font-size="15" fill="#476d92" font-weight="700" text-anchor="start">DEL HALLAZGO AL PILOTO</text>
+<text x="40" y="134" font-size="38" fill="#17364e" font-weight="700" text-anchor="start">Del conocimiento al uso</text>
+<text x="40" y="196.64" font-size="21" fill="#506b7e" font-weight="400" text-anchor="start">El puente necesita personas a ambos lados.</text>
+<g transform="translate(40 330)"><path d="M36 275Q260 30 484 275" fill="none" stroke="#476d92" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><path d="M36 278h448" fill="none" stroke="#17364e" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><path d="M60 253.70535714285714V275" fill="none" stroke="#8bb6c1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><path d="M140 200.13392857142856V275" fill="none" stroke="#8bb6c1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><path d="M220 173.34821428571428V275" fill="none" stroke="#8bb6c1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><path d="M300 173.34821428571428V275" fill="none" stroke="#8bb6c1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><path d="M380 200.13392857142856V275" fill="none" stroke="#8bb6c1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><path d="M460 253.70535714285714V275" fill="none" stroke="#8bb6c1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><rect x="22" y="287" width="112" height="100" rx="4" fill="#d5e4ed" stroke="none"/><rect x="386" y="287" width="112" height="100" rx="4" fill="#d5e4ed" stroke="none"/><text x="26" y="426" font-size="16" fill="#476d92" font-weight="700" text-anchor="start">HALLAZGO</text><text x="194" y="426" font-size="16" fill="#476d92" font-weight="700" text-anchor="start">APLICACIÓN</text><text x="396" y="426" font-size="16" fill="#476d92" font-weight="700" text-anchor="start">PILOTO</text><circle cx="260" cy="181" r="26" fill="#fff" stroke="#476d92" stroke-width="2"/><path d="M249 182l8 8 16-19" fill="none" stroke="#476d92" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><text x="260" y="476" font-size="18" fill="#17364e" font-weight="400" text-anchor="middle">Personas que conectan ambos lados</text></g>
+<circle cx="53" cy="894" r="13" fill="#dce8ef" stroke="none" stroke-width="2"/>
+<text x="53" y="899" font-size="13" fill="#476d92" font-weight="700" text-anchor="middle">1</text>
+<text x="80" y="900" font-size="21" fill="#17364e" font-weight="700" text-anchor="start">Hallazgo</text>
+<text x="80" y="928" font-size="18" fill="#506b7e" font-weight="400" text-anchor="start">¿Qué aprendiste en la investigación?</text>
+<circle cx="53" cy="1017" r="13" fill="#dce8ef" stroke="none" stroke-width="2"/>
+<text x="53" y="1022" font-size="13" fill="#476d92" font-weight="700" text-anchor="middle">2</text>
+<text x="80" y="1023" font-size="21" fill="#17364e" font-weight="700" text-anchor="start">Aplicación</text>
+<text x="80" y="1051" font-size="18" fill="#506b7e" font-weight="400" text-anchor="start">¿Quién podría usar ese conocimiento?</text>
+<circle cx="53" cy="1140" r="13" fill="#dce8ef" stroke="none" stroke-width="2"/>
+<text x="53" y="1145" font-size="13" fill="#476d92" font-weight="700" text-anchor="middle">3</text>
+<text x="80" y="1146" font-size="21" fill="#17364e" font-weight="700" text-anchor="start">Piloto</text>
+<text x="80" y="1174" font-size="18" fill="#506b7e" font-weight="400" text-anchor="start">¿Cómo lo probarás de forma acotada?</text>
+<path d="M40 1343H560" fill="none" stroke="#d2dfe7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/>
+<text x="40" y="1371" font-size="14" fill="#506b7e" font-weight="400" text-anchor="start">Investigar → encontrar una aplicación → ponerla a prueba.</text>
+</g></svg>

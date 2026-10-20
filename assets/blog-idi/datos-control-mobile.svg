@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="1400" viewBox="0 0 600 1400" role="img" aria-labelledby="title desc"><title id="title">No todo vacío significa cero</title><desc id="desc">Tres preguntas pequeñas que evitan conclusiones grandes y equivocadas. Significado: ¿No se midió o el resultado fue cero?. Unidad: ¿Horas, minutos o segundos?. Identidad: ¿Una persona o varias observaciones?</desc>
+<rect x="0" y="0" width="600" height="1400" rx="0" fill="#f4f7fa" stroke="none"/>
+<g font-family="Arial, Helvetica, sans-serif">
+<path d="M40 43h34" fill="none" stroke="#366ba2" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/>
+<text x="40" y="77" font-size="15" fill="#366ba2" font-weight="700" text-anchor="start">CALIDAD DE DATOS</text>
+<text x="40" y="134" font-size="38" fill="#17364e" font-weight="700" text-anchor="start">No todo vacío significa</text>
+<text x="40" y="182.64" font-size="38" fill="#17364e" font-weight="700" text-anchor="start">cero</text>
+<text x="40" y="245.27999999999997" font-size="21" fill="#506b7e" font-weight="400" text-anchor="start">Tres preguntas pequeñas que evitan</text>
+<text x="40" y="272.15999999999997" font-size="21" fill="#506b7e" font-weight="400" text-anchor="start">conclusiones grandes y equivocadas.</text>
+<g transform="translate(40 330)"><rect x="14" y="55" width="492" height="350" rx="16" fill="#ffffff" stroke="#d6e3eb"/><rect x="14" y="55" width="492" height="56" rx="12" fill="#17364e" stroke="none"/><text x="36" y="90" font-size="15" fill="#fff" font-weight="700" text-anchor="start">REGISTRO</text><text x="195" y="90" font-size="15" fill="#fff" font-weight="700" text-anchor="start">VALOR</text><text x="350" y="90" font-size="15" fill="#fff" font-weight="700" text-anchor="start">UNIDAD</text><text x="36" y="157" font-size="20" fill="#17364e" font-weight="400" text-anchor="start">A-01</text><text x="208" y="157" font-size="28" fill="#366ba2" font-weight="700" text-anchor="start">0</text><text x="367" y="157" font-size="20" fill="#17364e" font-weight="400" text-anchor="start">min</text><path d="M30 183h460" fill="none" stroke="#e0e9ef" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><text x="36" y="245" font-size="20" fill="#17364e" font-weight="400" text-anchor="start">A-02</text><text x="208" y="245" font-size="28" fill="#366ba2" font-weight="700" text-anchor="start">—</text><text x="367" y="245" font-size="20" fill="#17364e" font-weight="400" text-anchor="start">min</text><path d="M30 271h460" fill="none" stroke="#e0e9ef" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><text x="36" y="333" font-size="20" fill="#17364e" font-weight="400" text-anchor="start">A-03</text><text x="208" y="333" font-size="28" fill="#366ba2" font-weight="700" text-anchor="start">12</text><text x="367" y="333" font-size="20" fill="#17364e" font-weight="400" text-anchor="start">s</text><path d="M30 359h460" fill="none" stroke="#e0e9ef" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><rect x="20" y="429" width="210" height="40" rx="10" fill="#eaf2f7" stroke="none"/><text x="125.0" y="455" font-size="15" fill="#17364e" font-weight="700" text-anchor="middle">Cero ≠ sin dato</text><rect x="250" y="429" width="250" height="40" rx="10" fill="#eaf2f7" stroke="none"/><text x="375.0" y="455" font-size="15" fill="#17364e" font-weight="700" text-anchor="middle">Revisa las unidades</text></g>
+<circle cx="53" cy="894" r="13" fill="#dce8ef" stroke="none" stroke-width="2"/>
+<text x="53" y="899" font-size="13" fill="#366ba2" font-weight="700" text-anchor="middle">1</text>
+<text x="80" y="900" font-size="21" fill="#17364e" font-weight="700" text-anchor="start">Significado</text>
+<text x="80" y="928" font-size="18" fill="#506b7e" font-weight="400" text-anchor="start">¿No se midió o el resultado fue cero?</text>
+<circle cx="53" cy="1017" r="13" fill="#dce8ef" stroke="none" stroke-width="2"/>
+<text x="53" y="1022" font-size="13" fill="#366ba2" font-weight="700" text-anchor="middle">2</text>
+<text x="80" y="1023" font-size="21" fill="#17364e" font-weight="700" text-anchor="start">Unidad</text>
+<text x="80" y="1051" font-size="18" fill="#506b7e" font-weight="400" text-anchor="start">¿Horas, minutos o segundos?</text>
+<circle cx="53" cy="1140" r="13" fill="#dce8ef" stroke="none" stroke-width="2"/>
+<text x="53" y="1145" font-size="13" fill="#366ba2" font-weight="700" text-anchor="middle">3</text>
+<text x="80" y="1146" font-size="21" fill="#17364e" font-weight="700" text-anchor="start">Identidad</text>
+<text x="80" y="1174" font-size="18" fill="#506b7e" font-weight="400" text-anchor="start">¿Una persona o varias observaciones?</text>
+<path d="M40 1343H560" fill="none" stroke="#d2dfe7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/>
+<text x="40" y="1371" font-size="14" fill="#506b7e" font-weight="400" text-anchor="start">Revisa el significado antes de calcular.</text>
+</g></svg>

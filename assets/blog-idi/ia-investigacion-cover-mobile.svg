@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="1400" viewBox="0 0 600 1400" role="img" aria-labelledby="title desc"><title id="title">La evidencia antes que la respuesta</title><desc id="desc">Una IA útil también debe demostrar su aporte. Comparar: Establece una referencia. Verificar: Revisa los resultados. Supervisar: Conserva el criterio humano</desc>
+<rect x="0" y="0" width="600" height="1400" rx="0" fill="#102c42" stroke="none"/>
+<g font-family="Arial, Helvetica, sans-serif">
+<path d="M40 43h34" fill="none" stroke="#79cfbf" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/>
+<text x="40" y="77" font-size="15" fill="#8edaca" font-weight="700" text-anchor="start">INTELIGENCIA ARTIFICIAL</text>
+<text x="40" y="134" font-size="38" fill="#fff" font-weight="700" text-anchor="start">La evidencia antes que la</text>
+<text x="40" y="182.64" font-size="38" fill="#fff" font-weight="700" text-anchor="start">respuesta</text>
+<text x="40" y="245.27999999999997" font-size="21" fill="#b9d2df" font-weight="400" text-anchor="start">Una IA útil también debe demostrar su</text>
+<text x="40" y="272.15999999999997" font-size="21" fill="#b9d2df" font-weight="400" text-anchor="start">aporte.</text>
+<g transform="translate(40 330)"><circle cx="75" cy="80" r="31" fill="#264762" stroke="#6bb5ca" stroke-width="2"/><path d="M108 80 220 245" fill="none" stroke="#6bb5ca" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><circle cx="80" cy="245" r="31" fill="#264762" stroke="#6bb5ca" stroke-width="2"/><path d="M113 245 220 245" fill="none" stroke="#6bb5ca" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><circle cx="65" cy="409" r="31" fill="#264762" stroke="#6bb5ca" stroke-width="2"/><path d="M98 409 220 245" fill="none" stroke="#6bb5ca" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><rect x="220" y="181" width="125" height="128" rx="22" fill="#fff" stroke="#d6e3eb"/><text x="282" y="261" font-size="43" fill="#476d92" font-weight="700" text-anchor="middle">IA</text><path d="M345 245h45" fill="none" stroke="#82d7c9" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><path d="M446 164 504 186v67q0 54-58 85-58-31-58-85v-67Z" fill="#20485c" stroke="#89ddd0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><path d="M421 247l18 18 34-42" fill="none" stroke="#a4eee0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><text x="16" y="137" font-size="15" fill="#cde4ec" font-weight="700" text-anchor="start">FUENTES</text><text x="24" y="302" font-size="15" fill="#cde4ec" font-weight="700" text-anchor="start">CRITERIO</text><text x="12" y="466" font-size="15" fill="#cde4ec" font-weight="700" text-anchor="start">REVISIÓN</text><text x="270" y="404" font-size="21" fill="#d1e6ed" font-weight="400" text-anchor="start">Evidencia verificable</text></g>
+<circle cx="53" cy="894" r="13" fill="#31556b" stroke="none" stroke-width="2"/>
+<text x="53" y="899" font-size="13" fill="#d5eee8" font-weight="700" text-anchor="middle">1</text>
+<text x="80" y="900" font-size="21" fill="#fff" font-weight="700" text-anchor="start">Comparar</text>
+<text x="80" y="928" font-size="18" fill="#b9d2df" font-weight="400" text-anchor="start">Establece una referencia</text>
+<circle cx="53" cy="1017" r="13" fill="#31556b" stroke="none" stroke-width="2"/>
+<text x="53" y="1022" font-size="13" fill="#d5eee8" font-weight="700" text-anchor="middle">2</text>
+<text x="80" y="1023" font-size="21" fill="#fff" font-weight="700" text-anchor="start">Verificar</text>
+<text x="80" y="1051" font-size="18" fill="#b9d2df" font-weight="400" text-anchor="start">Revisa los resultados</text>
+<circle cx="53" cy="1140" r="13" fill="#31556b" stroke="none" stroke-width="2"/>
+<text x="53" y="1145" font-size="13" fill="#d5eee8" font-weight="700" text-anchor="middle">3</text>
+<text x="80" y="1146" font-size="21" fill="#fff" font-weight="700" text-anchor="start">Supervisar</text>
+<text x="80" y="1174" font-size="18" fill="#b9d2df" font-weight="400" text-anchor="start">Conserva el criterio humano</text>
+<path d="M40 1343H560" fill="none" stroke="#345064" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/>
+<text x="40" y="1371" font-size="14" fill="#b9d2df" font-weight="400" text-anchor="start">SOLVEN LABS / BLOG I+D</text>
+</g></svg>

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="1400" viewBox="0 0 600 1400" role="img" aria-labelledby="title desc"><title id="title">Una propuesta con fundamentos</title><desc id="desc">Del entusiasmo a un proyecto que se puede evaluar. Encaje: Comprueba los requisitos. Plan: Conecta tareas y recursos. Evidencia: Respalda los resultados</desc>
+<rect x="0" y="0" width="600" height="1400" rx="0" fill="#102c42" stroke="none"/>
+<g font-family="Arial, Helvetica, sans-serif">
+<path d="M40 43h34" fill="none" stroke="#79cfbf" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/>
+<text x="40" y="77" font-size="15" fill="#8edaca" font-weight="700" text-anchor="start">FINANCIAMIENTO I+D</text>
+<text x="40" y="134" font-size="38" fill="#fff" font-weight="700" text-anchor="start">Una propuesta con</text>
+<text x="40" y="182.64" font-size="38" fill="#fff" font-weight="700" text-anchor="start">fundamentos</text>
+<text x="40" y="245.27999999999997" font-size="21" fill="#b9d2df" font-weight="400" text-anchor="start">Del entusiasmo a un proyecto que se puede</text>
+<text x="40" y="272.15999999999997" font-size="21" fill="#b9d2df" font-weight="400" text-anchor="start">evaluar.</text>
+<g transform="translate(40 330)"><path d="M32 136 260 30 488 136Z" fill="#29495e" stroke="#96c9d3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><text x="260" y="110" font-size="25" fill="#fff" font-weight="700" text-anchor="middle">PROPUESTA I+D</text><rect x="50" y="157" width="112" height="235" rx="10" fill="#f4f8fb" stroke="none"/><text x="106" y="210" font-size="32" fill="#258778" font-weight="700" text-anchor="middle">01</text><text x="106" y="271" font-size="14" fill="#258778" font-weight="700" text-anchor="middle">ENCAJE</text><path d="M74 304h64M74 323h64" fill="none" stroke="#b9cdd9" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><rect x="203" y="157" width="112" height="235" rx="10" fill="#f4f8fb" stroke="none"/><text x="259" y="210" font-size="32" fill="#258778" font-weight="700" text-anchor="middle">02</text><text x="259" y="271" font-size="14" fill="#258778" font-weight="700" text-anchor="middle">PLAN</text><path d="M227 304h64M227 323h64" fill="none" stroke="#b9cdd9" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><rect x="356" y="157" width="112" height="235" rx="10" fill="#f4f8fb" stroke="none"/><text x="412" y="210" font-size="32" fill="#258778" font-weight="700" text-anchor="middle">03</text><text x="412" y="271" font-size="14" fill="#258778" font-weight="700" text-anchor="middle">EVIDENCIA</text><path d="M380 304h64M380 323h64" fill="none" stroke="#b9cdd9" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><rect x="28" y="413" width="464" height="42" rx="5" fill="#6c9bad" stroke="none"/><text x="260" y="487" font-size="21" fill="#d1e6ed" font-weight="400" text-anchor="middle">Una base sólida para postular</text></g>
+<circle cx="53" cy="894" r="13" fill="#31556b" stroke="none" stroke-width="2"/>
+<text x="53" y="899" font-size="13" fill="#d5eee8" font-weight="700" text-anchor="middle">1</text>
+<text x="80" y="900" font-size="21" fill="#fff" font-weight="700" text-anchor="start">Encaje</text>
+<text x="80" y="928" font-size="18" fill="#b9d2df" font-weight="400" text-anchor="start">Comprueba los requisitos</text>
+<circle cx="53" cy="1017" r="13" fill="#31556b" stroke="none" stroke-width="2"/>
+<text x="53" y="1022" font-size="13" fill="#d5eee8" font-weight="700" text-anchor="middle">2</text>
+<text x="80" y="1023" font-size="21" fill="#fff" font-weight="700" text-anchor="start">Plan</text>
+<text x="80" y="1051" font-size="18" fill="#b9d2df" font-weight="400" text-anchor="start">Conecta tareas y recursos</text>
+<circle cx="53" cy="1140" r="13" fill="#31556b" stroke="none" stroke-width="2"/>
+<text x="53" y="1145" font-size="13" fill="#d5eee8" font-weight="700" text-anchor="middle">3</text>
+<text x="80" y="1146" font-size="21" fill="#fff" font-weight="700" text-anchor="start">Evidencia</text>
+<text x="80" y="1174" font-size="18" fill="#b9d2df" font-weight="400" text-anchor="start">Respalda los resultados</text>
+<path d="M40 1343H560" fill="none" stroke="#345064" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/>
+<text x="40" y="1371" font-size="14" fill="#b9d2df" font-weight="400" text-anchor="start">SOLVEN LABS / BLOG I+D</text>
+</g></svg>

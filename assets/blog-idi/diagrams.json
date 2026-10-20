@@ -1,0 +1,380 @@
+{
+  "datos-control": {
+    "category": "CALIDAD DE DATOS",
+    "title": "No todo vacío significa cero",
+    "subtitle": "Tres preguntas pequeñas que evitan conclusiones grandes y equivocadas.",
+    "steps": [
+      [
+        "Significado",
+        "¿No se midió o el resultado fue cero?"
+      ],
+      [
+        "Unidad",
+        "¿Horas, minutos o segundos?"
+      ],
+      [
+        "Identidad",
+        "¿Una persona o varias observaciones?"
+      ]
+    ],
+    "footer": "Revisa el significado antes de calcular.",
+    "cover": false
+  },
+  "datos-ruta": {
+    "category": "TRAZABILIDAD",
+    "title": "El viaje de un dato",
+    "subtitle": "Si no puedes seguir el recorrido, el gráfico llega demasiado pronto.",
+    "steps": [
+      [
+        "Fuente",
+        "Conserva el archivo original."
+      ],
+      [
+        "Transformación",
+        "Registra reglas y versiones."
+      ],
+      [
+        "Resultado",
+        "Explica de dónde sale cada indicador."
+      ]
+    ],
+    "footer": "Cada resultado debe poder volver a su origen.",
+    "cover": false
+  },
+  "fondos-encaje": {
+    "category": "ESTRATEGIA DE POSTULACIÓN",
+    "title": "El fondo correcto empieza por el encaje",
+    "subtitle": "No todos los instrumentos acompañan la misma etapa.",
+    "steps": [
+      [
+        "Quién",
+        "Comprueba la entidad o persona elegible."
+      ],
+      [
+        "Para qué",
+        "Relaciona el objetivo con tu proyecto."
+      ],
+      [
+        "Cómo",
+        "Revisa gastos, aportes y entregables."
+      ]
+    ],
+    "footer": "Elige el instrumento que corresponde a tu etapa.",
+    "cover": false
+  },
+  "fondos-presupuesto": {
+    "category": "PLANIFICACIÓN",
+    "title": "Un presupuesto cuenta una historia",
+    "subtitle": "Cada gasto debe tener una relación visible con el trabajo.",
+    "steps": [
+      [
+        "Actividad",
+        "¿Qué vas a hacer?"
+      ],
+      [
+        "Recurso",
+        "¿Qué necesitas para hacerlo?"
+      ],
+      [
+        "Evidencia",
+        "¿Cómo mostrarás el resultado?"
+      ]
+    ],
+    "footer": "Una cadena clara entre trabajo, recursos y resultados.",
+    "cover": false
+  },
+  "ia-comparar": {
+    "category": "EVALUACIÓN DE IA",
+    "title": "La pregunta es: ¿mejora la tarea?",
+    "subtitle": "Antes de celebrar la respuesta, define cómo la vas a evaluar.",
+    "steps": [
+      [
+        "Referencia",
+        "Mide cómo se hace hoy."
+      ],
+      [
+        "Prueba",
+        "Usa casos representativos."
+      ],
+      [
+        "Decisión",
+        "Compara calidad, tiempo y errores."
+      ]
+    ],
+    "footer": "Compara con evidencia, no solo con una demostración.",
+    "cover": false
+  },
+  "ia-supervision": {
+    "category": "SUPERVISIÓN HUMANA",
+    "title": "Tres salidas posibles, no solo responder",
+    "subtitle": "Diseñar límites también es diseñar la experiencia.",
+    "steps": [
+      [
+        "Responder",
+        "Existe información suficiente y verificable."
+      ],
+      [
+        "Pedir contexto",
+        "Faltan datos para completar la tarea."
+      ],
+      [
+        "Escalar",
+        "Una persona debe revisar la decisión."
+      ]
+    ],
+    "footer": "La respuesta correcta también puede ser pedir ayuda.",
+    "cover": false
+  },
+  "prototipo-alcance": {
+    "category": "DISEÑO DE EXPERIMENTOS",
+    "title": "Una pregunta antes de cien funciones",
+    "subtitle": "El alcance protege la prueba que de verdad importa.",
+    "steps": [
+      [
+        "Hipótesis",
+        "¿Qué crees que mejorará?"
+      ],
+      [
+        "Función esencial",
+        "¿Qué permite comprobarlo?"
+      ],
+      [
+        "Criterio",
+        "¿Qué resultado aceptarás?"
+      ]
+    ],
+    "footer": "Define qué necesitas aprender antes de construir.",
+    "cover": false
+  },
+  "prototipo-realidad": {
+    "category": "DESARROLLO DE PRODUCTO",
+    "title": "La entrega tiene más de una pieza",
+    "subtitle": "Una captura no es un manual de operación.",
+    "steps": [
+      [
+        "Uso",
+        "Escenarios probados y límites conocidos."
+      ],
+      [
+        "Continuidad",
+        "Código, accesos y documentación acordados."
+      ],
+      [
+        "Siguiente paso",
+        "Hallazgos y prioridades de evolución."
+      ]
+    ],
+    "footer": "Una entrega útil se puede usar, mantener y mejorar.",
+    "cover": false
+  },
+  "tesis-entrega": {
+    "category": "TRANSFERENCIA",
+    "title": "Una entrega que no depende de tu memoria",
+    "subtitle": "El conocimiento también necesita instrucciones para viajar.",
+    "steps": [
+      [
+        "Uso",
+        "Guía para ejecutar la tarea."
+      ],
+      [
+        "Técnica",
+        "Código, versiones y configuración."
+      ],
+      [
+        "Continuidad",
+        "Responsable y próximo hito."
+      ]
+    ],
+    "footer": "Documentar permite que otros continúen el trabajo.",
+    "cover": false
+  },
+  "tesis-puente": {
+    "category": "DEL HALLAZGO AL PILOTO",
+    "title": "Del conocimiento al uso",
+    "subtitle": "El puente necesita personas a ambos lados.",
+    "steps": [
+      [
+        "Hallazgo",
+        "¿Qué aprendiste en la investigación?"
+      ],
+      [
+        "Aplicación",
+        "¿Quién podría usar ese conocimiento?"
+      ],
+      [
+        "Piloto",
+        "¿Cómo lo probarás de forma acotada?"
+      ]
+    ],
+    "footer": "Investigar → encontrar una aplicación → ponerla a prueba.",
+    "cover": false
+  },
+  "datos-investigacion-cover": {
+    "category": "DATOS DE INVESTIGACIÓN",
+    "title": "Del archivo suelto al dato confiable",
+    "subtitle": "Cada resultado debe poder volver a su origen.",
+    "steps": [
+      [
+        "Fuente",
+        "Conserva el original"
+      ],
+      [
+        "Reglas",
+        "Documenta los cambios"
+      ],
+      [
+        "Resultado",
+        "Comprueba el recorrido"
+      ]
+    ],
+    "footer": "SOLVEN LABS / BLOG I+D",
+    "cover": true
+  },
+  "realidad-prototipo-cover": {
+    "category": "DESARROLLO Y PROTOTIPOS",
+    "title": "De la idea a la primera prueba",
+    "subtitle": "Construir, observar y decidir qué sigue.",
+    "steps": [
+      [
+        "Hipótesis",
+        "Define qué aprender"
+      ],
+      [
+        "Prueba",
+        "Acota la experiencia"
+      ],
+      [
+        "Aprendizaje",
+        "Decide el siguiente paso"
+      ]
+    ],
+    "footer": "SOLVEN LABS / BLOG I+D",
+    "cover": true
+  },
+  "ia-investigacion-cover": {
+    "category": "INTELIGENCIA ARTIFICIAL",
+    "title": "La evidencia antes que la respuesta",
+    "subtitle": "Una IA útil también debe demostrar su aporte.",
+    "steps": [
+      [
+        "Comparar",
+        "Establece una referencia"
+      ],
+      [
+        "Verificar",
+        "Revisa los resultados"
+      ],
+      [
+        "Supervisar",
+        "Conserva el criterio humano"
+      ]
+    ],
+    "footer": "SOLVEN LABS / BLOG I+D",
+    "cover": true
+  },
+  "mitos-fondos-cover": {
+    "category": "FINANCIAMIENTO I+D",
+    "title": "Una propuesta con fundamentos",
+    "subtitle": "Del entusiasmo a un proyecto que se puede evaluar.",
+    "steps": [
+      [
+        "Encaje",
+        "Comprueba los requisitos"
+      ],
+      [
+        "Plan",
+        "Conecta tareas y recursos"
+      ],
+      [
+        "Evidencia",
+        "Respalda los resultados"
+      ]
+    ],
+    "footer": "SOLVEN LABS / BLOG I+D",
+    "cover": true
+  },
+  "tesis-piloto-cover": {
+    "category": "INVESTIGACIÓN APLICADA",
+    "title": "Tu investigación tiene un siguiente capítulo",
+    "subtitle": "Del conocimiento a una experiencia real de uso.",
+    "steps": [
+      [
+        "Hallazgo",
+        "Identifica el aporte"
+      ],
+      [
+        "Personas",
+        "Explora una necesidad"
+      ],
+      [
+        "Piloto",
+        "Prueba en un contexto real"
+      ]
+    ],
+    "footer": "SOLVEN LABS / BLOG I+D",
+    "cover": true
+  },
+  "primer-contacto-cover": {
+    "category": "VALIDACIÓN Y PILOTOS",
+    "title": "Una conversación. Un siguiente paso.",
+    "subtitle": "Del primer contacto a una prueba con propósito.",
+    "steps": [
+      [
+        "Conversar",
+        "Entiende el problema"
+      ],
+      [
+        "Mostrar",
+        "Haz tangible la propuesta"
+      ],
+      [
+        "Probar",
+        "Acuerda un piloto"
+      ]
+    ],
+    "footer": "SOLVEN LABS / BLOG I+D",
+    "cover": true
+  },
+  "proteger-idea-cover": {
+    "category": "PROPIEDAD INTELECTUAL",
+    "title": "Tu proyecto empieza antes del prototipo",
+    "subtitle": "Ordena lo que creas y cómo lo compartes.",
+    "steps": [
+      [
+        "Documentar",
+        "Registra tus avances"
+      ],
+      [
+        "Delimitar",
+        "Define qué compartir"
+      ],
+      [
+        "Acordar",
+        "Aclara la colaboración"
+      ]
+    ],
+    "footer": "SOLVEN LABS / BLOG I+D",
+    "cover": true
+  },
+  "fondos-20-dias-cover": {
+    "category": "FONDOS Y FINANCIAMIENTO",
+    "title": "20 días para decidir. Un plan para avanzar.",
+    "subtitle": "Evalúa la convocatoria antes de comprometerte.",
+    "steps": [
+      [
+        "Encaje",
+        "Revisa las bases"
+      ],
+      [
+        "Evidencia",
+        "Respalda tu propuesta"
+      ],
+      [
+        "Revisión",
+        "Prepara el envío"
+      ]
+    ],
+    "footer": "SOLVEN LABS / BLOG I+D",
+    "cover": true
+  }
+}

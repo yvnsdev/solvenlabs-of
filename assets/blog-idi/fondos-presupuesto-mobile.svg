@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="1400" viewBox="0 0 600 1400" role="img" aria-labelledby="title desc"><title id="title">Un presupuesto cuenta una historia</title><desc id="desc">Cada gasto debe tener una relación visible con el trabajo. Actividad: ¿Qué vas a hacer?. Recurso: ¿Qué necesitas para hacerlo?. Evidencia: ¿Cómo mostrarás el resultado?</desc>
+<rect x="0" y="0" width="600" height="1400" rx="0" fill="#f4f7fa" stroke="none"/>
+<g font-family="Arial, Helvetica, sans-serif">
+<path d="M40 43h34" fill="none" stroke="#258778" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/>
+<text x="40" y="77" font-size="15" fill="#258778" font-weight="700" text-anchor="start">PLANIFICACIÓN</text>
+<text x="40" y="134" font-size="38" fill="#17364e" font-weight="700" text-anchor="start">Un presupuesto cuenta una</text>
+<text x="40" y="182.64" font-size="38" fill="#17364e" font-weight="700" text-anchor="start">historia</text>
+<text x="40" y="245.27999999999997" font-size="21" fill="#506b7e" font-weight="400" text-anchor="start">Cada gasto debe tener una relación visible</text>
+<text x="40" y="272.15999999999997" font-size="21" fill="#506b7e" font-weight="400" text-anchor="start">con el trabajo.</text>
+<g transform="translate(40 330)"><text x="20" y="38" font-size="18" fill="#258778" font-weight="700" text-anchor="start">DEL TRABAJO AL RESULTADO</text><rect x="20" y="68" width="480" height="110" rx="12" fill="#fff" stroke="#d6e3eb"/><text x="40" y="111" font-size="26" fill="#258778" font-weight="700" text-anchor="start">01</text><text x="106" y="104" font-size="16" fill="#17364e" font-weight="700" text-anchor="start">ACTIVIDAD</text><text x="106" y="140" font-size="22" fill="#17364e" font-weight="400" text-anchor="start">Realizar una prueba</text><path d="M65 182v14" fill="none" stroke="#258778" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><rect x="20" y="200" width="480" height="110" rx="12" fill="#fff" stroke="#d6e3eb"/><text x="40" y="243" font-size="26" fill="#258778" font-weight="700" text-anchor="start">02</text><text x="106" y="236" font-size="16" fill="#17364e" font-weight="700" text-anchor="start">RECURSO</text><text x="106" y="272" font-size="22" fill="#17364e" font-weight="400" text-anchor="start">Tiempo + materiales</text><path d="M65 314v14" fill="none" stroke="#258778" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><rect x="20" y="332" width="480" height="110" rx="12" fill="#fff" stroke="#d6e3eb"/><text x="40" y="375" font-size="26" fill="#258778" font-weight="700" text-anchor="start">03</text><text x="106" y="368" font-size="16" fill="#17364e" font-weight="700" text-anchor="start">EVIDENCIA</text><text x="106" y="404" font-size="22" fill="#17364e" font-weight="400" text-anchor="start">Registro de resultados</text><text x="20" y="487" font-size="15" fill="#5a7283" font-weight="400" text-anchor="start">Ejemplo ilustrativo de trazabilidad</text></g>
+<circle cx="53" cy="894" r="13" fill="#dce8ef" stroke="none" stroke-width="2"/>
+<text x="53" y="899" font-size="13" fill="#258778" font-weight="700" text-anchor="middle">1</text>
+<text x="80" y="900" font-size="21" fill="#17364e" font-weight="700" text-anchor="start">Actividad</text>
+<text x="80" y="928" font-size="18" fill="#506b7e" font-weight="400" text-anchor="start">¿Qué vas a hacer?</text>
+<circle cx="53" cy="1017" r="13" fill="#dce8ef" stroke="none" stroke-width="2"/>
+<text x="53" y="1022" font-size="13" fill="#258778" font-weight="700" text-anchor="middle">2</text>
+<text x="80" y="1023" font-size="21" fill="#17364e" font-weight="700" text-anchor="start">Recurso</text>
+<text x="80" y="1051" font-size="18" fill="#506b7e" font-weight="400" text-anchor="start">¿Qué necesitas para hacerlo?</text>
+<circle cx="53" cy="1140" r="13" fill="#dce8ef" stroke="none" stroke-width="2"/>
+<text x="53" y="1145" font-size="13" fill="#258778" font-weight="700" text-anchor="middle">3</text>
+<text x="80" y="1146" font-size="21" fill="#17364e" font-weight="700" text-anchor="start">Evidencia</text>
+<text x="80" y="1174" font-size="18" fill="#506b7e" font-weight="400" text-anchor="start">¿Cómo mostrarás el resultado?</text>
+<path d="M40 1343H560" fill="none" stroke="#d2dfe7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/>
+<text x="40" y="1371" font-size="14" fill="#506b7e" font-weight="400" text-anchor="start">Una cadena clara entre trabajo, recursos y resultados.</text>
+</g></svg>

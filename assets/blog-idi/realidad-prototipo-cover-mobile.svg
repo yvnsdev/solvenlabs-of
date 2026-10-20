@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="1400" viewBox="0 0 600 1400" role="img" aria-labelledby="title desc"><title id="title">De la idea a la primera prueba</title><desc id="desc">Construir, observar y decidir qué sigue. Hipótesis: Define qué aprender. Prueba: Acota la experiencia. Aprendizaje: Decide el siguiente paso</desc>
+<rect x="0" y="0" width="600" height="1400" rx="0" fill="#102c42" stroke="none"/>
+<g font-family="Arial, Helvetica, sans-serif">
+<path d="M40 43h34" fill="none" stroke="#79cfbf" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/>
+<text x="40" y="77" font-size="15" fill="#8edaca" font-weight="700" text-anchor="start">DESARROLLO Y PROTOTIPOS</text>
+<text x="40" y="134" font-size="38" fill="#fff" font-weight="700" text-anchor="start">De la idea a la primera</text>
+<text x="40" y="182.64" font-size="38" fill="#fff" font-weight="700" text-anchor="start">prueba</text>
+<text x="40" y="245.27999999999997" font-size="21" fill="#b9d2df" font-weight="400" text-anchor="start">Construir, observar y decidir qué sigue.</text>
+<g transform="translate(40 330)"><rect x="28" y="60" width="460" height="326" rx="18" fill="#fff" stroke="#d6e3eb"/><rect x="28" y="60" width="460" height="42" rx="15" fill="#d9e4f1" stroke="none"/><circle cx="50" cy="81" r="4" fill="#7a94b2" stroke="none" stroke-width="2"/><circle cx="69" cy="81" r="4" fill="#7a94b2" stroke="none" stroke-width="2"/><circle cx="88" cy="81" r="4" fill="#7a94b2" stroke="none" stroke-width="2"/><rect x="47" y="120" width="100" height="246" rx="8" fill="#e9eff7" stroke="none"/><path d="M62 143h66" fill="none" stroke="#b2c6db" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><path d="M62 173h66" fill="none" stroke="#b2c6db" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><path d="M62 203h66" fill="none" stroke="#b2c6db" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><rect x="169" y="121" width="296" height="126" rx="10" fill="#ecf7f5" stroke="none"/><path d="M199 218l54-43 48 19 63-46 69 23" fill="none" stroke="#366ba2" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><rect x="169" y="268" width="138" height="72" rx="8" fill="#e8eef7" stroke="none"/><rect x="327" y="268" width="138" height="72" rx="8" fill="#e8eef7" stroke="none"/><path d="M439 401v43H81v-40m-8 8 8-8 8 8" fill="none" stroke="#8ed7cb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><text x="260" y="484" font-size="22" fill="#d1e6ed" font-weight="400" text-anchor="middle">Construir · observar · ajustar</text></g>
+<circle cx="53" cy="894" r="13" fill="#31556b" stroke="none" stroke-width="2"/>
+<text x="53" y="899" font-size="13" fill="#d5eee8" font-weight="700" text-anchor="middle">1</text>
+<text x="80" y="900" font-size="21" fill="#fff" font-weight="700" text-anchor="start">Hipótesis</text>
+<text x="80" y="928" font-size="18" fill="#b9d2df" font-weight="400" text-anchor="start">Define qué aprender</text>
+<circle cx="53" cy="1017" r="13" fill="#31556b" stroke="none" stroke-width="2"/>
+<text x="53" y="1022" font-size="13" fill="#d5eee8" font-weight="700" text-anchor="middle">2</text>
+<text x="80" y="1023" font-size="21" fill="#fff" font-weight="700" text-anchor="start">Prueba</text>
+<text x="80" y="1051" font-size="18" fill="#b9d2df" font-weight="400" text-anchor="start">Acota la experiencia</text>
+<circle cx="53" cy="1140" r="13" fill="#31556b" stroke="none" stroke-width="2"/>
+<text x="53" y="1145" font-size="13" fill="#d5eee8" font-weight="700" text-anchor="middle">3</text>
+<text x="80" y="1146" font-size="21" fill="#fff" font-weight="700" text-anchor="start">Aprendizaje</text>
+<text x="80" y="1174" font-size="18" fill="#b9d2df" font-weight="400" text-anchor="start">Decide el siguiente paso</text>
+<path d="M40 1343H560" fill="none" stroke="#345064" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/>
+<text x="40" y="1371" font-size="14" fill="#b9d2df" font-weight="400" text-anchor="start">SOLVEN LABS / BLOG I+D</text>
+</g></svg>

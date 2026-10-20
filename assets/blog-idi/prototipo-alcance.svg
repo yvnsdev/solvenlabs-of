@@ -1,21 +1,25 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc">
-<title id="title">Una pregunta antes de cien funciones</title><desc id="desc">El alcance protege la prueba que de verdad importa. Hipótesis: ¿Qué crees que mejorará? Función esencial: ¿Qué permite comprobarlo? Criterio: ¿Qué resultado aceptarás?</desc>
-<defs>
-<linearGradient id="paper" x2="1" y2="1"><stop stop-color="#f9fcfd"/><stop offset="1" stop-color="#eaf2f6"/></linearGradient>
-<linearGradient id="night" x2="1" y2="1"><stop stop-color="#102d45"/><stop offset="1" stop-color="#061b2b"/></linearGradient>
-<linearGradient id="glass" x2="0" y2="1"><stop stop-color="#fff" stop-opacity=".12"/><stop offset="1" stop-color="#fff" stop-opacity=".025"/></linearGradient>
-<filter id="shadow" x="-30%" y="-30%" width="160%" height="180%"><feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#052d45" flood-opacity=".1"/></filter>
-<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="m1 1 7 4-7 4" fill="none" stroke="#56a4b9" stroke-width="1.5"/></marker>
-</defs>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc"><title id="title">Una pregunta antes de cien funciones</title><desc id="desc">El alcance protege la prueba que de verdad importa. Hipótesis: ¿Qué crees que mejorará?. Función esencial: ¿Qué permite comprobarlo?. Criterio: ¿Qué resultado aceptarás?</desc>
+<rect x="0" y="0" width="1200" height="680" rx="0" fill="#f4f7fa" stroke="none"/>
 <g font-family="Arial, Helvetica, sans-serif">
-<rect width="1200" height="680" fill="url(#paper)"/>
-<path d="M60 55h34" stroke="#087e99" stroke-width="4"/><text x="108" y="61" fill="#416579" font-size="16" font-weight="700">SOLVEN LABS  /  BLOG I+D</text><text x="60" y="115" fill="#087e99" font-size="14" font-weight="700">DISEÑO DE EXPERIMENTOS</text><text x="60" y="168" fill="#102f46" font-size="38" font-weight="700">Una pregunta antes de cien funciones</text><text x="60" y="222" fill="#536d7e" font-size="20" font-weight="400">El alcance protege la prueba que de verdad importa.</text><path d="M96 292H1100" stroke="#bed3dd" stroke-width="2"/><circle cx="88" cy="292" r="18" fill="#fff" stroke="#087e99" stroke-width="2"/><text x="78" y="298" fill="#087e99" font-size="14" font-weight="700">01</text>
-<rect x="60" y="330" width="348" height="230" rx="18" fill="#fff" stroke="#d8e5eb" filter="url(#shadow)"/>
-<rect x="84" y="354" width="62" height="62" rx="15" fill="#edf5fa"/><g transform="translate(91 361) scale(0.75)" fill="none" stroke="#087e99" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="32" cy="32" r="24"/><path d="M24 24a8 8 0 1 1 12 7c-4 2-4 5-4 8M32 47v1"/></g>
-<text x="84" y="455" fill="#16384f" font-size="26" font-weight="700">Hipótesis</text><text x="84" y="491" fill="#526e80" font-size="21" font-weight="400">¿Qué crees que mejorará?</text><path d="M385 292h34" stroke="#56a4b9" stroke-width="2" marker-end="url(#arrow)"/><circle cx="454" cy="292" r="18" fill="#fff" stroke="#087e99" stroke-width="2"/><text x="444" y="298" fill="#087e99" font-size="14" font-weight="700">02</text>
-<rect x="426" y="330" width="348" height="230" rx="18" fill="#fff" stroke="#d8e5eb" filter="url(#shadow)"/>
-<rect x="450" y="354" width="62" height="62" rx="15" fill="#edf5fa"/><g transform="translate(457 361) scale(0.75)" fill="none" stroke="#087e99" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"><path d="m21 18-15 14 15 14m22-28 15 14-15 14M37 11 27 53"/></g>
-<text x="450" y="455" fill="#16384f" font-size="26" font-weight="700">Función esencial</text><text x="450" y="491" fill="#526e80" font-size="21" font-weight="400">¿Qué permite comprobarlo?</text><path d="M751 292h34" stroke="#56a4b9" stroke-width="2" marker-end="url(#arrow)"/><circle cx="820" cy="292" r="18" fill="#087e99" stroke="#087e99" stroke-width="2"/><text x="810" y="298" fill="#fff" font-size="14" font-weight="700">03</text>
-<rect x="792" y="330" width="348" height="230" rx="18" fill="#fff" stroke="#d8e5eb" filter="url(#shadow)"/>
-<rect x="816" y="354" width="62" height="62" rx="15" fill="#dff5f2"/><g transform="translate(823 361) scale(0.75)" fill="none" stroke="#087e99" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="32" cy="32" r="23"/><circle cx="32" cy="32" r="13"/><circle cx="32" cy="32" r="3"/><path d="m33 31 23-23M47 8h9v9"/></g>
-<text x="816" y="455" fill="#16384f" font-size="26" font-weight="700">Criterio</text><text x="816" y="491" fill="#526e80" font-size="21" font-weight="400">¿Qué resultado aceptarás?</text><path d="M60 603h1080" stroke="#cddde5"/><text x="60" y="638" fill="#3b6579" font-size="19" font-weight="400">Define qué necesitas aprender antes de construir.</text><text x="1080" y="638" fill="#087e99" font-size="16" font-weight="700">I+D</text></g></svg>
+<path d="M40 43h34" fill="none" stroke="#366ba2" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/>
+<text x="40" y="77" font-size="15" fill="#366ba2" font-weight="700" text-anchor="start">DISEÑO DE EXPERIMENTOS</text>
+<text x="40" y="134" font-size="42" fill="#17364e" font-weight="700" text-anchor="start">Una pregunta antes de</text>
+<text x="40" y="187.76" font-size="42" fill="#17364e" font-weight="700" text-anchor="start">cien funciones</text>
+<text x="40" y="255.51999999999998" font-size="21" fill="#506b7e" font-weight="400" text-anchor="start">El alcance protege la prueba que de</text>
+<text x="40" y="282.4" font-size="21" fill="#506b7e" font-weight="400" text-anchor="start">verdad importa.</text>
+<g transform="translate(620 100)"><circle cx="260" cy="242" r="205" fill="#e5edf7" stroke="none" stroke-width="2"/><circle cx="260" cy="242" r="145" fill="#d0e0f3" stroke="none" stroke-width="2"/><circle cx="260" cy="242" r="78" fill="#f9fcff" stroke="none" stroke-width="2"/><text x="260" y="88" font-size="17" fill="#17364e" font-weight="700" text-anchor="middle">HIPÓTESIS</text><text x="260" y="143" font-size="16" fill="#17364e" font-weight="700" text-anchor="middle">FUNCIÓN ESENCIAL</text><text x="260" y="238" font-size="24" fill="#366ba2" font-weight="700" text-anchor="middle">PRUEBA</text><text x="260" y="265" font-size="19" fill="#366ba2" font-weight="700" text-anchor="middle">ACOTADA</text><path d="M318 300 410 408h70" fill="none" stroke="#366ba2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/><rect x="275" y="426" width="220" height="40" rx="10" fill="#eaf2f7" stroke="none"/><text x="385.0" y="452" font-size="15" fill="#17364e" font-weight="700" text-anchor="middle">Criterio de éxito</text><text x="260" y="489" font-size="18" fill="#17364e" font-weight="400" text-anchor="middle">Reduce el alcance, conserva la pregunta.</text></g>
+<circle cx="53" cy="379" r="13" fill="#dce8ef" stroke="none" stroke-width="2"/>
+<text x="53" y="384" font-size="13" fill="#366ba2" font-weight="700" text-anchor="middle">1</text>
+<text x="80" y="385" font-size="21" fill="#17364e" font-weight="700" text-anchor="start">Hipótesis</text>
+<text x="80" y="413" font-size="18" fill="#506b7e" font-weight="400" text-anchor="start">¿Qué crees que mejorará?</text>
+<circle cx="53" cy="452" r="13" fill="#dce8ef" stroke="none" stroke-width="2"/>
+<text x="53" y="457" font-size="13" fill="#366ba2" font-weight="700" text-anchor="middle">2</text>
+<text x="80" y="458" font-size="21" fill="#17364e" font-weight="700" text-anchor="start">Función esencial</text>
+<text x="80" y="486" font-size="18" fill="#506b7e" font-weight="400" text-anchor="start">¿Qué permite comprobarlo?</text>
+<circle cx="53" cy="525" r="13" fill="#dce8ef" stroke="none" stroke-width="2"/>
+<text x="53" y="530" font-size="13" fill="#366ba2" font-weight="700" text-anchor="middle">3</text>
+<text x="80" y="531" font-size="21" fill="#17364e" font-weight="700" text-anchor="start">Criterio</text>
+<text x="80" y="559" font-size="18" fill="#506b7e" font-weight="400" text-anchor="start">¿Qué resultado aceptarás?</text>
+<path d="M40 623H1160" fill="none" stroke="#d2dfe7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray=""/>
+<text x="40" y="651" font-size="16" fill="#506b7e" font-weight="400" text-anchor="start">Define qué necesitas aprender antes de construir.</text>
+</g></svg>
