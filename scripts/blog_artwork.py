@@ -41,7 +41,27 @@ class Canvas:
 def artwork(name, accent):
     c = Canvas(accent)
     # Each subject has its own topology; these are not interchangeable cards.
-    if name == 'datos-control':
+    if name == 'planilla-costos-cover':
+        c.rect(18,62,484,335,'#fff',18,'none')
+        c.rect(18,62,484,52,accent,16,'none')
+        c.text('EL MONTO NECESITA UN CÁLCULO',38,95,17,'#fff',700)
+        for x,t in [(38,'CANTIDAD'),(206,'VALOR'),(362,'SUBTOTAL')]: c.text(t,x,147,14,accent,700)
+        for y,values in [(195,['24 h','$20.000','$480.000']),(248,['3 kits','$40.000','$120.000']),(301,['8 h','$20.000','$160.000'])]:
+            for x,value in zip([38,206,362],values):c.text(value,x,y,19)
+            c.path(f'M38 {y+15}h444','#dce6ec',1)
+        c.text('TOTAL',38,364,18,accent,700);c.text('$760.000',362,364,22,accent,700)
+        c.rect(93,424,334,57,'#d8eee7',12,'none')
+        c.check(119,452);c.text('Ejemplo ilustrativo · CLP',146,459,18)
+    elif name == 'costos-respaldo':
+        c.rect(34,22,452,455,'#fff',18)
+        c.text('REVISIÓN DE UNA FILA',58,65,19,accent,700)
+        for i,(label,detail) in enumerate([('ACTIVIDAD','¿Qué trabajo permite realizar?'),('CÁLCULO','Cantidad × precio unitario'),('RESPALDO','Referencia, fecha y alcance'),('FINANCIAMIENTO','¿Quién cubre este gasto?')]):
+            y=116+i*95
+            c.check(66,y)
+            c.text(label,96,y-4,16,accent,700)
+            c.text(detail,96,y+25,19)
+            if i<3:c.path(f'M58 {y+48}h400','#dce6ec',1)
+    elif name == 'datos-control':
         c.rect(14,55,492,350)
         c.rect(14,55,492,56,'#17364e',12,'none')
         for x,t in [(36,'REGISTRO'),(195,'VALOR'),(350,'UNIDAD')]: c.text(t,x,90,15,'#fff',700)

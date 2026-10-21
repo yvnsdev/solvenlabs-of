@@ -1,5 +1,8 @@
 // Contenido editorial I+D+i y actividades del blog.
+import { COSTS_POST } from './assets/blog-idi/planilla-costos-post.js?v=costos-8';
+import { ensureArticleGames } from './assets/blog-idi/article-games.js?v=games-9';
 export const BLOG_POSTS = [
+  COSTS_POST,
   {
     id: 'datos-investigacion',
     slug: 'automatizar-procesos-pyme-sin-complicar-operacion',
@@ -67,7 +70,7 @@ export const BLOG_POSTS = [
     author_name: 'Equipo Solven Labs',
     published_at: '2026-10-08T12:00:00-03:00',
     updated_at: '2026-10-08T12:00:00-03:00',
-    featured: true,
+    featured: false,
     cover_image: '/assets/blog-idi/mitos-fondos-cover.svg?v=diagrams-6',
     cover_alt: 'Una propuesta de investigación con objetivo, plan de trabajo, recursos y resultados',
     seo_title: 'Fondos concursables: cinco mitos que tu proyecto no necesita | Solven Labs',
@@ -159,7 +162,7 @@ export const BLOG_POSTS = [
     author_name: 'Equipo Solven Labs',
     published_at: '2026-10-17T11:00:00-03:00',
     updated_at: '2026-10-17T11:00:00-03:00',
-    featured: true,
+    featured: false,
     cover_image: '/assets/blog-idi/primer-contacto-cover.svg?v=diagrams-6',
     cover_alt: 'Conversación entre un equipo creador y una organización que conduce a una demostración o piloto',
     seo_title: '¿Plan piloto o demo gratuita? Cómo hacer el primer contacto | Solven Labs',
@@ -412,7 +415,7 @@ export function initReadingActivities(root, slug) {
         input.setAttribute('aria-invalid', String(!ok));
         if (ok) correct++;
       });
-      form.querySelector('[data-activity-result]').textContent = correct === cells.length ? '¡Completado! Datos, hito y piloto: tres piezas para llevar tu tesis a la práctica.' : `${correct} de ${cells.length} casillas correctas. Revisa las marcadas; las palabras comparten letras.`;
+      form.querySelector('[data-activity-result]').textContent = correct === cells.length ? '¡Crucigrama completado! Todas las palabras son correctas.' : `${correct} de ${cells.length} casillas correctas. Revisa las marcadas; las palabras comparten letras.`;
     });
     form.addEventListener('reset', () => { cells.forEach(input => input.removeAttribute('aria-invalid')); form.querySelector('[data-activity-result]').textContent = ''; progress(form, 0, cells.length, 'Una letra por casilla'); });
   });
@@ -463,9 +466,12 @@ function initSiteChrome() {
   const currentHeader = `<header class="navbar" role="banner"><div class="navbar__container"><a href="/" class="navbar__logo" aria-label="Solven Labs - Ir al inicio"><img src="/assets/logo%20extended%20chopped.png" alt="Solven Labs" class="navbar__logo-img" decoding="async" fetchpriority="high"></a><nav class="navbar__nav" role="navigation" aria-label="Navegación principal"><a href="/servicios" class="navbar__link">Qué hacemos</a><div class="navbar__dropdown"><button class="navbar__link navbar__dropdown-toggle" aria-expanded="false">Conócenos <i data-lucide="chevron-down" class="navbar__dropdown-icon"></i></button><div class="navbar__dropdown-menu"><a href="/proyectos" class="navbar__dropdown-item"><i data-lucide="layout-grid"></i><span>Proyectos</span></a><a href="/como-trabajamos" class="navbar__dropdown-item"><i data-lucide="shield-check"></i><span>Cómo trabajamos</span></a><a href="/equipo" class="navbar__dropdown-item"><i data-lucide="users"></i><span>Quiénes somos</span></a></div></div><a href="/guias" class="navbar__link active" aria-current="page">Blog I+D</a><div class="navbar__dropdown"><button class="navbar__link navbar__dropdown-toggle" aria-expanded="false">Recursos <i data-lucide="chevron-down" class="navbar__dropdown-icon"></i></button><div class="navbar__dropdown-menu"><a href="/diagnostico-digital" class="navbar__dropdown-item"><i data-lucide="calculator"></i><span>Orientador de proyecto</span></a><a href="/preguntas-frecuentes" class="navbar__dropdown-item"><i data-lucide="help-circle"></i><span>Preguntas frecuentes</span></a></div></div><a href="/contacto" class="navbar__link navbar__link--contact">Hablemos</a></nav><div class="navbar__actions"><a href="/contacto" class="btn btn--primary btn--sm navbar__project-cta" aria-label="Agendar reunión"><i data-lucide="arrow-up-right" class="icon icon--sm" aria-hidden="true"></i><span>Agendar reunión</span></a><button class="navbar__mobile-toggle" aria-label="Abrir menú" aria-expanded="false"><i data-lucide="menu" class="icon"></i></button></div></div></header>`;
   const currentMobile = `<div class="mobile-menu" role="dialog" aria-modal="true" aria-label="Menú móvil" aria-hidden="true"><nav class="mobile-menu__nav"><div class="mobile-menu__primary" aria-label="Secciones del sitio"><a href="/" class="mobile-menu__link"><i data-lucide="home"></i><span>Inicio</span></a><a href="/servicios" class="mobile-menu__link"><i data-lucide="layout-grid"></i><span>Qué hacemos</span></a><a href="/proyectos" class="mobile-menu__link"><i data-lucide="quote"></i><span>Proyectos</span></a><a href="/como-trabajamos" class="mobile-menu__link"><i data-lucide="git-branch"></i><span>Cómo trabajamos</span></a><a href="/equipo" class="mobile-menu__link"><i data-lucide="users"></i><span>Equipo</span></a><a href="/guias" class="mobile-menu__link active" aria-current="page"><i data-lucide="book-open"></i><span>Blog I+D</span></a><a href="/diagnostico-digital" class="mobile-menu__link"><i data-lucide="calculator"></i><span>Orientador</span></a><a href="/preguntas-frecuentes" class="mobile-menu__link"><i data-lucide="help-circle"></i><span>Preguntas frecuentes</span></a><a href="/contacto" class="mobile-menu__link"><i data-lucide="message-circle"></i><span>Contacto</span></a></div></nav><div class="mobile-menu__cta"><a href="/contacto" class="btn btn--primary" style="width:100%">Agendar reunión</a></div></div>`;
   const currentFooter = `<footer class="footer"><div class="container"><div class="footer__grid"><div class="footer__brand"><a href="/" class="footer__logo"><img decoding="async" src="/assets/logo%20blanco.png" alt="Solven Labs" class="footer__logo-img"></a><p class="footer__desc">Somos una EBCT apoyada por ANID. Transformamos ciencia y tecnología en soluciones con IA. Desde Chillán para todo Chile.</p><form class="footer__newsletter" data-newsletter-form action="https://formsubmit.co/tomas@solvenlabs.cl" method="POST"><input type="hidden" name="_subject" value="Nueva suscripción newsletter Solven Labs"><input type="hidden" name="_captcha" value="false"><input type="hidden" name="_template" value="box"><input type="email" name="email" class="footer__newsletter-input" placeholder="tu@email.com" aria-label="Email para newsletter"><button type="submit" class="footer__newsletter-btn">Recibir novedades</button></form><p class="footer__newsletter-success" role="status" aria-live="polite"></p></div><div class="footer__column footer__column--nav"><h4 class="footer__column-title">Empresa</h4><nav class="footer__links"><a href="/" class="footer__link">Inicio</a><a href="/servicios" class="footer__link">Qué hacemos</a><a href="/proyectos" class="footer__link">Proyectos</a><a href="/como-trabajamos" class="footer__link">Cómo trabajamos</a><a href="/equipo" class="footer__link">Equipo</a><a href="/guias" class="footer__link">Blog I+D</a><a href="/contacto" class="footer__link">Contacto</a></nav></div><div class="footer__column footer__column--nav"><h4 class="footer__column-title">Legal</h4><nav class="footer__links"><a href="/#terms-modal" class="footer__link">Términos y condiciones</a><a href="/#privacy-modal" class="footer__link">Privacidad y datos</a><a href="/#returns-modal" class="footer__link">Devoluciones y cancelaciones</a></nav></div><div class="footer__column footer__column--tax"><h4 class="footer__column-title">Información</h4><div class="footer__tax"><div class="footer__tax-item"><span class="footer__tax-label">Nombre legal</span><span class="footer__tax-value">Solven Labs SPA</span></div><div class="footer__tax-item"><span class="footer__tax-label">Dirección</span><span class="footer__tax-value"><i data-lucide="map-pin" class="footer__tax-icon"></i>Avenida Andrés Bello 720, Chillán, Chile</span></div><div class="footer__tax-item"><span class="footer__tax-label">WhatsApp</span><span class="footer__tax-value"><i data-lucide="phone" class="footer__tax-icon"></i><a href="https://wa.me/56977029753" class="footer__tax-link">+56 9 7702 9753</a></span></div><div class="footer__tax-item"><span class="footer__tax-label">Correo</span><span class="footer__tax-value"><i data-lucide="mail" class="footer__tax-icon"></i><a href="mailto:tomas@solvenlabs.cl" class="footer__tax-link">tomas@solvenlabs.cl</a></span></div></div></div></div><div class="footer__bottom"><div class="footer__social"><a href="https://wa.me/56977029753" target="_blank" rel="noopener" class="footer__social-link" aria-label="WhatsApp"><i data-lucide="message-circle" class="icon"></i></a><a href="mailto:tomas@solvenlabs.cl" class="footer__social-link" aria-label="Email"><i data-lucide="mail" class="icon"></i></a></div><p class="footer__copyright">© 2026 Solven Labs. Ciencia que se transforma en soluciones.</p></div></div></footer>`;
-  if (!$('.navbar__dropdown')) $('.navbar')?.outerHTML = currentHeader;
-  if ($$('.mobile-menu__link').length < 9) $('.mobile-menu')?.outerHTML = currentMobile;
-  if (!$('.footer__grid')) $('.footer')?.outerHTML = currentFooter;
+  const existingHeader = $('.navbar');
+  const existingMobileMenu = $('.mobile-menu');
+  const existingFooter = $('.footer');
+  if (!$('.navbar__dropdown') && existingHeader) existingHeader.outerHTML = currentHeader;
+  if ($$('.mobile-menu__link').length < 9 && existingMobileMenu) existingMobileMenu.outerHTML = currentMobile;
+  if (!$('.footer__grid') && existingFooter) existingFooter.outerHTML = currentFooter;
   const navbar = $('.navbar');
   const mobileToggle = $('.navbar__mobile-toggle');
   const mobileMenu = $('.mobile-menu');
@@ -708,18 +714,45 @@ function enrichArticle(container, post) {
       const dialog = document.createElement('dialog');
       dialog.className = 'figure-dialog';
       dialog.setAttribute('aria-label', 'Esquema ampliado');
+      const header = document.createElement('div');
+      header.className = 'figure-dialog__header';
+      const title = document.createElement('strong');
+      title.textContent = 'Esquema ampliado';
+      const zoom = document.createElement('button');
+      zoom.type = 'button';
+      zoom.textContent = 'Acercar';
+      zoom.setAttribute('aria-pressed', 'false');
       const close = document.createElement('button');
       close.type = 'button';
       close.textContent = 'Cerrar ×';
       const large = image.cloneNode();
       large.src = image.currentSrc || image.src;
       large.loading = 'eager';
-      dialog.append(close, large);
+      large.removeAttribute('width');
+      large.removeAttribute('height');
+      const viewport = document.createElement('div');
+      viewport.className = 'figure-dialog__viewport';
+      viewport.tabIndex = 0;
+      viewport.setAttribute('aria-label', 'Imagen del esquema; usa las flechas para desplazarte al acercar');
+      viewport.append(large);
+      header.append(title, zoom, close);
+      dialog.append(header, viewport);
       document.body.append(dialog);
+      document.documentElement.classList.add('figure-modal-open');
+      zoom.addEventListener('click', () => {
+        const enlarged = dialog.classList.toggle('is-zoomed');
+        zoom.setAttribute('aria-pressed', String(enlarged));
+        zoom.textContent = enlarged ? 'Ajustar a pantalla' : 'Acercar';
+        viewport.scrollTo(0, 0);
+      });
       close.addEventListener('click', () => dialog.close());
-      dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
-      dialog.addEventListener('close', () => { dialog.remove(); toolbar.querySelector('button').focus(); });
+      dialog.addEventListener('click', event => {
+        const bounds = dialog.getBoundingClientRect();
+        if (event.target === dialog && (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom)) dialog.close();
+      });
+      dialog.addEventListener('close', () => { document.documentElement.classList.remove('figure-modal-open'); dialog.remove(); toolbar.querySelector('button').focus(); });
       dialog.showModal();
+      close.focus();
     });
   });
   const note = EDITORIAL_NOTES[post.slug];
@@ -771,6 +804,7 @@ function showArticle(slug) {
   $('#article-reading').textContent = readingTime(post.content);
   $('#article-content').innerHTML = post.content;
   enrichArticle($('#article-content'), post);
+  ensureArticleGames($('#article-content'), post.slug);
   initReadingActivities($('#article-content'), post.slug);
   renderArticleOverview($('#article-content'));
   $('#article-cover-wrap').hidden = false;

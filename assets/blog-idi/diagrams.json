@@ -1,4 +1,20 @@
 {
+  "planilla-costos-cover": {
+    "category": "FONDOS Y FINANCIAMIENTO",
+    "title": "Tu presupuesto también se defiende",
+    "subtitle": "Cada monto necesita una explicación.",
+    "steps": [["Desglosar", "Cantidad, unidad y precio"], ["Justificar", "Conecta el gasto con una actividad"], ["Revisar", "Bases, respaldos y aportes"]],
+    "footer": "SOLVEN LABS / BLOG I+D",
+    "cover": true
+  },
+  "costos-respaldo": {
+    "category": "PRESUPUESTO DEL PROYECTO",
+    "title": "De una cifra a un gasto justificable",
+    "subtitle": "La suma es solo una parte de la revisión.",
+    "steps": [["Trabajo", "Identifica la actividad y el entregable"], ["Cálculo", "Explica cantidades y valores unitarios"], ["Sustento", "Conserva referencias y verifica las bases"]],
+    "footer": "Un presupuesto claro permite revisar los supuestos.",
+    "cover": false
+  },
   "datos-control": {
     "category": "CALIDAD DE DATOS",
     "title": "No todo vacío significa cero",

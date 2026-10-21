@@ -17819,6 +17819,12 @@ body {
 }
 
 /* Editorial diagrams: preserve the complete canvas and use vertical art on phones. */
+.costs-table-wrap { overflow-x: auto; margin: 24px 0; border: 1px solid #c8dce8; border-radius: 14px; background: #fff; }
+.costs-table { width: 100%; min-width: 540px; border-collapse: collapse; font-size: .9rem; }
+.costs-table caption { padding: 18px; text-align: left; font-weight: 700; color: #17364e; }
+.costs-table th, .costs-table td { padding: 14px 18px; border-top: 1px solid #dce7ee; text-align: left; }
+.costs-table thead, .costs-table tfoot { background: #eaf3f7; color: #17364e; font-weight: 700; }
+.costs-table td:last-child { white-space: nowrap; font-variant-numeric: tabular-nums; }
 #article-view .editorial-picture { display: block; width: 100%; }
 #article-view .editorial-media { margin-inline: 0; }
 #article-view .editorial-media img[src*="blog-idi/"],
