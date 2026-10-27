@@ -1,3 +1,37 @@
+// Section URLs work on direct entry, reload and browser back/forward.
+(() => {
+  const base = '/tomas-yevenes';
+  const sections = new Set(['trayectoria', 'experiencia', 'proyectos', 'catalogo', 'reconocimientos', 'certificaciones', 'formacion']);
+  const currentSection = () => {
+    const path = location.pathname.replace(/\/$/, '');
+    return path.startsWith(`${base}/`) ? path.slice(base.length + 1) : '';
+  };
+  const navigate = (smooth = false) => {
+    const section = currentSection();
+    const target = document.getElementById(sections.has(section) ? section : 'contenido');
+    document.querySelectorAll('.topbar nav a').forEach(link => {
+      if (link.getAttribute('href') === `${base}/${section}`) link.setAttribute('aria-current', 'location');
+      else link.removeAttribute('aria-current');
+    });
+    target?.scrollIntoView({ behavior: smooth && !window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'smooth' : 'instant', block: 'start' });
+  };
+  document.addEventListener('click', event => {
+    const link = event.target.closest('a');
+    if (!link || event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || link.target || link.hasAttribute('download')) return;
+    const url = new URL(link.href, location.href);
+    if (url.origin !== location.origin || !url.pathname.startsWith(`${base}/`) || !sections.has(url.pathname.slice(base.length + 1))) return;
+    event.preventDefault();
+    if (location.pathname !== url.pathname) history.pushState(null, '', url.pathname);
+    navigate(true);
+  });
+  window.addEventListener('popstate', () => navigate());
+  window.addEventListener('load', () => {
+    const legacy = location.hash.slice(1);
+    if (sections.has(legacy)) history.replaceState(null, '', `${base}/${legacy}`);
+    if (currentSection()) navigate();
+  }, { once: true });
+})();
+
 document.getElementById('year').textContent = new Date().getFullYear();
 
 const filters = document.querySelector('.project-filters');

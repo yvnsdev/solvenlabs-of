@@ -20,6 +20,20 @@
 /proyecto/*     /proyecto.html    200!
 
 # Perfil profesional de Tomas Yevenes
+/tomas-yevenes/trayectoria/ /tomas-yevenes/trayectoria 301!
+/tomas-yevenes/trayectoria /tomas-yevenes.html 200!
+/tomas-yevenes/experiencia/ /tomas-yevenes/experiencia 301!
+/tomas-yevenes/experiencia /tomas-yevenes.html 200!
+/tomas-yevenes/proyectos/ /tomas-yevenes/proyectos 301!
+/tomas-yevenes/proyectos /tomas-yevenes.html 200!
+/tomas-yevenes/catalogo/ /tomas-yevenes/catalogo 301!
+/tomas-yevenes/catalogo /tomas-yevenes.html 200!
+/tomas-yevenes/reconocimientos/ /tomas-yevenes/reconocimientos 301!
+/tomas-yevenes/reconocimientos /tomas-yevenes.html 200!
+/tomas-yevenes/certificaciones/ /tomas-yevenes/certificaciones 301!
+/tomas-yevenes/certificaciones /tomas-yevenes.html 200!
+/tomas-yevenes/formacion/ /tomas-yevenes/formacion 301!
+/tomas-yevenes/formacion /tomas-yevenes.html 200!
 /tomas-yevenes       /tomas-yevenes.html 200!
 /tomas-yevenes/      /tomas-yevenes     301!
 

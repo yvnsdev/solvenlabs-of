@@ -25,6 +25,9 @@ RewriteEngine On
 RewriteRule ^dashboard(?:/.*)?$ dashboard.html [L]
 RewriteRule ^login/?$ dashboard.html [L]
 
+# Perfil y secciones con URL propia
+RewriteRule ^tomas-yevenes(?:/(?:trayectoria|experiencia|proyectos|catalogo|reconocimientos|certificaciones|formacion))?/?$ tomas-yevenes.html [L]
+
 # Si la URL no es archivo real
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d

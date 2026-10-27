@@ -113,6 +113,56 @@ services:
         source: /project/*
         destination: /proyecto.html
       
+      # Professional profile and section routes
+      - type: redirect
+        source: /tomas-yevenes/
+        destination: /tomas-yevenes
+      - type: rewrite
+        source: /tomas-yevenes
+        destination: /tomas-yevenes.html
+      - type: redirect
+        source: /tomas-yevenes/trayectoria/
+        destination: /tomas-yevenes/trayectoria
+      - type: rewrite
+        source: /tomas-yevenes/trayectoria
+        destination: /tomas-yevenes.html
+      - type: redirect
+        source: /tomas-yevenes/experiencia/
+        destination: /tomas-yevenes/experiencia
+      - type: rewrite
+        source: /tomas-yevenes/experiencia
+        destination: /tomas-yevenes.html
+      - type: redirect
+        source: /tomas-yevenes/proyectos/
+        destination: /tomas-yevenes/proyectos
+      - type: rewrite
+        source: /tomas-yevenes/proyectos
+        destination: /tomas-yevenes.html
+      - type: redirect
+        source: /tomas-yevenes/catalogo/
+        destination: /tomas-yevenes/catalogo
+      - type: rewrite
+        source: /tomas-yevenes/catalogo
+        destination: /tomas-yevenes.html
+      - type: redirect
+        source: /tomas-yevenes/reconocimientos/
+        destination: /tomas-yevenes/reconocimientos
+      - type: rewrite
+        source: /tomas-yevenes/reconocimientos
+        destination: /tomas-yevenes.html
+      - type: redirect
+        source: /tomas-yevenes/certificaciones/
+        destination: /tomas-yevenes/certificaciones
+      - type: rewrite
+        source: /tomas-yevenes/certificaciones
+        destination: /tomas-yevenes.html
+      - type: redirect
+        source: /tomas-yevenes/formacion/
+        destination: /tomas-yevenes/formacion
+      - type: rewrite
+        source: /tomas-yevenes/formacion
+        destination: /tomas-yevenes.html
+
       # SPA fallback - must be last
       - type: rewrite
         source: /*
