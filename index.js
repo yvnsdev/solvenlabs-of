@@ -4435,6 +4435,10 @@ if (fallbackRoute && /^\/(?!\/)/.test(fallbackRoute)) {
       button.addEventListener('click', (e) => {
         e.preventDefault();
         const memberId = button.dataset.member;
+        if (memberId === 'tomas') {
+          window.location.href = '/tomas-yevenes';
+          return;
+        }
         const modal = $(`#modal-${memberId}`);
         
         if (modal) {

@@ -19,6 +19,10 @@
 /proyecto/      /proyecto         301!
 /proyecto/*     /proyecto.html    200!
 
+# Perfil profesional de Tomas Yevenes
+/tomas-yevenes       /tomas-yevenes.html 200!
+/tomas-yevenes/      /tomas-yevenes     301!
+
 # Netlify redirects: servicios antiguos consolidados en la home
 /nosotros                              /servicios                         301
 /servicios-puntuales                   /servicios/soporte-infraestructura 301
