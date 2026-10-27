@@ -112,12 +112,102 @@ body:has(.project-lightbox[open]){overflow:hidden}
 .certificate-card:hover .certificate-techs .tech-icon{transform:translateY(-2px)}
 .issuer-monogram .tech-icon{width:25px;height:25px}
 .degree-logo{width:85px;height:54px;object-fit:contain;object-position:left center;margin-bottom:20px}
-.career-org{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
-.org-logo{width:48px;height:32px;object-fit:contain;background:white}
+.career-org{display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px;line-height:1.45;margin:8px 0 12px}
+.career-org__logos{display:flex;align-items:center;gap:12px;flex:0 0 auto;max-width:100%}
+.career-org__name{display:block;flex:1 1 150px;color:var(--muted);font-weight:600;overflow-wrap:anywhere}
+.org-logo{display:block;width:72px;height:46px;padding:0;object-fit:contain;object-position:left center;background:transparent;border-radius:0;mix-blend-mode:multiply}
+.career-panel .career-item h3{font-size:1.12rem;line-height:1.4;letter-spacing:-.015em;margin:0 0 8px}
+.career-panel .career-item p{line-height:1.65}
 .category-icon{display:inline-block;width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-right:7px}
 .work-card__meta>span:first-child{display:inline-flex;align-items:center}
 .focus-tags>span{display:inline-flex;align-items:center;gap:8px}
 .focus-tags .tech-icon{width:17px;height:17px}
 .inline-tech{display:inline-block;width:19px;height:19px;object-fit:contain;vertical-align:middle;margin-right:7px}
 @media(prefers-reduced-motion:reduce){.certificate-techs .tech-icon{transition:none}.certificate-card:hover .certificate-techs .tech-icon{transform:none}}
-.experience-brand{display:block;width:125px;height:44px;object-fit:contain;object-position:left center;flex-shrink:0}
+.experience-brand{display:block;width:132px;height:44px;padding:0;object-fit:contain;object-position:left center;flex-shrink:0;background:transparent;border-radius:0;mix-blend-mode:multiply}
+.experience-brand--jardua{width:148px;height:60px;object-fit:cover;object-position:center}
+.experience-brand--corfo{width:160px;height:66px}
+.experience-brand--ntek{width:116px;height:38px}
+.experience-brand--pace{width:132px;height:46px}
+.experience-brand--sermaluc{width:140px;height:46px}
+/* Research projects, horizontal portfolio, and recognition archive. */
+.projects .section__heading{max-width:850px}
+.projects .research-brand{display:block;background:transparent;padding:0;margin:24px 0;max-width:100%}
+.projects .research-brand img{display:block;width:min(100%,360px);height:auto;object-fit:contain;object-position:left center}
+.projects .project--featured{background:#f5f9fd}
+.projects .project__visual{background:linear-gradient(145deg,#dbe9f4,#f1f7fb)}
+.projects .project-card{display:flex;flex-direction:column;background:#fff;overflow:hidden}
+.project-card .text-link{margin-top:auto;padding-top:20px}
+.project-alias{font-size:.72rem;color:var(--muted);letter-spacing:.06em}
+.research-preview{width:100%;height:180px;object-fit:cover;object-position:top;margin-top:22px;border-radius:12px;border:1px solid var(--line)}
+.research-topic{height:180px;margin-top:22px;border-radius:12px;background:#e4f2ef;display:flex;align-items:center;justify-content:center;gap:20px;padding:20px;color:#24564f;font-size:.95rem;font-weight:700}
+.research-topic img{width:60px;height:60px}
+.research-preview--full{object-fit:contain;background:#f7f9fb;height:auto;aspect-ratio:1577/756}
+.catalog-navigation{display:flex;justify-content:space-between;align-items:center;gap:16px;margin:16px 0}
+.catalog-navigation p{font-size:.8rem;color:var(--muted)}
+.catalog-navigation>div{display:flex;align-items:center;gap:14px;white-space:nowrap}
+.catalog-navigation button{width:44px;height:44px;border:1px solid var(--line);border-radius:50%;background:#fff;color:var(--blue);font-size:1.2rem;cursor:pointer}
+.catalog-navigation button:disabled{opacity:.35;cursor:default}
+.catalog-navigation span{font-size:.8rem;color:var(--muted);min-width:66px;text-align:center}
+.catalog-grid{display:flex;gap:24px;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;align-items:flex-start;padding:8px 2px 22px;scrollbar-width:thin;scrollbar-color:#9ebbd8 transparent}
+.catalog-grid .work-card{flex:0 0 calc((100% - 24px)/2);min-width:0;scroll-snap-align:start}
+.catalog-grid .work-card[hidden]{display:none}
+.catalog-grid:focus-visible,.catalog-navigation button:focus-visible{outline:3px solid var(--blue);outline-offset:4px}
+.recognition-archive{grid-template-columns:1fr;gap:24px}
+.recognition-archive>div:first-child{max-width:650px}
+.recognition-years{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
+.recognition-years>details{background:#f5f8fc;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.recognition-years>details>summary{padding:20px;gap:12px;flex-wrap:wrap}
+.recognition-years .award-list{padding:0 16px 6px}
+.recognition-years .award-list article{border-left:3px solid #76a2d2;padding:15px;background:white}
+.recognition-years .award-list h3{line-height:1.5}
+.recognition-years .award-list p{line-height:1.6}
+@media(max-width:700px){.catalog-grid .work-card{flex-basis:90%}.catalog-grid{gap:16px}.catalog-navigation{align-items:flex-start}.catalog-navigation p{max-width:130px;margin:0}.recognition-years{grid-template-columns:1fr}.projects .research-brand img{width:min(100%,320px)}}
+@media print{.catalog-navigation{display:none}.catalog-grid{display:grid;grid-template-columns:1fr 1fr;overflow:visible}.recognition-years{display:block}.recognition-years>details>.award-list{display:block!important}}
+.experience-brand--althara{width:150px;height:44px;background:transparent url("assets/portfolio/altara.png") no-repeat -18px -9px;background-size:1569px 800px;filter:brightness(1.045)}
+@media(max-width:520px){.career-org{gap:8px 14px}.career-org__name{flex-basis:130px;font-size:.74rem}.career-panel .career-item{padding:24px 0}.career-panel .career-item h3{font-size:1.06rem}}
+/* Compact credential cards with an explicit icon, title, and disclosure. */
+.issuer-group .certificate-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;padding:0 24px 24px}
+.issuer-group .certificate-card{display:flex;flex-direction:column;min-width:0;padding:24px;border:1px solid #dce6ef;border-radius:16px;background:linear-gradient(150deg,#fff 65%,#f5f8fc);box-shadow:0 4px 14px #142c4905}
+.issuer-group .certificate-card .certificate-techs{min-height:48px;margin:0 0 18px;gap:8px}
+.issuer-group .certificate-techs .tech-icon{width:44px;height:44px;padding:8px;background:#fff;border:1px solid #e6edf4;border-radius:12px}
+.issuer-group .certificate-card h3{font-size:1rem;line-height:1.5;margin:0 0 8px;letter-spacing:-.015em}
+.issuer-group .certificate-card>p{font-size:.74rem;color:var(--muted);margin:0 0 24px}
+.issuer-group .certificate-card details{margin-top:auto;padding-top:14px;border-top:1px solid #e5edf4}
+.issuer-group .certificate-card summary{font-size:.76rem;line-height:1.5;color:var(--blue);cursor:pointer}
+.issuer-group .certificate-card details p{font-size:.72rem;overflow-wrap:anywhere}
+.issuer-group .certificate-card code{font-size:.7rem;background:#eef4fa;border-radius:5px;padding:3px 5px}
+.issuer-group .certificate-card .text-link{font-size:.74rem;margin-top:8px}
+.recognition-years{display:flex;flex-direction:column;gap:14px}
+.recognition-years>details{width:100%;background:#fff;border-radius:18px}
+.recognition-years>details>summary{background:#f4f8fc;padding:18px 24px}
+.recognition-years>details>summary>span:first-child{color:var(--blue)}
+.recognition-years .award-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:20px}
+.recognition-years .award-list article{position:relative;border:1px solid #e2eaf3;border-radius:12px;margin:0;padding:20px 20px 20px 28px;background:#fff}
+.recognition-years .award-list article:before{content:"";position:absolute;left:12px;top:25px;width:5px;height:5px;border-radius:50%;background:#6693bf}
+.recognition-years .award-list article:only-child{grid-column:1/-1}
+.recognition-years .award-list h3{font-size:.94rem;font-weight:700}
+.recognition-years .award-list p{margin:8px 0 0;font-size:.83rem}
+.recognition-logo{height:58px;display:flex;align-items:center;margin-bottom:14px}
+.recognition-logo img{display:block;max-width:155px;max-height:54px;width:auto;height:auto;object-fit:contain;object-position:left center}
+.recognition-logo:has(img[src*="eco-sd"]){height:76px}
+.recognition-logo img[src*="eco-sd"]{max-width:190px;max-height:72px}
+.recognition-logo img[src*="ufi-"]{max-width:142px}
+.recognition-logo img[src*="programa-tutores"]{max-width:175px}
+.recognition-logo img[src*="pace-ubb"]{max-width:135px}
+.recognition-years summary:focus-visible,.certificate-card summary:focus-visible{outline:2px solid var(--blue);outline-offset:-3px}
+@media(max-width:1000px){.issuer-group .certificate-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.issuer-group .certificate-grid{grid-template-columns:1fr;padding:0 16px 16px}.issuer-group .certificate-card{padding:20px}.recognition-years .award-list{grid-template-columns:1fr;padding:14px}.recognition-years>details>summary{padding:18px}.research-preview--full{height:auto}}
+/* Shared Solven visual identity, adapted to the personal profile. */
+.hero__network-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:0;opacity:.42;pointer-events:none;border-radius:inherit}
+.hero__copy,.hero__portrait{position:relative;z-index:1}
+@media print{.hero__network-canvas{display:none}}
+.hero{position:relative;isolation:isolate;max-width:none;margin:0;padding:56px max(24px,calc((100% - 1200px)/2)) 64px;gap:clamp(32px,5vw,72px);color:#fff;background:radial-gradient(circle at 85% 20%,#66a3e430,transparent 32%),linear-gradient(135deg,#0b1621,#12263b 55%,#0e1b28)}
+.hero:before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background-image:linear-gradient(#c4efff09 1px,transparent 1px),linear-gradient(90deg,#c4efff09 1px,transparent 1px);background-size:54px 54px;mask-image:linear-gradient(#000,transparent)}
+.hero__copy{min-width:0}.hero .back-link{display:inline-flex;align-items:center;gap:10px;min-height:44px;padding:9px 16px;border:1px solid #b9ecff55;border-radius:999px;background:#e4f8ff0d;color:#dff6ff;font-size:.8rem;font-weight:600;transition:background .2s,border-color .2s}.hero .back-link:hover{background:#8cd8f425;border-color:#8cd8f4}.hero .back-link svg{flex-shrink:0}
+.hero .eyebrow{margin:30px 0 16px;color:#7dd1f0}.hero h1{font-size:clamp(2.5rem,4.6vw,4rem);line-height:1.12}.hero .profile-specialties{display:grid;margin-top:16px;font-size:.57em;line-height:1.3;color:#8cd8f4}.hero .profile-specialties>span{grid-area:1/1;margin:0;font-size:inherit;line-height:inherit;color:inherit;background:linear-gradient(110deg,#60d8f5,#81aeff);background-clip:text;-webkit-text-fill-color:transparent;opacity:0;animation:profile-specialty 10.8s infinite}.hero .profile-specialties>span:nth-child(2){animation-delay:3.6s}.hero .profile-specialties>span:nth-child(3){animation-delay:7.2s}
+@keyframes profile-specialty{0%,30%{opacity:1;transform:translateY(0)}33%,97%{opacity:0;transform:translateY(6px)}100%{opacity:1;transform:translateY(0)}}
+.hero__role{color:#e5f2fb;margin-top:24px}.hero__intro{color:#bdcedc;line-height:1.75}.hero__actions .button{border-radius:999px;background:#8cd8f4;border-color:#8cd8f4;color:#0d1b2b;min-height:48px}.hero__actions .button:hover{background:#b4e9fc}.hero__actions .button--ghost{background:transparent;border-color:#b9ecff55;color:#fff}.hero__actions .button--ghost:hover{background:#8cd8f41a}.hero__portrait{border:1px solid #b9ecff33;box-shadow:0 24px 60px #0003;background:#20394e}.portrait__note{color:#142c49;border-radius:999px}
+@media(max-width:700px){.hero{padding:28px 20px 40px;gap:32px}.hero h1{font-size:clamp(2.3rem,9vw,3.2rem)}.hero .profile-specialties{font-size:.58em}.hero .eyebrow{margin-top:24px}.hero__portrait{max-width:300px}.hero__actions .button{flex:1}.hero__intro{font-size:.95rem}}
+@media(prefers-reduced-motion:reduce){.hero .profile-specialties>span{animation:none;opacity:0}.hero .profile-specialties>span:first-child{opacity:1}}
+@media print{.hero{background:white;color:var(--ink);padding:20px 0}.hero:before,.hero .back-link{display:none}.hero__role,.hero__intro{color:var(--ink)}.hero .profile-specialties>span{animation:none;opacity:0;-webkit-text-fill-color:var(--blue)}.hero .profile-specialties>span:first-child{opacity:1}.hero__portrait{box-shadow:none}}

@@ -1,3 +1,16 @@
+/* Article navigation: visible entry and exit points on every post. */
+#article-view .article-return { display:flex; align-items:center; flex-wrap:wrap; gap:16px; width:100%; max-width:980px; margin:0 auto 24px; }
+#article-view .article-home-link { display:inline-flex; align-items:center; justify-content:center; gap:10px; min-height:44px; padding:11px 19px; border:1px solid #b8d5e5; border-radius:999px; background:#edf6fb; color:#124f7b; font-size:.84rem; font-weight:700; line-height:1.4; text-decoration:none; box-shadow:0 4px 14px rgb(24 64 94 / 6%); transition:background .2s,border-color .2s,box-shadow .2s; }
+#article-view .article-home-link svg { flex-shrink:0; }
+#article-view .article-home-link:hover { background:#dceefa; border-color:#5e9fc4; box-shadow:0 6px 18px rgb(24 64 94 / 12%); }
+#article-view .article-home-link:focus-visible, #article-view .article-blog-link:focus-visible { outline:3px solid #1678b8; outline-offset:4px; }
+#article-view .article-return--footer { margin:48px auto; padding-top:24px; border-top:1px solid #d7e5eb; justify-content:space-between; }
+#article-view .article-blog-link { display:inline-flex; align-items:center; gap:10px; min-height:44px; color:#124f7b; font-size:.84rem; font-weight:700; text-decoration:none; }
+#article-view .article-blog-link:hover { text-decoration:underline; text-underline-offset:4px; }
+@media(max-width:600px) { #article-view .article-return--footer { justify-content:flex-start; gap:12px 24px; } }
+@media(prefers-reduced-motion:reduce) { #article-view .article-home-link { transition:none; } }
+@media print { #article-view .article-return { display:none; } }
+
 /**
  * Solven Labs - Estilos CSS
  * Landing Page Corporativa

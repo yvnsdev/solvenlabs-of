@@ -3,6 +3,35 @@ document.getElementById('year').textContent = new Date().getFullYear();
 const filters = document.querySelector('.project-filters');
 const cards = [...document.querySelectorAll('.work-card')];
 const count = document.querySelector('.project-count');
+const track = document.querySelector('#project-results');
+const catalogPrev = document.querySelector('[data-catalog-prev]');
+const catalogNext = document.querySelector('[data-catalog-next]');
+const catalogPosition = document.querySelector('[data-catalog-position]');
+document.querySelector('.catalog-navigation').hidden = false;
+function syncCatalog() {
+  const visible = cards.filter(card => !card.hidden);
+  const bounds = track.getBoundingClientRect();
+  const shown = visible.filter(card => {
+    const rect = card.getBoundingClientRect();
+    return rect.right > bounds.left + 20 && rect.left < bounds.right - 20;
+  });
+  catalogPosition.textContent = shown.length ? (visible.indexOf(shown[0]) + 1) + '–' + (visible.indexOf(shown.at(-1)) + 1) + ' / ' + visible.length : '0 / 0';
+  catalogPrev.disabled = track.scrollLeft < 2;
+  catalogNext.disabled = track.scrollLeft >= track.scrollWidth - track.clientWidth - 2;
+}
+function moveCatalog(direction) {
+  track.scrollBy({ left: direction * track.clientWidth, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+}
+catalogPrev.addEventListener('click', () => moveCatalog(-1));
+catalogNext.addEventListener('click', () => moveCatalog(1));
+track.addEventListener('scroll', syncCatalog, { passive: true });
+window.addEventListener('resize', syncCatalog);
+track.addEventListener('keydown', event => {
+  if (event.target !== track || !['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+  event.preventDefault();
+  moveCatalog(event.key === 'ArrowLeft' ? -1 : 1);
+});
+requestAnimationFrame(syncCatalog);
 const searchLabel = document.querySelector('.project-search');
 const search = searchLabel.querySelector('input');
 searchLabel.hidden = false;
@@ -14,6 +43,8 @@ function updateProjects() {
     card.hidden = !(activeFilter === 'all' || card.dataset.category === activeFilter) || !normalize(card.textContent).includes(query);
   });
   const visible = cards.filter((card) => !card.hidden).length;
+  track.scrollLeft = 0;
+  requestAnimationFrame(syncCatalog);
   count.textContent = visible ? visible + (visible === 1 ? ' proyecto' : ' proyectos') : 'Sin resultados. Prueba otro nombre o categoría.';
 }
 search.addEventListener('input', updateProjects);
