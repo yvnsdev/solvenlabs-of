@@ -1687,13 +1687,10 @@ if (fallbackRoute && /^\/(?!\/)/.test(fallbackRoute)) {
       e.preventDefault();
       if (submitting) return;
 
-      const turnstileResponse = form.querySelector('[name="cf-turnstile-response"]');
-      const turnstileError = form.querySelector('.form__turnstile-error');
-      if (!turnstileResponse || !turnstileResponse.value) {
-        if (turnstileError) turnstileError.textContent = 'Confirma que eres una persona antes de enviar.';
+      if (!window.contactCaptcha?.isVerified()) {
+        window.contactCaptcha?.requireVerification();
         return;
       }
-      if (turnstileError) turnstileError.textContent = '';
       
       let isValid = true;
       fields.forEach(field => {
@@ -1781,11 +1778,12 @@ if (fallbackRoute && /^\/(?!\/)/.test(fallbackRoute)) {
               showToast('Solicitud recibida. Te contactaremos para continuar.', 'success');
             }
             form.reset();
-            if (window.turnstile) window.turnstile.reset(form.querySelector('.cf-turnstile'));
+            window.contactCaptcha?.reset();
           } else {
             throw new Error('Error al enviar');
           }
         } catch (error) {
+          window.contactCaptcha?.reset();
           showToast('No pudimos enviar tu mensaje. Intenta nuevamente o conversemos por WhatsApp.', 'error');
           console.error('Error:', error);
         } finally {

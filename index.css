@@ -8091,6 +8091,10 @@ input:focus, textarea:focus, select:focus { border-color: #1659a0 !important; bo
   border-radius: var(--radius-xl);
 }
 
+[data-captcha-retry][hidden] {
+  display: none;
+}
+
 .form__turnstile-error {
   min-height: 1.25rem;
   margin: var(--space-2) 0 0;
